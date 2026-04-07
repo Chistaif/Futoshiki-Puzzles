@@ -22,15 +22,7 @@ from .constants import (
     COLOR_SHADOW,
     COLOR_SOLVER,
 )
-
-
-def _mix(color_a: tuple[int, int, int], color_b: tuple[int, int, int], ratio: float) -> tuple[int, int, int]:
-    ratio = max(0.0, min(1.0, ratio))
-    return (
-        int(color_a[0] + (color_b[0] - color_a[0]) * ratio),
-        int(color_a[1] + (color_b[1] - color_a[1]) * ratio),
-        int(color_a[2] + (color_b[2] - color_a[2]) * ratio),
-    )
+from .utils import _mix
 
 
 class Button:
