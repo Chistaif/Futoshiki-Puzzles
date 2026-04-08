@@ -37,7 +37,9 @@ class LevelSelectScreen:
         self.button_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 2, bold=True)
         self.hint_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 2)
 
-        self.back_button = Button(pygame.Rect(34, 28, 132, 50), "Back", self.button_font)
+        self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
+        self.header_top = self.layout_margin
+        self.back_button = Button(pygame.Rect(0, 0, 132, 50), "Back", self.button_font)
 
         if available_sizes:
             self.level_options = tuple(sorted(available_sizes))
@@ -47,18 +49,43 @@ class LevelSelectScreen:
         self.level_buttons: List[Tuple[int, Button]] = []
         self._build_level_buttons()
 
+    def _compute_grid_columns(self) -> int:
+        if self.surface_rect.width < 760:
+            return 2
+        return 3
+
+    def _compute_panel_rect(self, columns: int) -> pygame.Rect:
+        row_count = max(1, (len(self.level_options) + columns - 1) // columns)
+        spacing_x = 24
+        spacing_y = 24
+        button_width = 184 if columns == 2 else 176
+        button_height = 82
+
+        content_width = columns * button_width + (columns - 1) * spacing_x
+        panel_width = min(self.surface_rect.width - self.layout_margin * 2, content_width + 80)
+        panel_height = min(
+            self.surface_rect.height - 230,
+            row_count * button_height + max(0, row_count - 1) * spacing_y + 96,
+        )
+
+        panel_rect = pygame.Rect(0, 0, panel_width, panel_height)
+        panel_rect.center = (self.surface_rect.centerx, self.surface_rect.centery + 44)
+        return panel_rect
+
     def _build_level_buttons(self) -> None:
         self.level_buttons.clear()
 
-        columns = 3
-        spacing_x = 28
-        spacing_y = 28
-        button_width = 200
-        button_height = 86
+        columns = self._compute_grid_columns()
+        panel_rect = self._compute_panel_rect(columns)
 
-        total_width = columns * button_width + (columns - 1) * spacing_x
-        start_x = (self.surface_rect.width - total_width) // 2
-        start_y = 240
+        spacing_x = 24
+        spacing_y = 24
+        button_height = 82
+
+        horizontal_space = panel_rect.width - 56 - (columns - 1) * spacing_x
+        button_width = horizontal_space // columns
+        start_x = panel_rect.left + (panel_rect.width - (columns * button_width + (columns - 1) * spacing_x)) // 2
+        start_y = panel_rect.top + 46
 
         for index, size in enumerate(self.level_options):
             row = index // columns
@@ -72,6 +99,8 @@ class LevelSelectScreen:
                 self.button_font,
             )
             self.level_buttons.append((size, button))
+
+        self.back_button.rect.topleft = (self.layout_margin, self.header_top)
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
         if self.back_button.handle_event(event):
@@ -87,16 +116,17 @@ class LevelSelectScreen:
         pass
 
     def draw(self, surface: pygame.Surface) -> None:
+        self._build_level_buttons()
         _draw_soft_background(surface)
 
         title = self.title_font.render("Select Level", True, COLOR_TITLE)
         subtitle = self.subtitle_font.render("Choose puzzle size from available inputs", True, COLOR_MUTED)
 
-        surface.blit(title, title.get_rect(center=(self.surface_rect.centerx, 110)))
-        surface.blit(subtitle, subtitle.get_rect(center=(self.surface_rect.centerx, 156)))
+        title_y = self.header_top + 84
+        surface.blit(title, title.get_rect(center=(self.surface_rect.centerx, title_y)))
+        surface.blit(subtitle, subtitle.get_rect(center=(self.surface_rect.centerx, title_y + 44)))
 
-        panel_rect = pygame.Rect(0, 0, 760, 390)
-        panel_rect.center = (self.surface_rect.centerx, self.surface_rect.centery + 38)
+        panel_rect = self._compute_panel_rect(self._compute_grid_columns())
 
         shadow = panel_rect.move(0, 8)
         pygame.draw.rect(surface, _mix(COLOR_SHADOW, COLOR_BACKGROUND, 0.22), shadow, border_radius=26)

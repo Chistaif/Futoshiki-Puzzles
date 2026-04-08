@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
 
+from file import PuzzleCase, load_all_input_puzzles
+
 from ..components import Button, Cell, Timer
 from ..constants import (
     COLOR_BACKGROUND,
@@ -25,7 +27,6 @@ from ..constants import (
     FONT_INFO_SIZE,
     GRID_CONFIG,
 )
-from ..puzzle_loader import PuzzleCase, load_all_input_puzzles
 from ..utils import _draw_relation_symbol, _draw_soft_background, _mix
 
 Transition = Optional[Dict[str, Any]]
@@ -36,6 +37,14 @@ class GameScreen:
 
     def __init__(self, surface_rect: pygame.Rect, n: int = DEFAULT_GRID_SIZE) -> None:
         self.surface_rect = surface_rect
+        self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
+        self.header_top = self.layout_margin
+        self.footer_height = 62
+        self.footer_gap = 16
+        self.title_pos = (self.layout_margin, 88)
+        self.subtitle_pos = (self.layout_margin, 130)
+        self.puzzle_name_pos = (self.layout_margin, 160)
+        self.timer_rect = pygame.Rect(0, 0, 146, 52)
 
         self._init_fonts()
         self._init_buttons()
@@ -83,9 +92,30 @@ class GameScreen:
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, 38, bold=True)
 
     def _init_buttons(self) -> None:
-        self.back_button = Button(pygame.Rect(30, 24, 132, 48), "Back", self.button_font)
-        self.new_puzzle_button = Button(pygame.Rect(178, 24, 188, 48), "New Puzzle", self.button_font)
+        self.back_button = Button(pygame.Rect(0, 0, 132, 48), "Back", self.button_font)
+        self.new_puzzle_button = Button(pygame.Rect(0, 0, 188, 48), "New Puzzle", self.button_font)
         self.timer = Timer()
+
+    def _update_layout(self) -> None:
+        """Recompute all dynamic coordinates for portrait 2:3 windows."""
+        self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
+        self.header_top = self.layout_margin
+
+        self.back_button.rect.topleft = (self.layout_margin, self.header_top)
+        self.new_puzzle_button.rect.topleft = (self.back_button.rect.right + 14, self.header_top)
+
+        timer_width = 146
+        timer_height = 52
+        timer_left = self.surface_rect.width - self.layout_margin - timer_width
+        self.timer_rect = pygame.Rect(timer_left, self.header_top - 2, timer_width, timer_height)
+
+        text_top = self.back_button.rect.bottom + 14
+        self.title_pos = (self.layout_margin, text_top)
+        self.subtitle_pos = (self.layout_margin, text_top + 40)
+        self.puzzle_name_pos = (self.layout_margin, text_top + 72)
+
+        min_board_top = text_top + 108
+        self.board_top = max(self.board_top, min_board_top)
 
     def set_level(self, n: int) -> None:
         if n not in GRID_CONFIG:
@@ -100,6 +130,7 @@ class GameScreen:
         self.relation_size = cfg["relation_size"]
         self.relation_stroke = cfg["relation_stroke"]
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, cfg["cell_font"], bold=True)
+        self._update_layout()
 
         self.case_index_by_size.setdefault(n, -1)
         self.case_index_by_size[n] = -1
@@ -167,7 +198,11 @@ class GameScreen:
     def _build_cells(self) -> None:
         board_size = self.n * self.cell_size + (self.n - 1) * self.cell_gap
         board_left = (self.surface_rect.width - board_size) // 2
-        board_top = self.board_top
+
+        footer_top = self.surface_rect.height - self.footer_height - self.footer_gap
+        max_board_top = footer_top - board_size - self.container_padding * 2 - 10
+        board_top = min(self.board_top, max_board_top)
+        board_top = max(board_top, self.back_button.rect.bottom + 118)
 
         self.board_rect = pygame.Rect(
             board_left - self.container_padding,
@@ -363,12 +398,11 @@ class GameScreen:
         return all(value != 0 for row in self.values for value in row)
 
     def _draw_timer(self, surface: pygame.Surface) -> None:
-        timer_rect = pygame.Rect(self.surface_rect.width - 182, 22, 146, 52)
-        pygame.draw.rect(surface, COLOR_PANEL, timer_rect, border_radius=16)
-        pygame.draw.rect(surface, COLOR_BORDER, timer_rect, width=1, border_radius=16)
+        pygame.draw.rect(surface, COLOR_PANEL, self.timer_rect, border_radius=16)
+        pygame.draw.rect(surface, COLOR_BORDER, self.timer_rect, width=1, border_radius=16)
 
         timer_text = self.timer_font.render(self.timer.format_time(), True, COLOR_TITLE)
-        surface.blit(timer_text, timer_text.get_rect(center=timer_rect.center))
+        surface.blit(timer_text, timer_text.get_rect(center=self.timer_rect.center))
 
     def _draw_relations(self, surface: pygame.Surface) -> None:
         for (row, col), symbol in self.horizontal_relations.items():
@@ -398,9 +432,9 @@ class GameScreen:
             COLOR_MUTED,
         )
 
-        surface.blit(title, (30, 90))
-        surface.blit(subtitle, (30, 133))
-        surface.blit(puzzle_name, (30, 165))
+        surface.blit(title, self.title_pos)
+        surface.blit(subtitle, self.subtitle_pos)
+        surface.blit(puzzle_name, self.puzzle_name_pos)
 
         self.back_button.draw(surface)
         self.new_puzzle_button.draw(surface)
@@ -427,26 +461,31 @@ class GameScreen:
         clue_legend = self.legend_font.render("Clue", True, COLOR_CLUE)
         solver_legend = self.legend_font.render("Player/Solver", True, COLOR_SOLVER)
 
-        legend_y = self.surface_rect.height - 84
-        legend_box = pygame.Rect(30, legend_y - 16, 430, 62)
+        legend_y = self.surface_rect.height - self.footer_height
+        legend_width = max(260, int(self.surface_rect.width * 0.38))
+        legend_box = pygame.Rect(self.layout_margin, legend_y - 16, legend_width, self.footer_height)
         pygame.draw.rect(surface, COLOR_PANEL, legend_box, border_radius=16)
         pygame.draw.rect(surface, COLOR_BORDER, legend_box, width=1, border_radius=16)
 
-        surface.blit(clue_legend, (48, legend_y))
-        surface.blit(solver_legend, (148, legend_y))
+        surface.blit(clue_legend, (legend_box.left + 16, legend_y))
+        surface.blit(solver_legend, (legend_box.left + 108, legend_y))
 
     def _draw_status(self, surface: pygame.Surface) -> None:
         status_color = COLOR_ERROR if self.invalid_positions else COLOR_MUTED
         status_text = self.legend_font.render(self.status_message, True, status_color)
 
-        legend_y = self.surface_rect.height - 84
-        status_box = pygame.Rect(474, legend_y - 16, self.surface_rect.width - 504, 62)
+        legend_y = self.surface_rect.height - self.footer_height
+        legend_width = max(260, int(self.surface_rect.width * 0.38))
+        status_left = self.layout_margin + legend_width + 16
+        status_width = self.surface_rect.width - status_left - self.layout_margin
+        status_box = pygame.Rect(status_left, legend_y - 16, status_width, self.footer_height)
         box_color = COLOR_PANEL if not self.invalid_positions else COLOR_SUCCESS_SOFT
         pygame.draw.rect(surface, box_color, status_box, border_radius=16)
         pygame.draw.rect(surface, COLOR_BORDER, status_box, width=1, border_radius=16)
         surface.blit(status_text, status_text.get_rect(midleft=(status_box.left + 18, status_box.centery)))
 
     def draw(self, surface: pygame.Surface) -> None:
+        self._update_layout()
         _draw_soft_background(surface)
         self._draw_header(surface)
         self._draw_board(surface)

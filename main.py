@@ -8,11 +8,32 @@ from gui.constants import DEFAULT_GRID_SIZE, FPS, SCREEN_HEIGHT, SCREEN_WIDTH, W
 from gui.screens import GameScreen, LevelSelectScreen, MenuScreen
 
 
+def _compute_window_size_2_by_3() -> tuple[int, int]:
+    """Return a window size that keeps a strict 2:3 (width:height) ratio and fits display."""
+    display_info = pygame.display.Info()
+    max_width = max(360, int(display_info.current_w * 0.94))
+    max_height = max(540, int(display_info.current_h * 0.88))
+
+    target_width = min(max_width, int(max_height * (2 / 3)))
+    target_height = int(target_width * (3 / 2))
+
+    if target_height > max_height:
+        target_height = max_height
+        target_width = int(target_height * (2 / 3))
+
+    return target_width, target_height
+
+
 def run() -> None:
     pygame.init()
     pygame.display.set_caption(WINDOW_TITLE)
 
-    surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    default_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
+    window_size = _compute_window_size_2_by_3()
+    if window_size[0] <= 0 or window_size[1] <= 0:
+        window_size = default_size
+
+    surface = pygame.display.set_mode(window_size)
     clock = pygame.time.Clock()
 
     menu_screen = MenuScreen(surface.get_rect())
