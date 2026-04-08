@@ -1,4 +1,8 @@
-"""Menu screen for the Futoshiki interface."""
+"""Màn hình menu của giao diện Futoshiki.
+
+File này chịu trách nhiệm hiển thị ảnh nền menu và nút Play ở giữa màn hình.
+Mục tiêu là giữ layout thật gọn, chỉ có những thành phần cần thiết cho màn mở đầu.
+"""
 
 from __future__ import annotations
 
@@ -28,6 +32,11 @@ PLAY_BUTTON_TEXT = (30, 30, 30)
 
 
 def _load_menu_background() -> Optional[pygame.Surface]:
+    """Tìm và nạp ảnh nền menu từ các vị trí có thể có trong project.
+
+    Làm theo kiểu thử nhiều đường dẫn để project vẫn chạy được dù cấu trúc thư mục
+    ảnh có thể khác nhau giữa các phiên bản.
+    """
     root_path = Path(__file__).resolve().parents[2]
     for parts in MENU_IMAGE_CANDIDATES:
         candidate = root_path.joinpath(*parts)
@@ -37,7 +46,7 @@ def _load_menu_background() -> Optional[pygame.Surface]:
 
 
 def _compute_menu_frame(surface_rect: pygame.Rect) -> pygame.Rect:
-    """Build a centered portrait frame with a 2:3 ratio."""
+    """Tính khung ảnh dọc theo tỷ lệ 2:3 và căn giữa màn hình."""
     available_width = max(120, surface_rect.width)
     available_height = max(180, surface_rect.height)
 
@@ -50,7 +59,11 @@ def _compute_menu_frame(surface_rect: pygame.Rect) -> pygame.Rect:
 
 
 def _scale_contain(source: pygame.Surface, target_rect: pygame.Rect) -> tuple[pygame.Surface, pygame.Rect]:
-    """Scale image to fit inside target rect without cropping any details."""
+    """Scale ảnh sao cho vừa khung mà không bị cắt mất chi tiết.
+
+    Cách này ưu tiên giữ toàn bộ ảnh gốc, kể cả khi sẽ xuất hiện khoảng trống
+    thừa bên trong khung mục tiêu.
+    """
     src_width, src_height = source.get_size()
     if src_width <= 0 or src_height <= 0:
         return source, source.get_rect(center=target_rect.center)
@@ -64,7 +77,7 @@ def _scale_contain(source: pygame.Surface, target_rect: pygame.Rect) -> tuple[py
 
 
 class MenuScreen:
-    """Landing screen with hero background and Play CTA."""
+    """Màn hình mở đầu với ảnh nền và nút Play."""
 
     def __init__(self, surface_rect: pygame.Rect) -> None:
         self.surface_rect = surface_rect
@@ -75,9 +88,11 @@ class MenuScreen:
         self._center_play_button()
 
     def _center_play_button(self) -> None:
+        """Đưa nút Play về chính giữa màn hình."""
         self.play_button_rect.center = self.surface_rect.center
 
     def _draw_play_button(self, surface: pygame.Surface) -> None:
+        """Vẽ nút Play với nền trắng đục và hiệu ứng hover."""
         button_layer = pygame.Surface(self.play_button_rect.size, pygame.SRCALPHA)
         bg_color = PLAY_BUTTON_BG_HOVER if self.is_play_hovered else PLAY_BUTTON_BG
         pygame.draw.rect(button_layer, bg_color, button_layer.get_rect(), border_radius=PLAY_BUTTON_RADIUS)
@@ -95,6 +110,7 @@ class MenuScreen:
         surface.blit(label, label_rect)
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
+        """Xử lý chuột: hover để đổi màu và click để sang màn chọn level."""
         if event.type == pygame.MOUSEMOTION:
             self.is_play_hovered = self.play_button_rect.collidepoint(event.pos)
 
@@ -106,6 +122,7 @@ class MenuScreen:
         pass
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Vẽ toàn bộ màn menu theo đúng thứ tự nền -> ảnh -> nút."""
         self._center_play_button()
         _draw_soft_background(surface)
 

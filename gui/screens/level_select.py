@@ -1,4 +1,8 @@
-"""Level selection screen for choosing puzzle size."""
+"""Màn hình chọn cấp độ để người chơi chọn kích thước bàn cờ.
+
+File này chịu trách nhiệm bố trí danh sách level theo layout phù hợp với
+tỷ lệ cửa sổ 2:3, đồng thời vẫn tự co giãn nếu số lượng level thay đổi.
+"""
 
 from __future__ import annotations
 
@@ -28,7 +32,7 @@ Transition = Optional[Dict[str, Any]]
 
 
 class LevelSelectScreen:
-    """Screen where users choose board size before starting."""
+    """Màn hình cho phép người chơi chọn kích thước puzzle trước khi vào game."""
 
     def __init__(self, surface_rect: pygame.Rect, available_sizes: Optional[Tuple[int, ...]] = None) -> None:
         self.surface_rect = surface_rect
@@ -50,11 +54,13 @@ class LevelSelectScreen:
         self._build_level_buttons()
 
     def _compute_grid_columns(self) -> int:
+        """Tự chọn số cột hiển thị dựa trên bề rộng màn hình."""
         if self.surface_rect.width < 760:
             return 2
         return 3
 
     def _compute_panel_rect(self, columns: int) -> pygame.Rect:
+        """Tính khung nền chứa các nút level sao cho vừa màn hình."""
         row_count = max(1, (len(self.level_options) + columns - 1) // columns)
         spacing_x = 24
         spacing_y = 24
@@ -73,6 +79,11 @@ class LevelSelectScreen:
         return panel_rect
 
     def _build_level_buttons(self) -> None:
+        """Tạo lại danh sách nút level theo layout hiện tại.
+
+        Hàm này gom toàn bộ logic tính vị trí nút để phần draw chỉ tập trung
+        vào việc vẽ, không phải tự tính toán layout lặp lại.
+        """
         self.level_buttons.clear()
 
         columns = self._compute_grid_columns()
@@ -103,6 +114,7 @@ class LevelSelectScreen:
         self.back_button.rect.topleft = (self.layout_margin, self.header_top)
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
+        """Bắt sự kiện click của nút Back và các nút level."""
         if self.back_button.handle_event(event):
             return {"state": "menu"}
 
@@ -116,6 +128,7 @@ class LevelSelectScreen:
         pass
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Vẽ màn chọn level theo layout hiện tại của cửa sổ."""
         self._build_level_buttons()
         _draw_soft_background(surface)
 

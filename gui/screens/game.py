@@ -1,4 +1,12 @@
-"""Main gameplay screen for Futoshiki."""
+"""Màn hình chơi chính của Futoshiki.
+
+File này xử lý toàn bộ luồng game:
+- nạp puzzle từ file input
+- dựng bàn cờ theo kích thước level
+- xử lý chọn ô và nhập số
+- kiểm tra hợp lệ theo quy tắc Futoshiki
+- vẽ toàn bộ giao diện trong màn chơi
+"""
 
 from __future__ import annotations
 
@@ -33,7 +41,7 @@ Transition = Optional[Dict[str, Any]]
 
 
 class GameScreen:
-    """Main gameplay scene with live validation and file-based puzzles."""
+    """Màn hình chơi chính với kiểm tra hợp lệ trực tiếp và puzzle từ file."""
 
     def __init__(self, surface_rect: pygame.Rect, n: int = DEFAULT_GRID_SIZE) -> None:
         self.surface_rect = surface_rect
@@ -84,6 +92,11 @@ class GameScreen:
         self.set_level(preferred)
 
     def _init_fonts(self) -> None:
+        """Khởi tạo toàn bộ font dùng trong màn game.
+
+        Tách riêng phần này để việc chỉnh typography sau này dễ hơn và không
+        làm rối các phần logic khác.
+        """
         self.title_font = pygame.font.SysFont(FONT_FAMILY, 40, bold=True)
         self.info_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE)
         self.legend_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 2)
@@ -92,12 +105,17 @@ class GameScreen:
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, 38, bold=True)
 
     def _init_buttons(self) -> None:
+        """Tạo các nút điều hướng chính của màn game."""
         self.back_button = Button(pygame.Rect(0, 0, 132, 48), "Back", self.button_font)
         self.new_puzzle_button = Button(pygame.Rect(0, 0, 188, 48), "New Puzzle", self.button_font)
         self.timer = Timer()
 
     def _update_layout(self) -> None:
-        """Recompute all dynamic coordinates for portrait 2:3 windows."""
+        """Tính lại toàn bộ vị trí giao diện cho cửa sổ dọc 2:3.
+
+        Mục đích là tránh phụ thuộc vào tọa độ cứng, để màn hình vẫn đẹp khi
+        thay đổi kích thước hoặc khi chạy trên độ phân giải khác nhau.
+        """
         self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
         self.header_top = self.layout_margin
 
@@ -118,6 +136,7 @@ class GameScreen:
         self.board_top = max(self.board_top, min_board_top)
 
     def set_level(self, n: int) -> None:
+        """Đổi cấp độ chơi và nạp lại cấu hình tương ứng cho level mới."""
         if n not in GRID_CONFIG:
             n = DEFAULT_GRID_SIZE
 
@@ -137,7 +156,11 @@ class GameScreen:
         self.new_puzzle()
 
     def new_puzzle(self) -> None:
-        """Load next puzzle from Inputs for the current board size."""
+        """Nạp puzzle kế tiếp cho level hiện tại từ thư mục Inputs.
+
+        Nếu không có puzzle hợp lệ, màn game vẫn khởi động ở trạng thái rỗng
+        để người dùng không bị crash hoặc thoát app.
+        """
         cases = self.puzzles_by_size.get(self.n, [])
         if not cases:
             self.current_case = None
@@ -152,6 +175,7 @@ class GameScreen:
         self._load_case(cases[next_index])
 
     def _init_empty_board(self) -> None:
+        """Tạo bàn cờ rỗng khi không có file puzzle phù hợp."""
         self.values = [[0 for _ in range(self.n)] for _ in range(self.n)]
         self.clues = {}
         self.horizontal_relations = {}
@@ -160,6 +184,7 @@ class GameScreen:
         self._build_cells()
 
     def _load_case(self, case: PuzzleCase) -> None:
+        """Đổ dữ liệu từ một PuzzleCase vào trạng thái game hiện tại."""
         self.current_case = case
         self.n = case.n
 
@@ -196,6 +221,11 @@ class GameScreen:
         self.status_message = f"Loaded {case.name}"
 
     def _build_cells(self) -> None:
+        """Tạo các ô bàn cờ và tính luôn vùng chứa bàn cờ.
+
+        Phần này được tách riêng để logic dựng UI rõ ràng hơn: chỉ cần gọi lại
+        khi đổi level hoặc nạp puzzle mới.
+        """
         board_size = self.n * self.cell_size + (self.n - 1) * self.cell_gap
         board_left = (self.surface_rect.width - board_size) // 2
 
@@ -230,6 +260,7 @@ class GameScreen:
             self.cells.append(row_cells)
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
+        """Xử lý mọi sự kiện vào game: nút bấm, chuột và bàn phím."""
         if self.back_button.handle_event(event):
             self.timer.stop()
             return {"state": "level_select"}
@@ -247,9 +278,11 @@ class GameScreen:
         return None
 
     def update(self, dt: float) -> None:
+        """Cập nhật timer theo thời gian thực."""
         self.timer.update(dt)
 
     def _select_cell(self, pos: Tuple[int, int]) -> None:
+        """Chọn đúng ô được click và bỏ chọn các ô còn lại."""
         self.selected = None
         for row_cells in self.cells:
             for cell in row_cells:
@@ -259,6 +292,7 @@ class GameScreen:
                     self.selected = (cell.row, cell.col)
 
     def _handle_input_key(self, key: int) -> None:
+        """Xử lý nhập số từ bàn phím cho ô đang được chọn."""
         if self.selected is None:
             return
 
@@ -284,7 +318,7 @@ class GameScreen:
             self.set_cell_value(row, col, value)
 
     def set_cell_value(self, row: int, col: int, value: int) -> None:
-        """Set value for one cell and trigger immediate validation."""
+        """Gán giá trị cho một ô rồi kiểm tra lại tính hợp lệ ngay lập tức."""
         if not (0 <= row < self.n and 0 <= col < self.n):
             return
 
@@ -300,11 +334,12 @@ class GameScreen:
         self._revalidate_board()
 
     def _mark_invalid(self, positions: List[Tuple[int, int]]) -> None:
+        """Đánh dấu nhiều vị trí là không hợp lệ trong một lần."""
         for row, col in positions:
             self.invalid_positions.add((row, col))
 
     def _validate_rows(self) -> None:
-        # Validate row uniqueness and value domain.
+        # Kiểm tra trùng số theo hàng và kiểm tra miền giá trị.
         for row in range(self.n):
             seen: Dict[int, List[Tuple[int, int]]] = {}
             for col in range(self.n):
@@ -320,7 +355,7 @@ class GameScreen:
                     self._mark_invalid(positions)
 
     def _validate_cols(self) -> None:
-        # Validate column uniqueness.
+        # Kiểm tra trùng số theo cột.
         for col in range(self.n):
             seen = {}
             for row in range(self.n):
@@ -334,7 +369,7 @@ class GameScreen:
                     self._mark_invalid(positions)
 
     def _validate_horizontal(self) -> None:
-        # Validate horizontal inequalities.
+        # Kiểm tra các ràng buộc lớn hơn / nhỏ hơn theo chiều ngang.
         for (row, col), symbol in self.horizontal_relations.items():
             left = self.values[row][col]
             right = self.values[row][col + 1]
@@ -346,7 +381,7 @@ class GameScreen:
                     self.invalid_positions.add((row, col + 1))
                 if left != 0 and right != 0 and not (left < right):
                     self._mark_invalid([(row, col), (row, col + 1)])
-            else:  # ">"
+            else:  # Trường hợp ">": ô trái phải lớn hơn ô phải.
                 if left == 1:
                     self.invalid_positions.add((row, col))
                 if right == self.n:
@@ -355,7 +390,7 @@ class GameScreen:
                     self._mark_invalid([(row, col), (row, col + 1)])
 
     def _validate_vertical(self) -> None:
-        # Validate vertical inequalities.
+        # Kiểm tra các ràng buộc lớn hơn / nhỏ hơn theo chiều dọc.
         for (row, col), symbol in self.vertical_relations.items():
             top = self.values[row][col]
             bottom = self.values[row + 1][col]
@@ -367,7 +402,7 @@ class GameScreen:
                     self.invalid_positions.add((row + 1, col))
                 if top != 0 and bottom != 0 and not (top < bottom):
                     self._mark_invalid([(row, col), (row + 1, col)])
-            else:  # "v"
+            else:  # Trường hợp "v": ô trên phải lớn hơn ô dưới.
                 if top == 1:
                     self.invalid_positions.add((row, col))
                 if bottom == self.n:
@@ -376,6 +411,7 @@ class GameScreen:
                     self._mark_invalid([(row, col), (row + 1, col)])
 
     def _revalidate_board(self) -> None:
+        """Kiểm tra lại toàn bộ bàn cờ sau mỗi thay đổi giá trị."""
         self.invalid_positions = set()
 
         self._validate_rows()
@@ -395,9 +431,11 @@ class GameScreen:
             self.status_message = "Board is valid, continue solving"
 
     def _is_filled(self) -> bool:
+        """Kiểm tra xem tất cả ô đã được điền số hay chưa."""
         return all(value != 0 for row in self.values for value in row)
 
     def _draw_timer(self, surface: pygame.Surface) -> None:
+        """Vẽ hộp timer ở góc trên của màn chơi."""
         pygame.draw.rect(surface, COLOR_PANEL, self.timer_rect, border_radius=16)
         pygame.draw.rect(surface, COLOR_BORDER, self.timer_rect, width=1, border_radius=16)
 
@@ -405,6 +443,7 @@ class GameScreen:
         surface.blit(timer_text, timer_text.get_rect(center=self.timer_rect.center))
 
     def _draw_relations(self, surface: pygame.Surface) -> None:
+        """Vẽ toàn bộ ký hiệu quan hệ giữa các ô trên bàn cờ."""
         for (row, col), symbol in self.horizontal_relations.items():
             left_cell = self.cells[row][col]
             right_cell = self.cells[row][col + 1]
@@ -424,6 +463,7 @@ class GameScreen:
             _draw_relation_symbol(surface, center, symbol, self.relation_size, self.relation_stroke)
 
     def _draw_header(self, surface: pygame.Surface) -> None:
+        """Vẽ phần tiêu đề, tên puzzle và các nút điều hướng phía trên."""
         title = self.title_font.render(f"Futoshiki {self.n}x{self.n}", True, COLOR_TITLE)
         subtitle = self.info_font.render("Input-driven puzzles with live validation", True, COLOR_MUTED)
         puzzle_name = self.legend_font.render(
@@ -441,6 +481,7 @@ class GameScreen:
         self._draw_timer(surface)
 
     def _draw_board(self, surface: pygame.Surface) -> None:
+        """Vẽ khung bàn cờ, các ô và các quan hệ."""
         board_shadow = self.board_rect.move(0, 10)
         pygame.draw.rect(
             surface,
@@ -458,6 +499,7 @@ class GameScreen:
         self._draw_relations(surface)
 
     def _draw_legend(self, surface: pygame.Surface) -> None:
+        """Vẽ chú giải màu cho ô gợi ý và ô người chơi/solver."""
         clue_legend = self.legend_font.render("Clue", True, COLOR_CLUE)
         solver_legend = self.legend_font.render("Player/Solver", True, COLOR_SOLVER)
 
@@ -471,6 +513,7 @@ class GameScreen:
         surface.blit(solver_legend, (legend_box.left + 108, legend_y))
 
     def _draw_status(self, surface: pygame.Surface) -> None:
+        """Vẽ trạng thái hiện tại của bàn cờ ở cạnh dưới màn hình."""
         status_color = COLOR_ERROR if self.invalid_positions else COLOR_MUTED
         status_text = self.legend_font.render(self.status_message, True, status_color)
 
@@ -485,6 +528,7 @@ class GameScreen:
         surface.blit(status_text, status_text.get_rect(midleft=(status_box.left + 18, status_box.centery)))
 
     def draw(self, surface: pygame.Surface) -> None:
+        """Vẽ toàn bộ màn game theo thứ tự nền, header, board và footer."""
         self._update_layout()
         _draw_soft_background(surface)
         self._draw_header(surface)
