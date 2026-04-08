@@ -21,4 +21,9 @@ def readFile(fileName):
             row = list(map(int, f.readline().split(', ')))
             Vertical.append(row)
 
-    return n, matrix, Horizontal, Vertical
+    return {
+        "N": n,
+        "puzzle": matrix,
+        "horizontal": Horizontal,
+        "vertical": Vertical
+    }
