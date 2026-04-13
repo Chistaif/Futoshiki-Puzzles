@@ -82,7 +82,7 @@ class FOLKB:
         """
         for i in range(self.n - 1):
             for j in range(self.n):
-                sign = self.horizontal[i, j]
+                sign = self.vertical[i, j]
 
                 if sign == 0: continue # Bỏ qua nếu không có ràng buộc
                 
@@ -90,10 +90,10 @@ class FOLKB:
                     for b in range(1, self.n + 1):
                         # Dấu ^
                         if sign == 1 and not (a < b):
-                            self.clauses.append([-self.var(i, j, a), -self.var(i, j + 1, b)])
+                            self.clauses.append([-self.var(i, j, a), -self.var(i + 1, j, b)])
                         # Dấu v
                         elif sign == -1 and not (a > b):
-                            self.clauses.append([-self.var(i, j, a), -self.var(i, j + 1, b)])
+                            self.clauses.append([-self.var(i, j, a), -self.var(i + 1, j, b)])
     
     def given_constraints(self):
         """A9: Ô được gán giá trị cho sẵn thì cố định lại"""
@@ -102,7 +102,7 @@ class FOLKB:
                 if self.grid[i, j] != 0:
                     v = self.grid[i, j]
                     self.clauses.append(self.var(i, j, v))
-                    
+
     def build_KB(self):
         self.clauses = []
         self.cell_at_least_one()
