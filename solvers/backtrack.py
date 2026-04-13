@@ -1,92 +1,165 @@
 import copy
+from file import PuzzleCase
+
 
 class Backtracking:
-    def __init__(self, puzzle):
+    """Giải bài toán Futoshiki bằng thuật toán quay lui (Backtracking).
+
+    Ý tưởng chính:
+    - Duyệt từng ô trống trên bảng
+    - Thử gán các giá trị từ 1 → n
+    - Kiểm tra hợp lệ (row, column, inequality)
+    - Nếu hợp lệ thì tiếp tục đệ quy
+    - Nếu không thì quay lui (backtrack)
+    """
+
+    def __init__(self, puzzle: PuzzleCase):
+        """Khởi tạo solver từ một PuzzleCase.
+
+        - Sao chép grid để tránh làm thay đổi dữ liệu gốc
+        - Lưu lại các ràng buộc ngang và dọc
+        """
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.horizontal = puzzle.horizontal
         self.vertical = puzzle.vertical
 
-    def is_valid(self, row, col, val):
-        #check row
+    def is_valid(self, row: int, col: int, val: int) -> bool:
+        """Kiểm tra xem có thể đặt giá trị val vào ô (row, col) hay không.
+
+        Các điều kiện cần thỏa:
+        1. Không trùng trong hàng
+        2. Không trùng trong cột
+        3. Thỏa ràng buộc ngang (< hoặc >)
+        4. Thỏa ràng buộc dọc (< hoặc >)
+        """
+
+        # ========================
+        # 1. Kiểm tra hàng (row)
+        # ========================
         for c in range(self.n):
-            if self.grid[row][c] == val and c != col:
+            if self.grid[row][c] == val:
                 return False
-            
-        #check column
+
+        # ========================
+        # 2. Kiểm tra cột (column)
+        # ========================
         for r in range(self.n):
-            if self.grid[r][col] == val and r != row:
+            if self.grid[r][col] == val:
                 return False
-            
-        #horizontal - right
-        if col < self.n - 1 and self.horizontal[row][col] not in (None, ""):
+
+        # ========================
+        # 3. Kiểm tra ràng buộc ngang
+        # ========================
+
+        # Ô bên phải (row, col+1)
+        if col < self.n - 1:
             sign = self.horizontal[row][col]
 
-            if self.grid[row][col + 1] != 0:
-                if sign == "<" and not(val < self.grid[row][col + 1]):
+            # Chỉ kiểm tra khi có ràng buộc và ô bên phải đã có giá trị
+            if sign != 0 and self.grid[row][col + 1] != 0:
+                # sign == 1: ô trái < ô phải
+                if sign == 1 and not (val < self.grid[row][col + 1]):
                     return False
-                if sign == ">" and not(val > self.grid[row][col + 1]):
+                # sign == -1: ô trái > ô phải
+                if sign == -1 and not (val > self.grid[row][col + 1]):
                     return False
-                
-        #horizontal - left
-        if col > 0 and self.horizontal[row][col - 1] not in (None, ""):
+
+        # Ô bên trái (row, col-1)
+        if col > 0:
             sign = self.horizontal[row][col - 1]
 
-            if self.grid[row][col - 1] != 0:
-                if sign == "<" and not(self.grid[row][col - 1] < val):
+            if sign != 0 and self.grid[row][col - 1] != 0:
+                # sign == 1: ô trái < ô phải
+                if sign == 1 and not (self.grid[row][col - 1] < val):
                     return False
-                if sign == ">" and not(self.grid[row][col - 1] > val):
+                # sign == -1: ô trái > ô phải
+                if sign == -1 and not (self.grid[row][col - 1] > val):
                     return False
-        
-        #vertical - down
-        if row < self.n - 1 and self.vertical[row][col] not in (None, ""):
+
+        # ========================
+        # 4. Kiểm tra ràng buộc dọc
+        # ========================
+
+        # Ô phía dưới (row+1, col)
+        if row < self.n - 1:
             sign = self.vertical[row][col]
 
-            if self.grid[row + 1][col] != 0:
-                if sign == "v" and not(val < self.grid[row + 1][col]):
+            if sign != 0 and self.grid[row + 1][col] != 0:
+                # sign == 1: ô trên < ô dưới
+                if sign == 1 and not (val < self.grid[row + 1][col]):
                     return False
-                if sign == "^" and not(val > self.grid[row + 1][col]):
+                # sign == -1: ô trên > ô dưới
+                if sign == -1 and not (val > self.grid[row + 1][col]):
                     return False
-        
-        #vertical - up
-        if row > 0 and self.vertical[row - 1][col] not in (None, ""):
+
+        # Ô phía trên (row-1, col)
+        if row > 0:
             sign = self.vertical[row - 1][col]
 
-            if self.grid[row - 1][col] != 0:
-                if sign == "v" and not(self.grid[row - 1][col] < val):
+            if sign != 0 and self.grid[row - 1][col] != 0:
+                # sign == 1: ô trên < ô dưới
+                if sign == 1 and not (self.grid[row - 1][col] < val):
                     return False
-                if sign == "^" and not(self.grid[row - 1][col] > val):
+                # sign == -1: ô trên > ô dưới
+                if sign == -1 and not (self.grid[row - 1][col] > val):
                     return False
-                
+
         return True
-    
 
     def find_empty(self):
+        """Tìm một ô trống (giá trị = 0) trên bảng.
+
+        Trả về:
+        - (row, col) nếu còn ô trống
+        - None nếu bảng đã đầy
+        """
         for i in range(self.n):
             for j in range(self.n):
                 if self.grid[i][j] == 0:
                     return i, j
         return None
-    
-    def backtrack(self):
+
+    def backtrack(self) -> bool:
+        """Thuật toán quay lui chính.
+
+        Quy trình:
+        - Tìm ô trống
+        - Thử tất cả giá trị hợp lệ
+        - Nếu đặt được thì gọi đệ quy
+        - Nếu thất bại thì quay lui
+        """
+
         empty = self.find_empty()
+
+        # Nếu không còn ô trống → đã giải xong
         if not empty:
             return True
 
         i, j = empty
 
+        # Thử các giá trị từ 1 → n
         for val in range(1, self.n + 1):
             if self.is_valid(i, j, val):
+                # Gán thử
                 self.grid[i][j] = val
 
+                # Đệ quy
                 if self.backtrack():
                     return True
 
+                # Quay lui
                 self.grid[i][j] = 0
 
-        return False 
-    
+        return False
+
     def solve(self):
+        """Hàm public để giải puzzle.
+
+        Trả về:
+        - grid đã giải nếu có nghiệm
+        - None nếu không có nghiệm
+        """
         if self.backtrack():
             return self.grid
         return None
