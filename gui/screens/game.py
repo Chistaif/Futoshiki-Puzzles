@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import threading
+from collections import deque
+from queue import Empty, Queue
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Deque, Dict, List, Optional, Tuple
 
 import pygame
 
 from file import PuzzleCase, load_all_input_puzzles
+from solvers.astar import AStarSolver
 from solvers.backtrack import Backtracking
 
 from ..components import Button, Cell, Timer
@@ -68,14 +72,23 @@ class GameScreen:
         self.screen_mode = "play"
 
         self.ai_trace: List[Tuple[int, int, int]] = []
+        self.ai_pending_steps: Deque[Tuple[int, int, int]] = deque()
         self.ai_step_index = 0
         self.ai_step_elapsed = 0.0
         self.ai_step_delay_ms = 75
         self.ai_step_interval = self.ai_step_delay_ms / 1000.0
         self.ai_animating = False
         self.ai_solver_name = ""
+        self.ai_solver_running = False
+        self.ai_solver_done = False
+        self.ai_solver_found_solution = False
+        self.ai_worker_thread: Optional[threading.Thread] = None
+        self.ai_worker_cancel_event = threading.Event()
+        self.ai_event_queue: Queue[Tuple[str, Any]] = Queue()
         self.ai_focus_cell: Optional[Tuple[int, int]] = None
         self.ai_focus_backtrack = False
+        self.ai_dirty_cells: set[Tuple[int, int]] = set()
+        self.force_full_draw = True
 
         self.ai_click_sound: Optional[pygame.mixer.Sound] = None
         self._init_audio()
@@ -169,8 +182,17 @@ class GameScreen:
         cell.is_ai_focus = True
         cell.is_ai_backtrack = is_backtrack
 
+    def _solver_key_from_name(self) -> str:
+        name = self.ai_solver_name.lower().strip()
+        if "a*" in name or "astar" in name:
+            return "astar"
+        return "backtracking"
+
     def set_mode(self, mode: str) -> None:
         self.screen_mode = "ai" if str(mode).lower() == "ai" else "play"
+
+    def shutdown(self) -> None:
+        self._stop_ai_worker(wait_timeout=0.25)
 
     def set_level(self, n: int, case_name: Optional[str] = None) -> None:
         self._reset_ai_animation()
@@ -230,6 +252,7 @@ class GameScreen:
         self.horizontal_relations = {}
         self.vertical_relations = {}
         self.selected = None
+        self.force_full_draw = True
         self._build_cells()
 
     def _load_case(self, case: PuzzleCase) -> None:
@@ -263,6 +286,7 @@ class GameScreen:
                     self.vertical_relations[(row, col)] = "v"
 
         self.selected = None
+        self.force_full_draw = True
         self._build_cells()
         self.timer.start()
         self._revalidate_board(keep_status=True)
@@ -304,14 +328,20 @@ class GameScreen:
             self.cells.append(row_cells)
 
         self._set_ai_focus(self.ai_focus_cell, self.ai_focus_backtrack)
+        self.force_full_draw = True
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
         self._update_layout()
 
         if self.back_button.handle_event(event):
+            solver_key = self._solver_key_from_name()
             self._reset_ai_animation()
             self.timer.stop()
-            return {"state": "deal_select", "mode": self.screen_mode}
+            return {
+                "state": "deal_select",
+                "mode": self.screen_mode,
+                "solver_name": solver_key,
+            }
 
         if self.ai_animating:
             return None
@@ -326,6 +356,7 @@ class GameScreen:
 
     def update(self, dt: float) -> None:
         self.timer.update(dt)
+        self._drain_ai_events()
 
         if not self.ai_animating:
             return
@@ -335,16 +366,40 @@ class GameScreen:
             self.ai_step_elapsed -= self.ai_step_interval
             self._apply_next_ai_step()
 
+        if not self.ai_pending_steps and self.ai_solver_done:
+            self.ai_animating = False
+            self._set_ai_focus(None, False)
+            if self.ai_solver_found_solution and self._is_filled() and not self.invalid_positions:
+                self.status_message = "Solved"
+                self.timer.stop()
+            elif self.ai_solver_found_solution:
+                self.status_message = "Completed"
+            else:
+                self.status_message = "No solution found"
+            self.force_full_draw = True
+
     def _reset_ai_animation(self) -> None:
+        self._stop_ai_worker(wait_timeout=0.15)
         self.ai_trace = []
+        self.ai_pending_steps = deque()
         self.ai_step_index = 0
         self.ai_step_elapsed = 0.0
         self.ai_animating = False
+        self.ai_solver_running = False
+        self.ai_solver_done = False
+        self.ai_solver_found_solution = False
         self.ai_solver_name = ""
+        self.ai_event_queue = Queue()
+        self.ai_dirty_cells.clear()
+        self.force_full_draw = True
         self._set_ai_focus(None, False)
 
     def start_ai_solver(self, case: PuzzleCase, solver_name: str = "backtracking") -> None:
-        if solver_name.lower() != "backtracking":
+        normalized_solver = str(solver_name).strip().lower()
+        if normalized_solver in ("a*", "a_star"):
+            normalized_solver = "astar"
+
+        if normalized_solver not in ("backtracking", "astar"):
             self.status_message = f"Unsupported solver: {solver_name}"
             return
 
@@ -353,34 +408,106 @@ class GameScreen:
 
         active_case = self.current_case if self.current_case is not None else case
 
-        trace = self._capture_backtracking_trace(active_case)
-        self.ai_trace = trace
+        self.ai_solver_name = "A* Search" if normalized_solver == "astar" else "Backtracking"
+        self.ai_trace = []
+        self.ai_pending_steps = deque()
         self.ai_step_index = 0
         self.ai_step_elapsed = 0.0
-        self.ai_solver_name = "Backtracking"
-
-        if not trace:
-            if self._is_filled() and not self.invalid_positions:
-                self.status_message = "Puzzle already solved"
-            else:
-                self.status_message = "No solution found"
-            self.ai_animating = False
-            return
-
+        self.ai_solver_done = False
+        self.ai_solver_found_solution = False
+        self.ai_solver_running = True
         self.ai_animating = True
-        self.status_message = "Thinking..."
+        self.status_message = f"Thinking ({self.ai_solver_name})..."
+        self._start_ai_worker(active_case, normalized_solver)
 
-    def _capture_backtracking_trace(self, case: PuzzleCase) -> List[Tuple[int, int, int]]:
-        solver = Backtracking(case)
-        trace: List[Tuple[int, int, int]] = []
+    def _start_ai_worker(self, case: PuzzleCase, solver_name: str) -> None:
+        self._stop_ai_worker(wait_timeout=0.05)
+        event_queue: Queue[Tuple[str, Any]] = Queue()
+        cancel_event = threading.Event()
+        self.ai_event_queue = event_queue
+        self.ai_worker_cancel_event = cancel_event
 
-        def on_step(row: int, col: int, value: int) -> None:
-            trace.append((row, col, value))
+        worker = threading.Thread(
+            target=self._run_solver_worker,
+            args=(case, solver_name, event_queue, cancel_event),
+            daemon=True,
+        )
+        self.ai_worker_thread = worker
+        worker.start()
 
-        solved = solver.solve(step_callback=on_step)
-        if solved is None:
-            return []
-        return trace
+    def _run_solver_worker(
+        self,
+        case: PuzzleCase,
+        solver_name: str,
+        event_queue: Queue[Tuple[str, Any]],
+        cancel_event: threading.Event,
+    ) -> None:
+        try:
+            def on_step(row: int, col: int, value: int) -> None:
+                if cancel_event.is_set():
+                    raise RuntimeError("solver-cancelled")
+                event_queue.put(("step", (row, col, value)))
+
+            if solver_name == "astar":
+                solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
+            else:
+                solver = Backtracking(case)
+
+            solved_grid = solver.solve(step_callback=on_step)
+            if cancel_event.is_set():
+                event_queue.put(("cancelled", None))
+                return
+
+            event_queue.put(("done", solved_grid is not None))
+        except RuntimeError as exc:
+            if str(exc) == "solver-cancelled":
+                event_queue.put(("cancelled", None))
+                return
+            event_queue.put(("error", str(exc)))
+        except Exception as exc:  # pragma: no cover
+            event_queue.put(("error", str(exc)))
+
+    def _stop_ai_worker(self, wait_timeout: float) -> None:
+        self.ai_worker_cancel_event.set()
+        worker = self.ai_worker_thread
+        if worker is not None and worker.is_alive():
+            worker.join(timeout=wait_timeout)
+        self.ai_worker_thread = None
+
+    def _drain_ai_events(self) -> None:
+        while True:
+            try:
+                event_type, payload = self.ai_event_queue.get_nowait()
+            except Empty:
+                break
+
+            if event_type == "step":
+                row, col, value = payload
+                self.ai_pending_steps.append((row, col, value))
+                continue
+
+            if event_type == "done":
+                self.ai_solver_running = False
+                self.ai_solver_done = True
+                self.ai_solver_found_solution = bool(payload)
+                continue
+
+            if event_type == "cancelled":
+                self.ai_solver_running = False
+                self.ai_solver_done = True
+                self.ai_solver_found_solution = False
+                self.ai_pending_steps = deque()
+                self.ai_animating = False
+                self.status_message = "Solver cancelled"
+                continue
+
+            if event_type == "error":
+                self.ai_solver_running = False
+                self.ai_solver_done = True
+                self.ai_solver_found_solution = False
+                self.ai_pending_steps = deque()
+                self.ai_animating = False
+                self.status_message = f"Solver error: {payload}"
 
     def _play_ai_click(self) -> None:
         if self.ai_click_sound is None:
@@ -391,29 +518,72 @@ class GameScreen:
             pass
 
     def _apply_next_ai_step(self) -> None:
-        if self.ai_step_index >= len(self.ai_trace):
-            self.ai_animating = False
-            self._set_ai_focus(None, False)
-            if self._is_filled() and not self.invalid_positions:
-                self.status_message = "Solved"
-            else:
-                self.status_message = "Stopped"
+        if not self.ai_pending_steps:
             return
 
-        row, col, value = self.ai_trace[self.ai_step_index]
-        self.ai_step_index += 1
+        row, col, value = self.ai_pending_steps.popleft()
 
         is_backtrack = value == 0
         self._set_ai_focus((row, col), is_backtrack)
-        self.set_cell_value(row, col, value, keep_status=True)
+        self.render_step(row, col, value)
 
         if value != 0:
             self._play_ai_click()
-            self.status_message = "Thinking..."
+            self.status_message = f"Thinking ({self.ai_solver_name})..."
         else:
-            self.status_message = "Backtracking..."
+            if self._solver_key_from_name() == "backtracking":
+                self.status_message = "Backtracking..."
+            else:
+                self.status_message = f"Thinking ({self.ai_solver_name})..."
 
-        pygame.time.delay(3)
+    def render_step(self, row: int, col: int, value: int) -> None:
+        """Apply one AI step and mark only impacted cells for incremental redraw."""
+        if not (0 <= row < self.n and 0 <= col < self.n):
+            return
+
+        if value < 0 or value > self.n:
+            return
+
+        target_cell = self.cells[row][col]
+        if target_cell.is_clue:
+            return
+
+        self.values[row][col] = value
+        target_cell.set_value(value)
+        self._revalidate_board(keep_status=True)
+        self._mark_delta_cells(row, col)
+
+    def _mark_delta_cells(self, row: int, col: int) -> None:
+        self.ai_dirty_cells.add((row, col))
+        if row > 0:
+            self.ai_dirty_cells.add((row - 1, col))
+        if row < self.n - 1:
+            self.ai_dirty_cells.add((row + 1, col))
+        if col > 0:
+            self.ai_dirty_cells.add((row, col - 1))
+        if col < self.n - 1:
+            self.ai_dirty_cells.add((row, col + 1))
+
+    def _draw_incremental_board(self, surface: pygame.Surface) -> None:
+        if not self.ai_dirty_cells:
+            return
+
+        clear_rects: List[pygame.Rect] = []
+        for row, col in self.ai_dirty_cells:
+            cell_rect = self.cells[row][col].rect.inflate(self.cell_gap + 10, self.cell_gap + 10)
+            clipped = cell_rect.clip(self.board_rect)
+            if clipped.width > 0 and clipped.height > 0:
+                clear_rects.append(clipped)
+
+        for rect in clear_rects:
+            pygame.draw.rect(surface, COLOR_GAME_PANEL, rect)
+
+        for row, col in self.ai_dirty_cells:
+            self.cells[row][col].draw(surface, self.cell_font)
+
+        # Redraw relation symbols to keep inequality marks in sync with updated values.
+        self._draw_relations(surface)
+        self.ai_dirty_cells.clear()
 
     def _select_cell(self, pos: Tuple[int, int]) -> None:
         self.selected = None
@@ -743,6 +913,21 @@ class GameScreen:
 
     def draw(self, surface: pygame.Surface) -> None:
         self._update_layout()
+
+        if self.force_full_draw:
+            self._draw_background(surface)
+            self._draw_header(surface)
+            self._draw_board(surface)
+            self.force_full_draw = False
+            self.ai_dirty_cells.clear()
+            return
+
+        # In AI mode, keep background/board static and update only changed cells.
+        if self.screen_mode == "ai" and (self.ai_animating or self.ai_solver_running):
+            self._draw_header(surface)
+            self._draw_incremental_board(surface)
+            return
+
         self._draw_background(surface)
         self._draw_header(surface)
         self._draw_board(surface)

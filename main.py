@@ -45,6 +45,7 @@ def run() -> None:
     )
 
     selected_level = game_screen.n
+    selected_ai_solver = "backtracking"
     state = "menu"
     running = True
 
@@ -75,6 +76,7 @@ def run() -> None:
 
             if next_state == "deal_select":
                 deal_select_screen.set_mode(str(transition.get("mode", "play")))
+                selected_ai_solver = str(transition.get("solver_name", selected_ai_solver))
 
             if next_state == "game":
                 selected_level = int(transition.get("level", selected_level))
@@ -82,7 +84,6 @@ def run() -> None:
                 selected_case_name = raw_case_name.strip() if isinstance(raw_case_name, str) else None
                 if selected_case_name == "":
                     selected_case_name = None
-
                 is_ai_mode = bool(transition.get("start_ai", False))
                 game_screen.set_mode("ai" if is_ai_mode else "play")
 
@@ -90,7 +91,7 @@ def run() -> None:
 
                 if is_ai_mode:
                     if game_screen.current_case is not None:
-                        game_screen.start_ai_solver(game_screen.current_case, "backtracking")
+                        game_screen.start_ai_solver(game_screen.current_case, selected_ai_solver)
                     else:
                         game_screen.status_message = "No puzzle available for AI solver"
 
@@ -100,6 +101,7 @@ def run() -> None:
         active_screen.draw(surface)
         pygame.display.flip()
 
+    game_screen.shutdown()
     pygame.quit()
 
 
