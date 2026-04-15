@@ -101,7 +101,11 @@ class FOLKB:
             for j in range(self.n):
                 if self.grid[i, j] != 0:
                     v = self.grid[i, j]
-                    self.clauses.append(self.var(i, j, v))
+
+                    self.clauses.append([self.var(i, j, v)])
+
+    """A10: đã được encode ngầm => không thể có value ngoài [1..N]"""
+    """A11: đã có not(a < b) thay vì less"""
 
     def build_KB(self):
         self.clauses = []
