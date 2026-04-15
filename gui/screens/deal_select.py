@@ -11,6 +11,8 @@ from file import PuzzleCase
 
 from ..components import Button
 from ..constants import (
+    COLOR_BUTTON,
+    COLOR_BUTTON_HOVER,
     COLOR_BUTTON_TEXT,
     COLOR_MUTED,
     FONT_BUTTON_SIZE,
@@ -53,6 +55,7 @@ class DealSelectScreen:
 
         self.mode = "play"
         self.stage = "deal"
+        self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
         self.selected_size: Optional[int] = None
         self.hovered_size: Optional[int] = None
         self.hovered_case_name: Optional[str] = None
@@ -60,11 +63,11 @@ class DealSelectScreen:
         self.input_button_rects: List[Tuple[str, pygame.Rect]] = []
 
         self.back_button = Button(
-            pygame.Rect(0, 0, 156, 46),
-            "Back",
+            pygame.Rect(0, 0, 88, 44),
+            "",
             self.button_font,
-            bg_color=(142, 40, 40),
-            hover_color=(168, 52, 52),
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
             text_color=COLOR_BUTTON_TEXT,
         )
 
@@ -118,6 +121,8 @@ class DealSelectScreen:
         return rects
 
     def _update_layout(self) -> None:
+        self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
+
         if self.selected_size is None and self.level_options:
             self.selected_size = self.level_options[0]
 
@@ -133,7 +138,7 @@ class DealSelectScreen:
         self.panel_rect.center = (self.surface_rect.centerx, self.surface_rect.centery + 10)
         self.panel_rect.top = max(88, self.panel_rect.top)
 
-        self.back_button.rect.midbottom = (self.surface_rect.centerx, self.surface_rect.bottom - 24)
+        self.back_button.rect.topleft = (self.layout_margin, self.layout_margin)
 
         self.deal_button_rects = []
         self.input_button_rects = []
@@ -268,3 +273,15 @@ class DealSelectScreen:
             self._draw_input_buttons(surface)
 
         self.back_button.draw(surface)
+
+        icon_color = (255, 248, 220) if self.back_button.is_hovered else COLOR_BUTTON_TEXT
+        cx, cy = self.back_button.rect.center
+        pygame.draw.polygon(
+            surface,
+            icon_color,
+            [
+                (cx - 12, cy),
+                (cx + 6, cy - 10),
+                (cx + 6, cy + 10),
+            ],
+        )
