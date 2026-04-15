@@ -5,7 +5,7 @@ from __future__ import annotations
 import pygame
 
 from gui.constants import DEFAULT_GRID_SIZE, FPS, SCREEN_HEIGHT, SCREEN_WIDTH, WINDOW_TITLE
-from gui.screens import GameScreen, LevelSelectScreen, MenuScreen
+from gui.screens import DealSelectScreen, GameScreen, MenuScreen
 
 
 def _compute_window_size_2_by_3() -> tuple[int, int]:
@@ -38,7 +38,11 @@ def run() -> None:
 
     menu_screen = MenuScreen(surface.get_rect())
     game_screen = GameScreen(surface.get_rect(), n=DEFAULT_GRID_SIZE)
-    level_select_screen = LevelSelectScreen(surface.get_rect(), available_sizes=game_screen.available_sizes)
+    deal_select_screen = DealSelectScreen(
+        surface.get_rect(),
+        available_sizes=game_screen.available_sizes,
+        puzzles_by_size=game_screen.puzzles_by_size,
+    )
 
     selected_level = game_screen.n
     state = "menu"
@@ -49,8 +53,8 @@ def run() -> None:
 
         if state == "menu":
             active_screen = menu_screen
-        elif state == "level_select":
-            active_screen = level_select_screen
+        elif state == "deal_select":
+            active_screen = deal_select_screen
         else:
             active_screen = game_screen
 
@@ -64,9 +68,28 @@ def run() -> None:
                 continue
 
             next_state = transition.get("state", state)
+
+            if next_state == "exit":
+                running = False
+                continue
+
+            if next_state == "deal_select":
+                deal_select_screen.set_mode(str(transition.get("mode", "play")))
+
             if next_state == "game":
                 selected_level = int(transition.get("level", selected_level))
-                game_screen.set_level(selected_level)
+                raw_case_name = transition.get("case_name")
+                selected_case_name = raw_case_name.strip() if isinstance(raw_case_name, str) else None
+                if selected_case_name == "":
+                    selected_case_name = None
+
+                game_screen.set_level(selected_level, selected_case_name)
+
+                if bool(transition.get("start_ai", False)):
+                    if game_screen.current_case is not None:
+                        game_screen.start_ai_solver(game_screen.current_case, "backtracking")
+                    else:
+                        game_screen.status_message = "No puzzle available for AI solver"
 
             state = next_state
 

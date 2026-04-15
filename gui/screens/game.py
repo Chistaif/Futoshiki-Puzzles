@@ -1,33 +1,26 @@
-"""Màn hình chơi chính của Futoshiki.
-
-File này xử lý toàn bộ luồng game:
-- nạp puzzle từ file input
-- dựng bàn cờ theo kích thước level
-- xử lý chọn ô và nhập số
-- kiểm tra hợp lệ theo quy tắc Futoshiki
-- vẽ toàn bộ giao diện trong màn chơi
-"""
+"""Minimalist gameplay screen for Futoshiki."""
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import pygame
 
 from file import PuzzleCase, load_all_input_puzzles
+from solvers.backtrack import Backtracking
 
 from ..components import Button, Cell, Timer
 from ..constants import (
     COLOR_BACKGROUND,
     COLOR_BORDER,
-    COLOR_CLUE,
+    COLOR_BUTTON,
+    COLOR_BUTTON_HOVER,
+    COLOR_BUTTON_TEXT,
     COLOR_ERROR,
-    COLOR_MUTED,
     COLOR_PANEL,
     COLOR_SHADOW,
-    COLOR_SOLVER,
-    COLOR_SUCCESS_SOFT,
-    COLOR_TITLE,
+    COLOR_STATUS_BAR,
     CONTAINER_RADIUS,
     DEFAULT_GRID_SIZE,
     FONT_BUTTON_SIZE,
@@ -41,18 +34,14 @@ Transition = Optional[Dict[str, Any]]
 
 
 class GameScreen:
-    """Màn hình chơi chính với kiểm tra hợp lệ trực tiếp và puzzle từ file."""
+    """Main gameplay screen with optional AI solver animation."""
 
     def __init__(self, surface_rect: pygame.Rect, n: int = DEFAULT_GRID_SIZE) -> None:
         self.surface_rect = surface_rect
-        self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
-        self.header_top = self.layout_margin
-        self.footer_height = 62
-        self.footer_gap = 16
-        self.title_pos = (self.layout_margin, 88)
-        self.subtitle_pos = (self.layout_margin, 130)
-        self.puzzle_name_pos = (self.layout_margin, 160)
-        self.timer_rect = pygame.Rect(0, 0, 146, 52)
+        self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
+
+        self.status_bar_height = 42
+        self.status_bar_rect = pygame.Rect(0, self.surface_rect.height - self.status_bar_height, self.surface_rect.width, self.status_bar_height)
 
         self._init_fonts()
         self._init_buttons()
@@ -60,10 +49,9 @@ class GameScreen:
         self.n = n
         self.cell_size = 80
         self.cell_gap = 20
-        self.relation_size = 18
-        self.relation_stroke = 4
-        self.container_padding = 24
-        self.board_top = 140
+        self.relation_size = 16
+        self.relation_stroke = 2
+        self.container_padding = 20
 
         self.values: List[List[int]] = []
         self.clues: Dict[Tuple[int, int], int] = {}
@@ -74,8 +62,21 @@ class GameScreen:
         self.invalid_positions: set[Tuple[int, int]] = set()
 
         self.current_case: Optional[PuzzleCase] = None
-        self.status_message = ""
+        self.status_message = "Ready"
         self.board_rect = pygame.Rect(0, 0, 100, 100)
+
+        self.ai_trace: List[Tuple[int, int, int]] = []
+        self.ai_step_index = 0
+        self.ai_step_elapsed = 0.0
+        self.ai_step_delay_ms = 75
+        self.ai_step_interval = self.ai_step_delay_ms / 1000.0
+        self.ai_animating = False
+        self.ai_solver_name = ""
+        self.ai_focus_cell: Optional[Tuple[int, int]] = None
+        self.ai_focus_backtrack = False
+
+        self.ai_click_sound: Optional[pygame.mixer.Sound] = None
+        self._init_audio()
 
         self.puzzle_cases = load_all_input_puzzles()
         self.puzzles_by_size: Dict[int, List[PuzzleCase]] = {}
@@ -92,51 +93,79 @@ class GameScreen:
         self.set_level(preferred)
 
     def _init_fonts(self) -> None:
-        """Khởi tạo toàn bộ font dùng trong màn game.
-
-        Tách riêng phần này để việc chỉnh typography sau này dễ hơn và không
-        làm rối các phần logic khác.
-        """
-        self.title_font = pygame.font.SysFont(FONT_FAMILY, 40, bold=True)
-        self.info_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE)
-        self.legend_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 2)
         self.button_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 8, bold=True)
-        self.timer_font = pygame.font.SysFont(FONT_FAMILY, 30, bold=True)
+        self.status_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 5)
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, 38, bold=True)
 
     def _init_buttons(self) -> None:
-        """Tạo các nút điều hướng chính của màn game."""
-        self.back_button = Button(pygame.Rect(0, 0, 132, 48), "Back", self.button_font)
-        self.new_puzzle_button = Button(pygame.Rect(0, 0, 188, 48), "New Puzzle", self.button_font)
+        self.back_button = Button(
+            pygame.Rect(0, 0, 88, 44),
+            "",
+            self.button_font,
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
+            text_color=COLOR_BUTTON_TEXT,
+        )
         self.timer = Timer()
 
+    def _init_audio(self) -> None:
+        root_path = Path(__file__).resolve().parents[2]
+        candidates = (
+            ("assets", "btn_click.mp3"),
+            ("assets", "click.wav"),
+            ("assets", "picture", "btn_click.mp3"),
+        )
+
+        for parts in candidates:
+            sound_path = root_path.joinpath(*parts)
+            if not sound_path.exists():
+                continue
+
+            try:
+                if pygame.mixer.get_init() is None:
+                    pygame.mixer.init()
+                self.ai_click_sound = pygame.mixer.Sound(sound_path.as_posix())
+                self.ai_click_sound.set_volume(0.2)
+            except pygame.error:
+                self.ai_click_sound = None
+            return
+
     def _update_layout(self) -> None:
-        """Tính lại toàn bộ vị trí giao diện cho cửa sổ dọc 2:3.
+        self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
 
-        Mục đích là tránh phụ thuộc vào tọa độ cứng, để màn hình vẫn đẹp khi
-        thay đổi kích thước hoặc khi chạy trên độ phân giải khác nhau.
-        """
-        self.layout_margin = max(20, int(self.surface_rect.width * 0.04))
-        self.header_top = self.layout_margin
+        self.back_button.rect.topleft = (self.layout_margin, self.layout_margin)
 
-        self.back_button.rect.topleft = (self.layout_margin, self.header_top)
-        self.new_puzzle_button.rect.topleft = (self.back_button.rect.right + 14, self.header_top)
+        self.status_bar_rect = pygame.Rect(
+            0,
+            self.surface_rect.height - self.status_bar_height,
+            self.surface_rect.width,
+            self.status_bar_height,
+        )
 
-        timer_width = 146
-        timer_height = 52
-        timer_left = self.surface_rect.width - self.layout_margin - timer_width
-        self.timer_rect = pygame.Rect(timer_left, self.header_top - 2, timer_width, timer_height)
+    def _clear_ai_focus(self) -> None:
+        for row_cells in self.cells:
+            for cell in row_cells:
+                cell.is_ai_focus = False
+                cell.is_ai_backtrack = False
 
-        text_top = self.back_button.rect.bottom + 14
-        self.title_pos = (self.layout_margin, text_top)
-        self.subtitle_pos = (self.layout_margin, text_top + 40)
-        self.puzzle_name_pos = (self.layout_margin, text_top + 72)
+    def _set_ai_focus(self, pos: Optional[Tuple[int, int]], is_backtrack: bool) -> None:
+        self.ai_focus_cell = pos
+        self.ai_focus_backtrack = is_backtrack
+        self._clear_ai_focus()
 
-        min_board_top = text_top + 108
-        self.board_top = max(self.board_top, min_board_top)
+        if pos is None:
+            return
 
-    def set_level(self, n: int) -> None:
-        """Đổi cấp độ chơi và nạp lại cấu hình tương ứng cho level mới."""
+        row, col = pos
+        if not (0 <= row < len(self.cells) and 0 <= col < len(self.cells[row])):
+            return
+
+        cell = self.cells[row][col]
+        cell.is_ai_focus = True
+        cell.is_ai_backtrack = is_backtrack
+
+    def set_level(self, n: int, case_name: Optional[str] = None) -> None:
+        self._reset_ai_animation()
         if n not in GRID_CONFIG:
             n = DEFAULT_GRID_SIZE
 
@@ -144,30 +173,43 @@ class GameScreen:
         cfg = GRID_CONFIG[n]
         self.cell_size = cfg["cell_size"]
         self.cell_gap = cfg["gap"]
-        self.board_top = cfg["board_top"]
         self.container_padding = cfg["container_padding"]
         self.relation_size = cfg["relation_size"]
         self.relation_stroke = cfg["relation_stroke"]
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, cfg["cell_font"], bold=True)
-        self._update_layout()
 
         self.case_index_by_size.setdefault(n, -1)
+
+        if case_name:
+            case = self._find_case_by_name(n, case_name)
+            if case is not None:
+                self._load_case(case)
+                return
+
         self.case_index_by_size[n] = -1
         self.new_puzzle()
 
-    def new_puzzle(self) -> None:
-        """Nạp puzzle kế tiếp cho level hiện tại từ thư mục Inputs.
+    def _find_case_by_name(self, n: int, case_name: str) -> Optional[PuzzleCase]:
+        target = case_name.strip().lower()
+        if not target:
+            return None
 
-        Nếu không có puzzle hợp lệ, màn game vẫn khởi động ở trạng thái rỗng
-        để người dùng không bị crash hoặc thoát app.
-        """
+        cases = self.puzzles_by_size.get(n, [])
+        for index, case in enumerate(cases):
+            if case.name.lower() == target or case.path.name.lower() == target:
+                self.case_index_by_size[n] = index
+                return case
+        return None
+
+    def new_puzzle(self) -> None:
+        self._reset_ai_animation()
         cases = self.puzzles_by_size.get(self.n, [])
         if not cases:
             self.current_case = None
             self._init_empty_board()
             self.timer.start()
-            self._revalidate_board()
-            self.status_message = f"No puzzle file for level {self.n}x{self.n} in Inputs"
+            self._revalidate_board(keep_status=True)
+            self.status_message = f"No puzzle file for {self.n}x{self.n}"
             return
 
         next_index = (self.case_index_by_size.get(self.n, -1) + 1) % len(cases)
@@ -175,7 +217,6 @@ class GameScreen:
         self._load_case(cases[next_index])
 
     def _init_empty_board(self) -> None:
-        """Tạo bàn cờ rỗng khi không có file puzzle phù hợp."""
         self.values = [[0 for _ in range(self.n)] for _ in range(self.n)]
         self.clues = {}
         self.horizontal_relations = {}
@@ -184,7 +225,6 @@ class GameScreen:
         self._build_cells()
 
     def _load_case(self, case: PuzzleCase) -> None:
-        """Đổ dữ liệu từ một PuzzleCase vào trạng thái game hiện tại."""
         self.current_case = case
         self.n = case.n
 
@@ -217,22 +257,19 @@ class GameScreen:
         self.selected = None
         self._build_cells()
         self.timer.start()
-        self._revalidate_board()
+        self._revalidate_board(keep_status=True)
         self.status_message = f"Loaded {case.name}"
 
     def _build_cells(self) -> None:
-        """Tạo các ô bàn cờ và tính luôn vùng chứa bàn cờ.
+        self._update_layout()
 
-        Phần này được tách riêng để logic dựng UI rõ ràng hơn: chỉ cần gọi lại
-        khi đổi level hoặc nạp puzzle mới.
-        """
         board_size = self.n * self.cell_size + (self.n - 1) * self.cell_gap
         board_left = (self.surface_rect.width - board_size) // 2
 
-        footer_top = self.surface_rect.height - self.footer_height - self.footer_gap
-        max_board_top = footer_top - board_size - self.container_padding * 2 - 10
-        board_top = min(self.board_top, max_board_top)
-        board_top = max(board_top, self.back_button.rect.bottom + 118)
+        usable_top = self.back_button.rect.bottom + 22
+        usable_bottom = self.status_bar_rect.top - 16
+        usable_height = max(0, usable_bottom - usable_top)
+        board_top = usable_top + max(0, (usable_height - board_size) // 2)
 
         self.board_rect = pygame.Rect(
             board_left - self.container_padding,
@@ -247,7 +284,6 @@ class GameScreen:
             for col in range(self.n):
                 x = board_left + col * (self.cell_size + self.cell_gap)
                 y = board_top + row * (self.cell_size + self.cell_gap)
-
                 row_cells.append(
                     Cell(
                         row=row,
@@ -259,14 +295,17 @@ class GameScreen:
                 )
             self.cells.append(row_cells)
 
-    def handle_event(self, event: pygame.event.Event) -> Transition:
-        """Xử lý mọi sự kiện vào game: nút bấm, chuột và bàn phím."""
-        if self.back_button.handle_event(event):
-            self.timer.stop()
-            return {"state": "level_select"}
+        self._set_ai_focus(self.ai_focus_cell, self.ai_focus_backtrack)
 
-        if self.new_puzzle_button.handle_event(event):
-            self.new_puzzle()
+    def handle_event(self, event: pygame.event.Event) -> Transition:
+        self._update_layout()
+
+        if self.back_button.handle_event(event):
+            self._reset_ai_animation()
+            self.timer.stop()
+            return {"state": "deal_select", "mode": "play"}
+
+        if self.ai_animating:
             return None
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -278,11 +317,95 @@ class GameScreen:
         return None
 
     def update(self, dt: float) -> None:
-        """Cập nhật timer theo thời gian thực."""
         self.timer.update(dt)
 
+        if not self.ai_animating:
+            return
+
+        self.ai_step_elapsed += dt
+        while self.ai_step_elapsed >= self.ai_step_interval and self.ai_animating:
+            self.ai_step_elapsed -= self.ai_step_interval
+            self._apply_next_ai_step()
+
+    def _reset_ai_animation(self) -> None:
+        self.ai_trace = []
+        self.ai_step_index = 0
+        self.ai_step_elapsed = 0.0
+        self.ai_animating = False
+        self.ai_solver_name = ""
+        self._set_ai_focus(None, False)
+
+    def start_ai_solver(self, case: PuzzleCase, solver_name: str = "backtracking") -> None:
+        if solver_name.lower() != "backtracking":
+            self.status_message = f"Unsupported solver: {solver_name}"
+            return
+
+        self.set_level(case.n)
+        self._load_case(case)
+
+        trace = self._capture_backtracking_trace(case)
+        self.ai_trace = trace
+        self.ai_step_index = 0
+        self.ai_step_elapsed = 0.0
+        self.ai_solver_name = "Backtracking"
+
+        if not trace:
+            if self._is_filled() and not self.invalid_positions:
+                self.status_message = "Puzzle already solved"
+            else:
+                self.status_message = "No solution found"
+            self.ai_animating = False
+            return
+
+        self.ai_animating = True
+        self.status_message = "Thinking..."
+
+    def _capture_backtracking_trace(self, case: PuzzleCase) -> List[Tuple[int, int, int]]:
+        solver = Backtracking(case)
+        trace: List[Tuple[int, int, int]] = []
+
+        def on_step(row: int, col: int, value: int) -> None:
+            trace.append((row, col, value))
+
+        solved = solver.solve(step_callback=on_step)
+        if solved is None:
+            return []
+        return trace
+
+    def _play_ai_click(self) -> None:
+        if self.ai_click_sound is None:
+            return
+        try:
+            self.ai_click_sound.play()
+        except pygame.error:
+            pass
+
+    def _apply_next_ai_step(self) -> None:
+        if self.ai_step_index >= len(self.ai_trace):
+            self.ai_animating = False
+            self._set_ai_focus(None, False)
+            if self._is_filled() and not self.invalid_positions:
+                self.status_message = "Solved"
+            else:
+                self.status_message = "Stopped"
+            return
+
+        row, col, value = self.ai_trace[self.ai_step_index]
+        self.ai_step_index += 1
+
+        is_backtrack = value == 0
+        self._set_ai_focus((row, col), is_backtrack)
+        self.set_cell_value(row, col, value, keep_status=True)
+
+        if value != 0:
+            self._play_ai_click()
+            self.status_message = "Thinking..."
+        else:
+            self.status_message = "Backtracking..."
+
+        pygame.time.delay(3)
+
     def _select_cell(self, pos: Tuple[int, int]) -> None:
-        """Chọn đúng ô được click và bỏ chọn các ô còn lại."""
         self.selected = None
         for row_cells in self.cells:
             for cell in row_cells:
@@ -292,7 +415,6 @@ class GameScreen:
                     self.selected = (cell.row, cell.col)
 
     def _handle_input_key(self, key: int) -> None:
-        """Xử lý nhập số từ bàn phím cho ô đang được chọn."""
         if self.selected is None:
             return
 
@@ -317,8 +439,7 @@ class GameScreen:
         if 1 <= value <= self.n:
             self.set_cell_value(row, col, value)
 
-    def set_cell_value(self, row: int, col: int, value: int) -> None:
-        """Gán giá trị cho một ô rồi kiểm tra lại tính hợp lệ ngay lập tức."""
+    def set_cell_value(self, row: int, col: int, value: int, keep_status: bool = False) -> None:
         if not (0 <= row < self.n and 0 <= col < self.n):
             return
 
@@ -331,15 +452,13 @@ class GameScreen:
 
         self.values[row][col] = value
         cell.set_value(value)
-        self._revalidate_board()
+        self._revalidate_board(keep_status=keep_status)
 
     def _mark_invalid(self, positions: List[Tuple[int, int]]) -> None:
-        """Đánh dấu nhiều vị trí là không hợp lệ trong một lần."""
         for row, col in positions:
             self.invalid_positions.add((row, col))
 
     def _validate_rows(self) -> None:
-        # Kiểm tra trùng số theo hàng và kiểm tra miền giá trị.
         for row in range(self.n):
             seen: Dict[int, List[Tuple[int, int]]] = {}
             for col in range(self.n):
@@ -355,9 +474,8 @@ class GameScreen:
                     self._mark_invalid(positions)
 
     def _validate_cols(self) -> None:
-        # Kiểm tra trùng số theo cột.
         for col in range(self.n):
-            seen = {}
+            seen: Dict[int, List[Tuple[int, int]]] = {}
             for row in range(self.n):
                 value = self.values[row][col]
                 if value == 0:
@@ -369,7 +487,6 @@ class GameScreen:
                     self._mark_invalid(positions)
 
     def _validate_horizontal(self) -> None:
-        # Kiểm tra các ràng buộc lớn hơn / nhỏ hơn theo chiều ngang.
         for (row, col), symbol in self.horizontal_relations.items():
             left = self.values[row][col]
             right = self.values[row][col + 1]
@@ -381,7 +498,7 @@ class GameScreen:
                     self.invalid_positions.add((row, col + 1))
                 if left != 0 and right != 0 and not (left < right):
                     self._mark_invalid([(row, col), (row, col + 1)])
-            else:  # Trường hợp ">": ô trái phải lớn hơn ô phải.
+            else:
                 if left == 1:
                     self.invalid_positions.add((row, col))
                 if right == self.n:
@@ -390,7 +507,6 @@ class GameScreen:
                     self._mark_invalid([(row, col), (row, col + 1)])
 
     def _validate_vertical(self) -> None:
-        # Kiểm tra các ràng buộc lớn hơn / nhỏ hơn theo chiều dọc.
         for (row, col), symbol in self.vertical_relations.items():
             top = self.values[row][col]
             bottom = self.values[row + 1][col]
@@ -402,7 +518,7 @@ class GameScreen:
                     self.invalid_positions.add((row + 1, col))
                 if top != 0 and bottom != 0 and not (top < bottom):
                     self._mark_invalid([(row, col), (row + 1, col)])
-            else:  # Trường hợp "v": ô trên phải lớn hơn ô dưới.
+            else:
                 if top == 1:
                     self.invalid_positions.add((row, col))
                 if bottom == self.n:
@@ -410,8 +526,7 @@ class GameScreen:
                 if top != 0 and bottom != 0 and not (top > bottom):
                     self._mark_invalid([(row, col), (row + 1, col)])
 
-    def _revalidate_board(self) -> None:
-        """Kiểm tra lại toàn bộ bàn cờ sau mỗi thay đổi giá trị."""
+    def _revalidate_board(self, keep_status: bool = False) -> None:
         self.invalid_positions = set()
 
         self._validate_rows()
@@ -423,27 +538,20 @@ class GameScreen:
             for cell in row_cells:
                 cell.is_invalid = (cell.row, cell.col) in self.invalid_positions
 
+        if keep_status:
+            return
+
         if self.invalid_positions:
-            self.status_message = "Invalid move: duplicate or inequality violation"
+            self.status_message = "Invalid move"
         elif self._is_filled():
-            self.status_message = "Board is valid"
+            self.status_message = "Board valid"
         else:
-            self.status_message = "Board is valid, continue solving"
+            self.status_message = "Editing"
 
     def _is_filled(self) -> bool:
-        """Kiểm tra xem tất cả ô đã được điền số hay chưa."""
         return all(value != 0 for row in self.values for value in row)
 
-    def _draw_timer(self, surface: pygame.Surface) -> None:
-        """Vẽ hộp timer ở góc trên của màn chơi."""
-        pygame.draw.rect(surface, COLOR_PANEL, self.timer_rect, border_radius=16)
-        pygame.draw.rect(surface, COLOR_BORDER, self.timer_rect, width=1, border_radius=16)
-
-        timer_text = self.timer_font.render(self.timer.format_time(), True, COLOR_TITLE)
-        surface.blit(timer_text, timer_text.get_rect(center=self.timer_rect.center))
-
     def _draw_relations(self, surface: pygame.Surface) -> None:
-        """Vẽ toàn bộ ký hiệu quan hệ giữa các ô trên bàn cờ."""
         for (row, col), symbol in self.horizontal_relations.items():
             left_cell = self.cells[row][col]
             right_cell = self.cells[row][col + 1]
@@ -463,33 +571,29 @@ class GameScreen:
             _draw_relation_symbol(surface, center, symbol, self.relation_size, self.relation_stroke)
 
     def _draw_header(self, surface: pygame.Surface) -> None:
-        """Vẽ phần tiêu đề, tên puzzle và các nút điều hướng phía trên."""
-        title = self.title_font.render(f"Futoshiki {self.n}x{self.n}", True, COLOR_TITLE)
-        subtitle = self.info_font.render("Input-driven puzzles with live validation", True, COLOR_MUTED)
-        puzzle_name = self.legend_font.render(
-            self.current_case.name if self.current_case is not None else "No puzzle file loaded",
-            True,
-            COLOR_MUTED,
+        self.back_button.draw(surface)
+
+        icon_color = COLOR_BUTTON_TEXT
+        cx, cy = self.back_button.rect.center
+        pygame.draw.polygon(
+            surface,
+            icon_color,
+            [
+                (cx - 12, cy),
+                (cx + 6, cy - 10),
+                (cx + 6, cy + 10),
+            ],
         )
 
-        surface.blit(title, self.title_pos)
-        surface.blit(subtitle, self.subtitle_pos)
-        surface.blit(puzzle_name, self.puzzle_name_pos)
-
-        self.back_button.draw(surface)
-        self.new_puzzle_button.draw(surface)
-        self._draw_timer(surface)
-
     def _draw_board(self, surface: pygame.Surface) -> None:
-        """Vẽ khung bàn cờ, các ô và các quan hệ."""
-        board_shadow = self.board_rect.move(0, 10)
+        board_shadow = self.board_rect.move(0, 8)
         pygame.draw.rect(
             surface,
-            _mix(COLOR_SHADOW, COLOR_BACKGROUND, 0.24),
+            _mix(COLOR_SHADOW, COLOR_BACKGROUND, 0.35),
             board_shadow,
             border_radius=CONTAINER_RADIUS,
         )
-        pygame.draw.rect(surface, COLOR_PANEL, self.board_rect, border_radius=CONTAINER_RADIUS)
+        pygame.draw.rect(surface, _mix(COLOR_PANEL, COLOR_BACKGROUND, 0.32), self.board_rect, border_radius=CONTAINER_RADIUS)
         pygame.draw.rect(surface, COLOR_BORDER, self.board_rect, width=1, border_radius=CONTAINER_RADIUS)
 
         for row_cells in self.cells:
@@ -498,40 +602,13 @@ class GameScreen:
 
         self._draw_relations(surface)
 
-    def _draw_legend(self, surface: pygame.Surface) -> None:
-        """Vẽ chú giải màu cho ô gợi ý và ô người chơi/solver."""
-        clue_legend = self.legend_font.render("Clue", True, COLOR_CLUE)
-        solver_legend = self.legend_font.render("Player/Solver", True, COLOR_SOLVER)
-
-        legend_y = self.surface_rect.height - self.footer_height
-        legend_width = max(260, int(self.surface_rect.width * 0.38))
-        legend_box = pygame.Rect(self.layout_margin, legend_y - 16, legend_width, self.footer_height)
-        pygame.draw.rect(surface, COLOR_PANEL, legend_box, border_radius=16)
-        pygame.draw.rect(surface, COLOR_BORDER, legend_box, width=1, border_radius=16)
-
-        surface.blit(clue_legend, (legend_box.left + 16, legend_y))
-        surface.blit(solver_legend, (legend_box.left + 108, legend_y))
-
-    def _draw_status(self, surface: pygame.Surface) -> None:
-        """Vẽ trạng thái hiện tại của bàn cờ ở cạnh dưới màn hình."""
-        status_color = COLOR_ERROR if self.invalid_positions else COLOR_MUTED
-        status_text = self.legend_font.render(self.status_message, True, status_color)
-
-        legend_y = self.surface_rect.height - self.footer_height
-        legend_width = max(260, int(self.surface_rect.width * 0.38))
-        status_left = self.layout_margin + legend_width + 16
-        status_width = self.surface_rect.width - status_left - self.layout_margin
-        status_box = pygame.Rect(status_left, legend_y - 16, status_width, self.footer_height)
-        box_color = COLOR_PANEL if not self.invalid_positions else COLOR_SUCCESS_SOFT
-        pygame.draw.rect(surface, box_color, status_box, border_radius=16)
-        pygame.draw.rect(surface, COLOR_BORDER, status_box, width=1, border_radius=16)
-        surface.blit(status_text, status_text.get_rect(midleft=(status_box.left + 18, status_box.centery)))
+    def _draw_status_bar(self, surface: pygame.Surface) -> None:
+        pygame.draw.rect(surface, COLOR_STATUS_BAR, self.status_bar_rect)
+        pygame.draw.line(surface, COLOR_BORDER, (0, self.status_bar_rect.top), (self.surface_rect.width, self.status_bar_rect.top), 1)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """Vẽ toàn bộ màn game theo thứ tự nền, header, board và footer."""
         self._update_layout()
         _draw_soft_background(surface)
         self._draw_header(surface)
         self._draw_board(surface)
-        self._draw_legend(surface)
-        self._draw_status(surface)
+        self._draw_status_bar(surface)

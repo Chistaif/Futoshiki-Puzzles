@@ -1,5 +1,9 @@
 import copy
 from file import PuzzleCase
+from typing import Callable, Optional
+
+
+StepCallback = Callable[[int, int, int], None]
 
 
 class Backtracking:
@@ -120,7 +124,7 @@ class Backtracking:
                     return i, j
         return None
 
-    def backtrack(self) -> bool:
+    def backtrack(self, step_callback: Optional[StepCallback] = None) -> bool:
         """Thuật toán quay lui chính.
 
         Quy trình:
@@ -143,23 +147,27 @@ class Backtracking:
             if self.is_valid(i, j, val):
                 # Gán thử
                 self.grid[i][j] = val
+                if step_callback is not None:
+                    step_callback(i, j, val)
 
                 # Đệ quy
-                if self.backtrack():
+                if self.backtrack(step_callback):
                     return True
 
                 # Quay lui
                 self.grid[i][j] = 0
+                if step_callback is not None:
+                    step_callback(i, j, 0)
 
         return False
 
-    def solve(self):
+    def solve(self, step_callback: Optional[StepCallback] = None):
         """Hàm public để giải puzzle.
 
         Trả về:
         - grid đã giải nếu có nghiệm
         - None nếu không có nghiệm
         """
-        if self.backtrack():
+        if self.backtrack(step_callback):
             return self.grid
         return None
