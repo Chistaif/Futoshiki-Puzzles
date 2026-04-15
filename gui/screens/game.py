@@ -12,15 +12,18 @@ from solvers.backtrack import Backtracking
 
 from ..components import Button, Cell, Timer
 from ..constants import (
-    COLOR_BACKGROUND,
-    COLOR_BORDER,
     COLOR_BUTTON,
     COLOR_BUTTON_HOVER,
     COLOR_BUTTON_TEXT,
-    COLOR_ERROR,
-    COLOR_PANEL,
-    COLOR_SHADOW,
-    COLOR_STATUS_BAR,
+    COLOR_GAME_ACCENT,
+    COLOR_GAME_BACKGROUND,
+    COLOR_GAME_BACKGROUND_SHADE,
+    COLOR_GAME_MUTED,
+    COLOR_GAME_PANEL,
+    COLOR_GAME_PANEL_BORDER,
+    COLOR_GAME_TEXT,
+    COLOR_RELATION_ACTIVE,
+    COLOR_RELATION_IDLE,
     CONTAINER_RADIUS,
     DEFAULT_GRID_SIZE,
     FONT_BUTTON_SIZE,
@@ -28,7 +31,7 @@ from ..constants import (
     FONT_INFO_SIZE,
     GRID_CONFIG,
 )
-from ..utils import _draw_relation_symbol, _draw_soft_background, _mix
+from ..utils import _draw_relation_symbol, _mix
 
 Transition = Optional[Dict[str, Any]]
 
@@ -39,9 +42,7 @@ class GameScreen:
     def __init__(self, surface_rect: pygame.Rect, n: int = DEFAULT_GRID_SIZE) -> None:
         self.surface_rect = surface_rect
         self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
-
-        self.status_bar_height = 42
-        self.status_bar_rect = pygame.Rect(0, self.surface_rect.height - self.status_bar_height, self.surface_rect.width, self.status_bar_height)
+        self.header_rect = pygame.Rect(0, 0, 100, 44)
 
         self._init_fonts()
         self._init_buttons()
@@ -64,6 +65,7 @@ class GameScreen:
         self.current_case: Optional[PuzzleCase] = None
         self.status_message = "Ready"
         self.board_rect = pygame.Rect(0, 0, 100, 100)
+        self.screen_mode = "play"
 
         self.ai_trace: List[Tuple[int, int, int]] = []
         self.ai_step_index = 0
@@ -94,7 +96,8 @@ class GameScreen:
 
     def _init_fonts(self) -> None:
         self.button_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 8, bold=True)
-        self.status_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 5)
+        self.status_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 8, bold=True)
+        self.meta_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 10)
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, 38, bold=True)
 
     def _init_buttons(self) -> None:
@@ -135,11 +138,13 @@ class GameScreen:
 
         self.back_button.rect.topleft = (self.layout_margin, self.layout_margin)
 
-        self.status_bar_rect = pygame.Rect(
-            0,
-            self.surface_rect.height - self.status_bar_height,
-            self.surface_rect.width,
-            self.status_bar_height,
+        header_left = self.back_button.rect.right + 12
+        header_width = max(130, self.surface_rect.width - self.layout_margin - header_left)
+        self.header_rect = pygame.Rect(
+            header_left,
+            self.back_button.rect.top,
+            header_width,
+            self.back_button.rect.height,
         )
 
     def _clear_ai_focus(self) -> None:
@@ -163,6 +168,9 @@ class GameScreen:
         cell = self.cells[row][col]
         cell.is_ai_focus = True
         cell.is_ai_backtrack = is_backtrack
+
+    def set_mode(self, mode: str) -> None:
+        self.screen_mode = "ai" if str(mode).lower() == "ai" else "play"
 
     def set_level(self, n: int, case_name: Optional[str] = None) -> None:
         self._reset_ai_animation()
@@ -266,8 +274,8 @@ class GameScreen:
         board_size = self.n * self.cell_size + (self.n - 1) * self.cell_gap
         board_left = (self.surface_rect.width - board_size) // 2
 
-        usable_top = self.back_button.rect.bottom + 22
-        usable_bottom = self.status_bar_rect.top - 16
+        usable_top = self.back_button.rect.bottom + 24
+        usable_bottom = self.surface_rect.height - self.layout_margin - 20
         usable_height = max(0, usable_bottom - usable_top)
         board_top = usable_top + max(0, (usable_height - board_size) // 2)
 
@@ -303,7 +311,7 @@ class GameScreen:
         if self.back_button.handle_event(event):
             self._reset_ai_animation()
             self.timer.stop()
-            return {"state": "deal_select", "mode": "play"}
+            return {"state": "deal_select", "mode": self.screen_mode}
 
         if self.ai_animating:
             return None
@@ -340,10 +348,12 @@ class GameScreen:
             self.status_message = f"Unsupported solver: {solver_name}"
             return
 
-        self.set_level(case.n)
-        self._load_case(case)
+        self.set_mode("ai")
+        self.set_level(case.n, case.name)
 
-        trace = self._capture_backtracking_trace(case)
+        active_case = self.current_case if self.current_case is not None else case
+
+        trace = self._capture_backtracking_trace(active_case)
         self.ai_trace = trace
         self.ai_step_index = 0
         self.ai_step_elapsed = 0.0
@@ -551,24 +561,114 @@ class GameScreen:
     def _is_filled(self) -> bool:
         return all(value != 0 for row in self.values for value in row)
 
+    @staticmethod
+    def _relation_is_satisfied(symbol: str, left_value: int, right_value: int) -> bool:
+        if left_value == 0 or right_value == 0:
+            return False
+
+        if symbol in ("<", "^"):
+            return left_value < right_value
+
+        return left_value > right_value
+
     def _draw_relations(self, surface: pygame.Surface) -> None:
         for (row, col), symbol in self.horizontal_relations.items():
             left_cell = self.cells[row][col]
             right_cell = self.cells[row][col + 1]
+            left_value = self.values[row][col]
+            right_value = self.values[row][col + 1]
             center = (
                 (left_cell.rect.right + right_cell.rect.left) // 2,
                 left_cell.rect.centery,
             )
-            _draw_relation_symbol(surface, center, symbol, self.relation_size, self.relation_stroke)
+            relation_color = (
+                COLOR_RELATION_ACTIVE
+                if self._relation_is_satisfied(symbol, left_value, right_value)
+                else COLOR_RELATION_IDLE
+            )
+            _draw_relation_symbol(
+                surface,
+                center,
+                symbol,
+                self.relation_size,
+                self.relation_stroke,
+                color=relation_color,
+            )
 
         for (row, col), symbol in self.vertical_relations.items():
             top_cell = self.cells[row][col]
             bottom_cell = self.cells[row + 1][col]
+            top_value = self.values[row][col]
+            bottom_value = self.values[row + 1][col]
             center = (
                 top_cell.rect.centerx,
                 (top_cell.rect.bottom + bottom_cell.rect.top) // 2,
             )
-            _draw_relation_symbol(surface, center, symbol, self.relation_size, self.relation_stroke)
+            relation_color = (
+                COLOR_RELATION_ACTIVE
+                if self._relation_is_satisfied(symbol, top_value, bottom_value)
+                else COLOR_RELATION_IDLE
+            )
+            _draw_relation_symbol(
+                surface,
+                center,
+                symbol,
+                self.relation_size,
+                self.relation_stroke,
+                color=relation_color,
+            )
+
+    @staticmethod
+    def _truncate_text(font: pygame.font.Font, text: str, max_width: int) -> str:
+        if max_width <= 12:
+            return ""
+
+        if font.size(text)[0] <= max_width:
+            return text
+
+        suffix = "..."
+        raw = text
+        while raw and font.size(raw + suffix)[0] > max_width:
+            raw = raw[:-1]
+        return (raw + suffix) if raw else suffix
+
+    def _draw_background(self, surface: pygame.Surface) -> None:
+        surface.fill(COLOR_GAME_BACKGROUND)
+
+        width, height = surface.get_size()
+        overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+
+        blob_a = (*_mix(COLOR_GAME_BACKGROUND_SHADE, (255, 255, 255), 0.2), 180)
+        blob_b = (*_mix(COLOR_GAME_BACKGROUND_SHADE, COLOR_GAME_PANEL_BORDER, 0.35), 130)
+        blob_c = (*_mix(COLOR_GAME_BACKGROUND, (255, 255, 255), 0.55), 95)
+
+        radius = max(80, int(min(width, height) * 0.32))
+        pygame.draw.circle(overlay, blob_a, (int(width * 0.14), int(height * 0.16)), radius)
+        pygame.draw.circle(overlay, blob_b, (int(width * 0.86), int(height * 0.84)), int(radius * 1.15))
+        pygame.draw.circle(overlay, blob_c, (int(width * 0.84), int(height * 0.18)), int(radius * 0.6))
+
+        surface.blit(overlay, (0, 0))
+
+    def _draw_info_pill_right(
+        self,
+        surface: pygame.Surface,
+        text: str,
+        right: int,
+        top: int,
+        accent: bool = False,
+    ) -> int:
+        label_color = (250, 252, 255) if accent else COLOR_GAME_TEXT
+        label = self.meta_font.render(text, True, label_color)
+
+        width = label.get_width() + 18
+        rect = pygame.Rect(right - width, top, width, 28)
+        fill = COLOR_GAME_ACCENT if accent else _mix(COLOR_GAME_PANEL, COLOR_GAME_BACKGROUND, 0.06)
+        border = COLOR_GAME_ACCENT if accent else COLOR_GAME_PANEL_BORDER
+
+        pygame.draw.rect(surface, fill, rect, border_radius=14)
+        pygame.draw.rect(surface, border, rect, width=1, border_radius=14)
+        surface.blit(label, label.get_rect(center=rect.center))
+        return rect.left - 8
 
     def _draw_header(self, surface: pygame.Surface) -> None:
         self.back_button.draw(surface)
@@ -585,16 +685,55 @@ class GameScreen:
             ],
         )
 
-    def _draw_board(self, surface: pygame.Surface) -> None:
-        board_shadow = self.board_rect.move(0, 8)
+        header_shadow = self.header_rect.move(0, 3)
         pygame.draw.rect(
             surface,
-            _mix(COLOR_SHADOW, COLOR_BACKGROUND, 0.35),
+            _mix(COLOR_GAME_PANEL_BORDER, COLOR_GAME_BACKGROUND_SHADE, 0.35),
+            header_shadow,
+            border_radius=16,
+        )
+        pygame.draw.rect(surface, COLOR_GAME_PANEL, self.header_rect, border_radius=16)
+        pygame.draw.rect(surface, COLOR_GAME_PANEL_BORDER, self.header_rect, width=1, border_radius=16)
+
+        chip_top = self.header_rect.top + (self.header_rect.height - 28) // 2
+        right_cursor = self.header_rect.right - 12
+        right_cursor = self._draw_info_pill_right(surface, self.timer.format_time(), right_cursor, chip_top)
+        mode_label = "AI" if self.screen_mode == "ai" else "PLAY"
+        right_cursor = self._draw_info_pill_right(
+            surface,
+            mode_label,
+            right_cursor,
+            chip_top,
+            accent=(self.screen_mode == "ai"),
+        )
+
+        left_x = self.header_rect.left + 12
+        max_text_width = max(70, right_cursor - left_x - 6)
+
+        if self.current_case is not None:
+            case_label = Path(self.current_case.name).stem.replace("_", "-")
+        else:
+            case_label = f"Deal {self.n}x{self.n}"
+
+        case_label = self._truncate_text(self.status_font, case_label, max_text_width)
+        status_text = self._truncate_text(self.meta_font, self.status_message, max_text_width)
+
+        case_surface = self.status_font.render(case_label, True, COLOR_GAME_TEXT)
+        status_surface = self.meta_font.render(status_text, True, COLOR_GAME_MUTED)
+
+        surface.blit(case_surface, (left_x, self.header_rect.top + 4))
+        surface.blit(status_surface, (left_x, self.header_rect.top + 24))
+
+    def _draw_board(self, surface: pygame.Surface) -> None:
+        board_shadow = self.board_rect.move(0, 10)
+        pygame.draw.rect(
+            surface,
+            _mix(COLOR_GAME_PANEL_BORDER, COLOR_GAME_BACKGROUND_SHADE, 0.55),
             board_shadow,
             border_radius=CONTAINER_RADIUS,
         )
-        pygame.draw.rect(surface, _mix(COLOR_PANEL, COLOR_BACKGROUND, 0.32), self.board_rect, border_radius=CONTAINER_RADIUS)
-        pygame.draw.rect(surface, COLOR_BORDER, self.board_rect, width=1, border_radius=CONTAINER_RADIUS)
+        pygame.draw.rect(surface, COLOR_GAME_PANEL, self.board_rect, border_radius=CONTAINER_RADIUS)
+        pygame.draw.rect(surface, COLOR_GAME_PANEL_BORDER, self.board_rect, width=1, border_radius=CONTAINER_RADIUS)
 
         for row_cells in self.cells:
             for cell in row_cells:
@@ -602,13 +741,8 @@ class GameScreen:
 
         self._draw_relations(surface)
 
-    def _draw_status_bar(self, surface: pygame.Surface) -> None:
-        pygame.draw.rect(surface, COLOR_STATUS_BAR, self.status_bar_rect)
-        pygame.draw.line(surface, COLOR_BORDER, (0, self.status_bar_rect.top), (self.surface_rect.width, self.status_bar_rect.top), 1)
-
     def draw(self, surface: pygame.Surface) -> None:
         self._update_layout()
-        _draw_soft_background(surface)
+        self._draw_background(surface)
         self._draw_header(surface)
         self._draw_board(surface)
-        self._draw_status_bar(surface)

@@ -68,6 +68,7 @@ def _draw_relation_symbol(
     symbol: str,
     size: int,
     stroke: int,
+    color: Tuple[int, int, int] = COLOR_RELATION,
 ) -> None:
     cx, cy = center
     half = size // 2
@@ -82,9 +83,9 @@ def _draw_relation_symbol(
         points = [(cx - half, cy - half), (cx, cy + half), (cx + half, cy - half)]
 
     if stroke <= 1:
-        pygame.draw.aaline(surface, COLOR_RELATION, points[0], points[1])
-        pygame.draw.aaline(surface, COLOR_RELATION, points[1], points[2])
+        pygame.draw.aaline(surface, color, points[0], points[1])
+        pygame.draw.aaline(surface, color, points[1], points[2])
         return
 
-    pygame.draw.line(surface, COLOR_RELATION, points[0], points[1], stroke)
-    pygame.draw.line(surface, COLOR_RELATION, points[1], points[2], stroke)
+    pygame.draw.line(surface, color, points[0], points[1], stroke)
+    pygame.draw.line(surface, color, points[1], points[2], stroke)

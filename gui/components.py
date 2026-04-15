@@ -11,16 +11,16 @@ from .constants import (
     CELL_BORDER_WIDTH,
     CELL_RADIUS,
     COLOR_BACKGROUND,
-    COLOR_BORDER,
     COLOR_BUTTON,
     COLOR_BUTTON_HOVER,
     COLOR_BUTTON_TEXT,
-    COLOR_CELL,
     COLOR_CLUE,
     COLOR_ERROR,
     COLOR_ERROR_SOFT,
-    COLOR_MENU_HOVER,
-    COLOR_SELECTED,
+    COLOR_GAME_ACCENT,
+    COLOR_GAME_CELL,
+    COLOR_GAME_CELL_BORDER,
+    COLOR_GAME_CELL_SHADOW,
     COLOR_SHADOW,
     COLOR_SOLVER,
     COLOR_SOLVER_BACKTRACK,
@@ -131,27 +131,30 @@ class Cell:
             self.value = value
 
     def draw(self, surface: pygame.Surface, font: pygame.font.Font) -> None:
+        shadow_rect = self.rect.move(0, 2)
+        pygame.draw.rect(surface, COLOR_GAME_CELL_SHADOW, shadow_rect, border_radius=CELL_RADIUS)
+
         if self.is_invalid:
             fill = COLOR_ERROR_SOFT
         elif self.is_ai_focus:
-            fill = COLOR_AI_HIGHLIGHT
-        elif self.is_selected:
-            fill = COLOR_SELECTED
+            fill = _mix(COLOR_AI_HIGHLIGHT, COLOR_GAME_CELL, 0.45)
         else:
-            fill = COLOR_CELL
+            fill = COLOR_GAME_CELL
 
         pygame.draw.rect(surface, fill, self.rect, border_radius=CELL_RADIUS)
 
         if self.is_invalid:
             border_color = COLOR_ERROR
+        elif self.is_selected:
+            border_color = COLOR_GAME_ACCENT
         elif self.is_ai_focus and self.is_ai_backtrack:
             border_color = COLOR_SOLVER_BACKTRACK
         elif self.is_ai_focus:
-            border_color = COLOR_MENU_HOVER
+            border_color = COLOR_GAME_ACCENT
         else:
-            border_color = COLOR_BORDER
+            border_color = COLOR_GAME_CELL_BORDER
 
-        border_width = CELL_BORDER_WIDTH + 1 if self.is_selected else CELL_BORDER_WIDTH
+        border_width = CELL_BORDER_WIDTH + 1 if (self.is_selected or self.is_ai_focus) else CELL_BORDER_WIDTH
         pygame.draw.rect(
             surface,
             border_color,

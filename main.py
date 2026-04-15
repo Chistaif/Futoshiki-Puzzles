@@ -83,9 +83,12 @@ def run() -> None:
                 if selected_case_name == "":
                     selected_case_name = None
 
+                is_ai_mode = bool(transition.get("start_ai", False))
+                game_screen.set_mode("ai" if is_ai_mode else "play")
+
                 game_screen.set_level(selected_level, selected_case_name)
 
-                if bool(transition.get("start_ai", False)):
+                if is_ai_mode:
                     if game_screen.current_case is not None:
                         game_screen.start_ai_solver(game_screen.current_case, "backtracking")
                     else:
