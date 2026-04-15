@@ -63,6 +63,11 @@ class GameScreen:
         self.status_message = "Ready"
         self.board_rect = pygame.Rect(0, 0, 100, 100)
         self.screen_mode = "play"
+        self.is_victory = False
+        self.move_count = 0
+        self.victory_dialog_rect = pygame.Rect(0, 0, 100, 100)
+        self.victory_anim_duration = 0.15
+        self.victory_anim_elapsed = 0.0
 
         self.ai_manager = AISolverManager(step_delay_ms=75)
         self.ai_focus_cell: Optional[Tuple[int, int]] = None
@@ -92,6 +97,8 @@ class GameScreen:
         self.status_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 8, bold=True)
         self.meta_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE - 10)
         self.cell_font = pygame.font.SysFont(FONT_FAMILY, 38, bold=True)
+        self.victory_title_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE + 16, bold=True)
+        self.victory_info_font = pygame.font.SysFont(FONT_FAMILY, FONT_INFO_SIZE + 2, bold=True)
 
     def _init_buttons(self) -> None:
         self.back_button = Button(
@@ -101,6 +108,22 @@ class GameScreen:
             bg_color=COLOR_BUTTON,
             hover_color=COLOR_BUTTON_HOVER,
             text_color=COLOR_BUTTON_TEXT,
+        )
+        self.play_again_button = Button(
+            pygame.Rect(0, 0, 170, 44),
+            "Play Again",
+            self.button_font,
+            bg_color=(196, 138, 42),
+            hover_color=(224, 167, 64),
+            text_color=(35, 26, 5),
+        )
+        self.back_to_menu_button = Button(
+            pygame.Rect(0, 0, 170, 44),
+            "Back to Select",
+            self.button_font,
+            bg_color=(49, 121, 119),
+            hover_color=(67, 145, 143),
+            text_color=(240, 252, 250),
         )
         self.timer = Timer()
 
@@ -139,6 +162,18 @@ class GameScreen:
             header_width,
             self.back_button.rect.height,
         )
+
+        dialog_width = min(620, max(430, int(self.surface_rect.width * 0.78)))
+        dialog_height = min(390, max(300, int(self.surface_rect.height * 0.46)))
+        self.victory_dialog_rect = pygame.Rect(0, 0, dialog_width, dialog_height)
+        self.victory_dialog_rect.center = self.surface_rect.center
+
+        buttons_y = self.victory_dialog_rect.bottom - 74
+        spacing = 18
+        total_width = self.play_again_button.rect.width + self.back_to_menu_button.rect.width + spacing
+        start_x = self.victory_dialog_rect.centerx - total_width // 2
+        self.play_again_button.rect.topleft = (start_x, buttons_y)
+        self.back_to_menu_button.rect.topleft = (self.play_again_button.rect.right + spacing, buttons_y)
 
     def _clear_ai_focus(self) -> None:
         for row_cells in self.cells:
@@ -246,6 +281,9 @@ class GameScreen:
     def _init_empty_board(self) -> None:
         self.board_model.initialize_empty(self.n)
         self.selected = None
+        self.is_victory = False
+        self.victory_anim_elapsed = 0.0
+        self.move_count = 0
         self.force_full_draw = True
         self._build_cells()
 
@@ -256,6 +294,9 @@ class GameScreen:
         self.board_model.load_case(case)
 
         self.selected = None
+        self.is_victory = False
+        self.victory_anim_elapsed = 0.0
+        self.move_count = 0
         self.force_full_draw = True
         self._build_cells()
         self.timer.start()
@@ -303,6 +344,9 @@ class GameScreen:
     def handle_event(self, event: pygame.event.Event) -> Transition:
         self._update_layout()
 
+        if self.is_victory:
+            return self._handle_victory_event(event)
+
         if self.back_button.handle_event(event):
             solver_key = self._current_solver_key()
             self._reset_ai_animation()
@@ -326,6 +370,10 @@ class GameScreen:
 
     def update(self, dt: float) -> None:
         self.timer.update(dt)
+        if self.is_victory and self.victory_anim_elapsed < self.victory_anim_duration:
+            self.victory_anim_elapsed = min(self.victory_anim_duration, self.victory_anim_elapsed + dt)
+            self.force_full_draw = True
+
         self.ai_manager.update(
             dt,
             apply_step=self._handle_ai_step,
@@ -363,8 +411,7 @@ class GameScreen:
     def _handle_ai_finished(self, found_solution: bool) -> None:
         self._set_ai_focus(None, False)
         if found_solution and self.board_model.is_filled() and not self.invalid_positions:
-            self.status_message = "Solved"
-            self.timer.stop()
+            self._trigger_victory("Solved")
         elif found_solution:
             self.status_message = "Completed"
         else:
@@ -456,11 +503,14 @@ class GameScreen:
             self.set_cell_value(row, col, value)
 
     def set_cell_value(self, row: int, col: int, value: int, keep_status: bool = False) -> None:
+        previous_value = self.values[row][col]
         if not self.board_model.set_value(row, col, value):
             return
 
         cell = self.cells[row][col]
         cell.set_value(value)
+        if previous_value != value:
+            self.move_count += 1
         self._sync_board_validation(keep_status=keep_status)
 
     def _sync_board_validation(self, keep_status: bool = False) -> None:
@@ -477,8 +527,91 @@ class GameScreen:
             self.status_message = "Invalid move"
         elif self.board_model.is_filled():
             self.status_message = "Board valid"
+            self._check_victory()
         else:
             self.status_message = "Editing"
+
+    def _check_victory(self) -> bool:
+        if self.is_victory:
+            return True
+
+        if self.board_model.is_filled() and not self.invalid_positions:
+            self._trigger_victory("VICTORY!")
+            return True
+
+        return False
+
+    def _trigger_victory(self, title: str) -> None:
+        self.is_victory = True
+        self.victory_anim_elapsed = 0.0
+        self.status_message = title
+        self.timer.stop()
+        self.ai_manager.reset(wait_timeout=0.05)
+        self.force_full_draw = True
+
+    def _handle_victory_event(self, event: pygame.event.Event) -> Transition:
+        if self.play_again_button.handle_event(event):
+            if self.current_case is not None:
+                self._load_case(self.current_case)
+                return None
+            self.new_puzzle()
+            return None
+
+        if self.back_to_menu_button.handle_event(event):
+            solver_key = self._current_solver_key()
+            self.is_victory = False
+            self.victory_anim_elapsed = 0.0
+            self.timer.stop()
+            return {
+                "state": "deal_select",
+                "mode": self.screen_mode,
+                "solver_name": solver_key,
+            }
+
+        return None
+
+    def _draw_victory_overlay(self, surface: pygame.Surface) -> None:
+        progress = 1.0
+        if self.victory_anim_duration > 0:
+            progress = min(1.0, self.victory_anim_elapsed / self.victory_anim_duration)
+        eased = 1.0 - (1.0 - progress) ** 3
+
+        overlay_alpha = int(150 * eased)
+        overlay = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, overlay_alpha))
+        surface.blit(overlay, (0, 0))
+
+        scale = 0.86 + 0.14 * eased
+        animated_width = max(320, int(self.victory_dialog_rect.width * scale))
+        animated_height = max(220, int(self.victory_dialog_rect.height * scale))
+        animated_rect = pygame.Rect(0, 0, animated_width, animated_height)
+        animated_rect.center = self.victory_dialog_rect.center
+
+        glow_rect = animated_rect.inflate(24, 24)
+        glow_alpha = int(75 * eased)
+        pygame.draw.rect(surface, (255, 215, 0, glow_alpha), glow_rect, border_radius=30)
+        pygame.draw.rect(surface, (34, 41, 46), animated_rect, border_radius=24)
+        pygame.draw.rect(surface, (255, 215, 0), animated_rect, width=2, border_radius=24)
+
+        title_shadow = self.victory_title_font.render("CONGRATULATIONS!", True, (72, 53, 0))
+        title_text = self.victory_title_font.render("CONGRATULATIONS!", True, (255, 233, 132))
+        title_shadow.set_alpha(int(255 * eased))
+        title_text.set_alpha(int(255 * eased))
+        title_center = (animated_rect.centerx, animated_rect.top + 74)
+        surface.blit(title_shadow, title_shadow.get_rect(center=(title_center[0], title_center[1] + 2)))
+        surface.blit(title_text, title_text.get_rect(center=title_center))
+
+        info_color = (204, 226, 224)
+        time_text = self.victory_info_font.render(f"Time: {self.timer.get_time()}", True, info_color)
+        moves_text = self.victory_info_font.render(f"Moves: {self.move_count}", True, info_color)
+        time_text.set_alpha(int(255 * eased))
+        moves_text.set_alpha(int(255 * eased))
+        surface.blit(time_text, time_text.get_rect(center=(animated_rect.centerx, animated_rect.top + 146)))
+        surface.blit(moves_text, moves_text.get_rect(center=(animated_rect.centerx, animated_rect.top + 184)))
+
+        if eased > 0.45:
+            self.play_again_button.draw(surface)
+            self.back_to_menu_button.draw(surface)
 
     def _draw_relations(self, surface: pygame.Surface) -> None:
         for (row, col), symbol in self.horizontal_relations.items():
@@ -665,8 +798,12 @@ class GameScreen:
         if self.screen_mode == "ai" and (self.ai_manager.animating or self.ai_manager.solver_running):
             self._draw_header(surface)
             self._draw_incremental_board(surface)
+            if self.is_victory:
+                self._draw_victory_overlay(surface)
             return
 
         self._draw_background(surface)
         self._draw_header(surface)
         self._draw_board(surface)
+        if self.is_victory:
+            self._draw_victory_overlay(surface)

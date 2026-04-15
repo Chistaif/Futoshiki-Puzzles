@@ -101,6 +101,10 @@ class Timer:
         seconds = total % 60
         return f"{minutes:02d}:{seconds:02d}"
 
+    def get_time(self) -> str:
+        """Return formatted elapsed time for UI displays."""
+        return self.format_time()
+
 
 class Cell:
     """Grid cell with selected and invalid visual states."""
