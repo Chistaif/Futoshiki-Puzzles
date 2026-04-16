@@ -2,40 +2,17 @@
 \usepackage{graphicx}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{makecell} % Đã xóa dòng trùng lặp
+\usepackage{makecell}
 \usepackage{longtable}
 \usepackage{float}
 \usepackage{placeins}
-\usepackage[utf8]{inputenc}   % Nhận dạng ký tự Unicode
-\usepackage[T5]{fontenc}      % Hỗ trợ xuất ký tự có dấu ra PDF
-\usepackage[vietnamese, main=english]{babel} % Tiếng Anh là chính, có hỗ trợ tiếng Việt
-% \usepackage[T1]{fontenc} % KHÔNG dùng dòng này khi dùng XeLaTeX/polyglossia
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese, main=english]{babel}
 \usepackage{tabularx}
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{enumitem}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, shadows, shapes.geometric}
-\tikzset{
-    % --- Node Styles ---
-    node_base/.style = {rectangle, rounded corners, draw=black, minimum width=2.4cm, minimum height=1cm, align=center, font=\small, fill=white, drop shadow={opacity=0.1}},
-    % Currently being expanded or on the current recursion stack
-    node_active/.style = {node_base, fill=blue!10, draw=blue!60, line width=1.2pt},
-    % Waiting in the BFS Queue (Frontier)
-    node_frontier/.style = {node_base, fill=orange!10, draw=orange!50, line width=1pt},
-    % Already expanded and moved to the 'reached' set
-    node_expanded/.style = {node_base, fill=gray!5, draw=gray!40, text=gray!70},
-    % Successfully found Goal (52 cards in foundation)
-    node_goal/.style = {node_base, fill=green!15, draw=green!60!black, line width=1.5pt, font=\bfseries\small},
-    % Pruned due to cycle detection or repeated state
-    node_pruned/.style = {node_base, fill=gray!20, draw=gray!60, dashed, text=gray!80},
-    % Specific to IDS: Reached the current depth limit L
-    node_cutoff/.style = {node_base, fill=red!5, draw=red!40, dotted, text=red!70},
-    % --- Edge Styles ---
-    edge_std/.style = {->, >={Stealth[scale=1.2]}, line width=0.8pt, draw=black!70},
-    % The final optimal path found by the solver
-    edge_sol/.style = {->, >={Stealth[scale=1.2]}, line width=1.6pt, green!60!black}
-}
 \usepackage{caption}
 \captionsetup[figure]{font=small,labelfont=bf}
 \captionsetup[algorithm]{font=small,labelfont=bf}
@@ -49,22 +26,25 @@
 \begin{document}
 \input{cover}
 \tableofcontents
+\newpage
 \section{Introduction}
-FreeCell is a classic solitaire card game that, unlike many other variants, is almost entirely a test of skill rather than luck. From a computational perspective, it presents a complex state-space search challenge that can be modeled as a deterministic, fully observable, single-agent problem. 
+\subsection{Project Overview}
+[Chèn nội dung tại đây]
 
-The primary objective of this project, titled "Freecell Solver," is to develop an automated system capable of finding valid solutions for standard 52-card deals. We aim to implement and rigorously compare four fundamental search algorithms: Breadth-First Search (BFS), Iterative Deepening Search (IDS), Uniform-Cost Search (UCS), and $A^*$ Search. By establishing a formal framework for state representation and legal transitions, this report evaluates each algorithm's performance across critical metrics, including memory efficiency, runtime, and success rate under strict resource constraints.
+\subsection{Objectives and Scope}
+[Chèn nội dung tại đây]
+
+\subsection{Team Information}
+[Chèn nội dung tại đây]
+
 \input{Planning}
 \input{Problem Formulation}
-\section{Algorithm Description}
 \input{Algorithm Description/BFS}
 \input{Algorithm Description/DFS}
-\input{Algorithm Description/UCS}
 \input{Algorithm Description/AStar}
+\input{Algorithm Description/UCS}
 \input{Experiments}
-\section{Conclusion}
-The "Freecell Solver" project successfully demonstrates the application and effectiveness of classical AI search strategies in a complex game environment. Through comprehensive experimental evaluation, we concluded that $A^*$ Search, utilizing an informed heuristic, is the most robust algorithm for production-level deployment, achieving a 90\% success rate while maintaining superior runtime efficiency.
-
-Our analysis also highlighted significant trade-offs between algorithms: while BFS and IDS provide optimal solutions in terms of move count, they are often hindered by exponential memory growth or redundant computations in IDS iterations. Furthermore, our results emphasize that well-designed heuristics are not merely an optimization but a practical necessity for solving games of non-trivial difficulty within limited time and memory budgets. Future work could explore more advanced heuristics or machine learning techniques to further increase the solver's success rate on heavily locked board configurations.
 \input{References}
 \input{Appendix}
+
 \end{document}
