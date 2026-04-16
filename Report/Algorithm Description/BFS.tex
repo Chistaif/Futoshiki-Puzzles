@@ -1,0 +1,188 @@
+ \subsection{Breadth-First Search (BFS)}
+  \subsubsection{Idea}
+  BFS explores the state space in nondecreasing depth (number of moves). With unit costs, BFS expands all states at depth $0,1,2,\dots$ until a goal is
+  found; the first goal reached is guaranteed to have minimum cost. A visited set prevents re-enqueuing states already generated.
+
+  \subsubsection{Pseudocode }
+  
+  \begin{algorithm}[H]
+    \caption{Breadth-First Search (BFS) - Main Loop}
+    \begin{algorithmic}[1]
+        \Require $s_0, \textit{max\_nodes}, \textit{max\_time}$
+        \Ensure $(solved, moves, \textit{expanded})$
+        
+        \Function{BFS\_Search}{$s_0, \textit{max\_nodes}, \textit{max\_time}$}
+            \State $\textit{frontier} \gets \text{Queue}(\langle \text{Key}(s_0), s_0, \text{None} \rangle)$
+            \State $\textit{reached} \gets \{ \text{Key}(s_0) \}$; \quad $\textit{parent} \gets \text{Map}(\text{Key}(s_0) \mapsto \text{None})$
+            \State $\textit{move\_map} \gets \text{Map}()$; \quad $\textit{expanded} \gets 0$; \quad $\textit{begin} \gets \text{Now}()$
+            \State $\textit{best} \gets \langle \text{Key}(s_0), \text{ProgressScore}(s_0) \rangle$
+
+            \While{$\textit{frontier} \text{ is not empty}$}
+                \If{$\textit{expanded} \ge \textit{max\_nodes}$ \textbf{or} $\text{Now}() - \textit{begin} \ge \textit{max\_time}$}
+                    \State \textbf{break}
+                \EndIf
+                
+                \State $(k, s, \textit{in\_move}) \gets \textit{frontier.PopLeft}()$
+                \State \Call{UpdateBestProgress}{s, k, \textit{best}} \Comment{Track partial solution}
+
+                \If{$\text{Goal}(s)$}
+                    \State \Return $(\textbf{true}, \text{ReconstructPath}(k, \textit{parent}, \textit{move\_map}), \textit{expanded})$
+                \EndIf
+
+                \State $\textit{expanded} \gets \textit{expanded} + 1$
+                \State \Call{ProcessSuccessors}{s, k, \textit{in\_move}, \textit{frontier}, \textit{reached}, \textit{parent}, \textit{move\_map}}
+            \EndWhile
+            
+            \State \Return $(\textbf{false}, \text{ReconstructPath}(\textit{best.key}, \textit{parent}, \textit{move\_map}), \textit{expanded})$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{BFS - Helper Functions}
+    \begin{algorithmic}[1]
+        \Function{ReconstructPath}{$k, \textit{parent}, \textit{move\_map}$}
+            \State $\textit{path} \gets [\ ]$; \quad $\textit{cursor} \gets k$
+            \While{$\textit{parent}[\textit{cursor}] \text{ is not None}$}
+                \State $\textit{path.Append}(\textit{move\_map}[\textit{cursor}])$
+                \State $\textit{cursor} \gets \textit{parent}[\textit{cursor}]$
+            \EndWhile
+            \State \Return $\text{Reverse}(\textit{path})$
+        \EndFunction
+        \Statex
+        \Function{ProgressScore}{$s$}
+            \State $\textit{found} \gets \sum \textit{s.foundations}$
+            \State $\textit{free} \gets \text{CountEmptyFreeCells}(s)$
+            \State \Return $(\textit{found}, \textit{free})$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+  \begin{algorithm}[H]
+    \caption{BFS - Successor Processing}
+    \begin{algorithmic}[1]
+        \Function{ProcessSuccessors}{$s, k, \textit{in\_m}, \textit{front}, \textit{reach}, \textit{par}, \textit{m\_map}$}
+            \ForAll{$\langle \textit{core\_m}, \textit{m}, s' \rangle \in \text{GenerateMoves}(s)$}
+                \If{$\text{IsInverse}(\textit{core\_m}, \textit{in\_m})$} \textbf{continue} \EndIf
+                
+                \State $k' \gets \text{Key}(s')$
+                \If{$k' \notin \textit{reach}$}
+                    \State $\textit{reach.Add}(k')$; \quad $\textit{par}[k'] \gets k$; \quad $\textit{m\_map}[k'] \gets \textit{m}$
+                    
+                    \If{$\text{Goal}(s')$} \Comment{Early goal check}
+                        \State \textbf{exit function and return solution}
+                    \EndIf
+                    
+                    \State $\textit{front.Append}(\langle k', s', \textit{core\_m} \rangle)$
+                \EndIf
+            \EndFor
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+
+  \subsubsection{Illustration}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+        % Level 0
+        \node[node_frontier] (s0) {$s_0$ \\ (Initial)};
+        
+        % Legend / Status
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{Status:}\\
+            Queue: $[s_0]$\\
+            Reached: $\{s_0\}$
+        };
+    \end{tikzpicture}
+    \caption{Initialization: The root node is added to the frontier.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+        % Level 0
+        \node[node_expanded] (s0) {$s_0$};
+        
+        % Level 1
+        \node[node_frontier] (s1) [below left=of s0] {$s_1$};
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$};
+        
+        % Edges
+        \draw[edge_std] (s0) -- (s1);
+        \draw[edge_std] (s0) -- (s2);
+        
+        % Status
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{Status:}\\
+            Queue: $[s_1, s_2]$\\
+            Reached: $\{s_0, s_1, s_2\}$
+        };
+    \end{tikzpicture}
+    \caption{Expansion 1: Level 0 is processed, discovering states at Level 1.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.2cm and 0.8cm]
+        % Level 0
+        \node[node_expanded] (s0) {$s_0$};
+        
+        % Level 1
+        \node[node_active]   (s1) [below left=of s0] {$s_1$ \\ (Current)};
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$};
+        
+        % Level 2
+        \node[node_frontier] (s3) [below left=of s1] {$s_3$};
+        \node[node_pruned]   (s2p) [below right=of s1] {$s_2$ \\ (Pruned)};
+        
+        % The Goal (Visible but not yet generated/connected)
+        \node[node_base, dashed, text=gray!50] (sg) [below=of s1] {$s_{goal}$ \\ (Pending)};
+        
+        % Edges
+        \draw[edge_std] (s0) -- (s1);
+        \draw[edge_std] (s0) -- (s2);
+        \draw[edge_std] (s1) -- (s3);
+        \draw[edge_std, dashed] (s1) -- (s2p);
+        
+        % Note: No edge to (sg) yet because it hasn't been generated in this step
+        
+        % Status Box
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{Status:}\\
+            Queue: $[s_2, s_3]$\\
+            Reached: $\{s_0, s_1, s_2, s_3\}$
+        };
+    \end{tikzpicture}
+    \caption{Step 3 - Level 2 Expansion: $s_1$ is processed, discovery of $s_3$ is successful, while $s_2$ is pruned. The goal state exists in the search space but is not yet reached.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.2cm and 1cm]
+        % Level 0
+        \node[node_expanded] (s0) {$s_0$};
+        
+        % Level 1
+        \node[node_active]   (s1) [below left=of s0] {$s_1$};
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$};
+        
+        % Level 2
+        \node[node_frontier] (s3) [below left=of s1] {$s_3$};
+        \node[node_goal]     (sg) [below=of s1] {GOAL \\ $s_{goal}$};
+        
+        % Edges
+        \draw[edge_std] (s0) -- (s1);
+        \draw[edge_std] (s0) -- (s2);
+        \draw[edge_std] (s1) -- (s3);
+        \draw[edge_sol] (s1) -- (sg);
+        
+        % Highlight Final Path
+        \draw[edge_sol] (s0) -- (s1);
+    \end{tikzpicture}
+    \caption{Goal Reached: The optimal path $s_0 \to s_1 \to s_{goal}$ is found at Depth 2.}
+\end{figure}
+
+  \subsubsection{Algorithm Analysis}
+  Let $b$ be the (average) branching factor and $d$ the depth of the shallowest goal.
+  \begin{itemize}
+    \item \textbf{Time:} $O(b^d)$ node generations/expansions in the worst case.
+    \item \textbf{Space:} $O(b^d)$ for the queue and visited set.
+    \item \textbf{Completeness:} Complete if $b$ is finite (BFS will eventually reach depth $d$).
+    \item \textbf{Optimality (unit-cost):} Optimal because the first goal found has minimum depth, and with $c(n,a,n')=1$ this minimizes path cost.
+  \end{itemize}

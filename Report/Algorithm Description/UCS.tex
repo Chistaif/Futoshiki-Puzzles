@@ -1,0 +1,190 @@
+\subsection{Uniform-Cost Search (UCS)}
+  \subsubsection{Idea}
+  UCS expands the frontier in nondecreasing path cost $g(n)$. It uses a priority queue keyed by $g$. Even though Freecell uses unit costs (so UCS
+  behaves similarly to BFS), UCS is presented as the general cost-optimal baseline. Repeated states are handled using $\textsc{bestG}[n]$, and a newly
+  found path to $n$ is only kept if it improves the best known cost.
+
+  \subsubsection{Pseudocode }
+  \begin{algorithm}[H]
+    \caption{Uniform-Cost Search (UCS) - Main Loop}
+    \label{alg:ucs_main}
+    \begin{algorithmic}[1]
+        \Require $s_0, \textit{max\_nodes}, \textit{max\_time}$
+        \Ensure $(solved, moves, \textit{expanded})$
+        
+        \Function{UCS\_Search}{$s_0, \textit{max\_nodes}, \textit{max\_time}$}
+            \State $\textit{frontier} \gets \text{PriorityQueue}(\langle 0, 0, \textit{tie}, s_0 \rangle)$
+            \State $\textit{best\_g} \gets \text{Map}(\text{Key}(s_0) \mapsto 0)$
+            \State $\textit{parent} \gets \text{Map}(\text{Key}(s_0) \mapsto \text{None})$
+            \State $\textit{move\_map} \gets \text{Map}()$
+            \State $\textit{best} \gets \langle \text{Key}(s_0), \text{ProgressScore}(s_0) \rangle$
+            \State $\textit{expanded} \gets 0, \textit{tie} \gets 0, \textit{begin} \gets \text{Now}()$
+
+            \While{$\textit{frontier} \text{ is not empty}$}
+                \If{$\textit{expanded} \ge \textit{max\_nodes}$ \textbf{or} $\text{Now}() - \textit{begin} \ge \textit{max\_time}$}
+                    \State \textbf{break}
+                \EndIf
+                
+                \State $(\_, g, \_, s) \gets \textit{frontier.PopMin}()$
+                \State $k \gets \text{Key}(s)$
+
+                \If{$g > \textit{best\_g}.get(k, \infty)$} \textbf{continue} \EndIf
+                \If{$\text{Goal}(s)$}
+                    \State \Return $(\textbf{true}, \text{ReconstructPath}(k, \textit{parent}, \textit{move\_map}), \textit{expanded})$
+                \EndIf
+
+                \State $\textit{expanded} \gets \textit{expanded} + 1$
+                \State \Call{UpdateBestProg}{s, k, \textit{best}}
+                \State \Call{ExpandUCS}{s, g, \textit{frontier}, \textit{best\_g}, \textit{parent}, \textit{move\_map}, \textit{tie}, \textit{best}}
+            \EndWhile
+            
+            \State \Return $(\textbf{false}, \text{ReconstructPath}(\textit{best.key}, \textit{parent}, \textit{move\_map}), \textit{expanded})$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{UCS - Successor Expansion \& Cost}
+    \label{alg:ucs_expand}
+    \begin{algorithmic}[1]
+        \Function{ExpandUCS}{$s, g, \textit{front}, \textit{bg}, \textit{par}, \textit{m\_map}, \textit{tie}, \textit{best}$}
+            \ForAll{$\langle \textit{move}, s' \rangle \in \text{GenerateMoves}(s)$}
+                \State $k' \gets \text{Key}(s')$
+                \State $g' \gets g + \Call{GetMoveCost}{\textit{move}, s}$
+                
+                \If{$g' < \textit{bg}.get(k', \infty)$}
+                    \State $\textit{bg}[k'] \gets g'$; \quad $\textit{par}[k'] \gets \text{Key}(s)$; \quad $\textit{m\_map}[k'] \gets \textit{move}$
+                    \State \Call{UpdateBestProg}{s', k', \textit{best}}
+                    \State $\textit{tie} \gets \textit{tie} + 1$
+                    \State $\textit{front.Push}(\langle g', g', \textit{tie}, s' \rangle)$
+                \EndIf
+            \EndFor
+        \EndFunction
+        \Statex
+        \Function{GetMoveCost}{$\textit{move}, s$}
+            \State $\langle \textit{src}, \textit{dst} \rangle \gets \textit{move}$
+            \If{$\textit{dst.type} = \text{"foundation"}$} \Return $1$ \EndIf
+            \If{$\textit{src.type} = \text{"cascade"}$ \textbf{and} $\textit{src.start} = 0$} \Return $5$ \EndIf
+            \If{$\textit{dst.type} = \text{"freecell"}$} \Return $50$ \EndIf
+            \Return $10$ \Comment{Default cost for other moves}
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\begin{algorithm}[H]
+    \caption{UCS - Helper Functions}
+    \label{alg:ucs_helpers}
+    \begin{algorithmic}[1]
+        \Function{ProgressScore}{$s$}
+            \State $\textit{found} \gets \sum \textit{s.foundations}$
+            \State $\textit{empty\_slots} \gets \text{CountEmptyFreeCells}(s) + \text{CountEmptyCascades}(s)$
+            \State \Return $(\textit{found}, \textit{empty\_slots}, 0)$ \Comment{Tiered priority}
+        \EndFunction
+        \Statex
+        \Function{ReconstructPath}{$k, \textit{parent}, \textit{move\_map}$}
+            \State $\textit{path} \gets [\ ]$; \quad $\textit{cursor} \gets k$
+            \While{$\textit{parent}[\textit{cursor}] \text{ is not None}$}
+                \State $\textit{path.Append}(\textit{move\_map}[\textit{cursor}])$
+                \State $\textit{cursor} \gets \textit{parent}[\textit{cursor}]$
+            \EndWhile
+            \State \Return $\text{Reverse}(\textit{path})$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+  \subsubsection{Illustration }
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+        % Level 0
+        \node[node_frontier] (s0) {$s_0$ \\ $g=0$};
+        
+        % Status box
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{UCS Status:}\\
+            Priority Queue: $[(g:0, s_0)]$\\
+            Best Cost: $\{s_0: 0\}$
+        };
+    \end{tikzpicture}
+    \caption{Step 1: The root node is added to the frontier with cost $g=0$.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.5cm and 1.2cm]
+        % Level 0
+        \node[node_expanded] (s0) {$s_0$ \\ $g=0$};
+        
+        % Level 1
+        \node[node_frontier] (s1) [below left=of s0] {$s_1$ \\ $g=1$};
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$ \\ $g=10$};
+        
+        % Edges with costs
+        \draw[edge_std] (s0) -- node[left, font=\scriptsize] {+1 (Found.)} (s1);
+        \draw[edge_std] (s0) -- node[right, font=\scriptsize] {+10 (Casc.)} (s2);
+        
+        % Status
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{Status:}\\
+            PQ: $[(g:1, s_1), (g:10, s_2)]$\\
+            Reached: $\{s_0, s_1, s_2\}$
+        };
+    \end{tikzpicture}
+    \caption{Step 2: Nodes are added to the frontier with their cumulative costs.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.2cm and 0.8cm]
+        % Nodes
+        \node[node_expanded] (s0) {$s_0$ \\ $g=0$};
+        \node[node_active]   (s1) [below left=of s0] {$s_1$ \\ $g=1$};
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$ \\ $g=10$};
+        
+        \node[node_frontier] (s3) [below left=of s1] {$s_3$ \\ $g=6$};
+        \node[node_pruned]   (s2p) [below right=of s1] {$s_2$ \\ $g=11$ (Pruned)};
+        
+        % The Goal (Visible but not yet reached)
+        \node[node_base, dashed, text=gray!50] (sg) [below=of s3] {$s_{goal}$ \\ (Pending)};
+        
+        % Edges
+        \draw[edge_std] (s0) -- (s1);
+        \draw[edge_std] (s0) -- (s2);
+        \draw[edge_std] (s1) -- node[left, font=\scriptsize] {+5} (s3);
+        \draw[edge_std, dashed] (s1) -- node[right, font=\scriptsize] {+10} (s2p);
+        
+        % Status
+        \node[draw, fill=white, right=2.5cm of s0, font=\scriptsize, align=left] {
+            \textbf{UCS Logic:}\\
+            Pop $s_1$ (cost 1).\\
+            New $s_2$ cost (11) $>$\\
+            Existing cost (10).\\
+            Discarding new path.
+        };
+    \end{tikzpicture}
+    \caption{Step 3: UCS always expands the cheapest node ($s_1$). It discards higher-cost paths to existing states.}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=1.2cm and 1cm]
+        % Optimized Path
+        \node[node_expanded] (s0) {$s_0$ \\ $g=0$};
+        \node[node_expanded] (s1) [below left=of s0] {$s_1$ \\ $g=1$};
+        \node[node_expanded] (s3) [below=of s1] {$s_3$ \\ $g=6$};
+        \node[node_goal]     (sg) [below=of s3] {GOAL \\ $g=7$};
+        
+        % Unexpanded nodes
+        \node[node_frontier] (s2) [below right=of s0] {$s_2$ \\ $g=10$};
+        
+        % Edges
+        \draw[edge_sol] (s0) -- node[left] {+1} (s1);
+        \draw[edge_sol] (s1) -- node[left] {+5} (s3);
+        \draw[edge_sol] (s3) -- node[left] {+1} (sg);
+        \draw[edge_std] (s0) -- node[right] {+10} (s2);
+    \end{tikzpicture}
+    \caption{Final Result: The optimal path is found with total cost $g=7$. $s_2$ remains in the queue unexpanded.}
+\end{figure}
+
+  \subsubsection{Algorithm Analysis}
+  \begin{itemize}
+    \item \textbf{Time:} In general, UCS expands all nodes with $g(n) < C^\*$ and possibly some with $g(n)=C^\*$, where $C^\*$ is the optimal solution
+  cost. With a binary heap, typical bounds are $O((V+E)\log V)$. Under unit costs and tree-like growth, this is often summarized as $O(b^d)$.
+    \item \textbf{Space:} $O(V)$ for $\textsc{bestG}$ plus the priority queue; commonly $O(b^d)$ up to the optimal depth.
+    \item \textbf{Completeness:} Complete if step costs are bounded below by a positive constant (here $1$) and $b$ is finite.
+    \item \textbf{Optimality:} Optimal because it always expands the lowest-$g$ frontier node first.
+  \end{itemize}

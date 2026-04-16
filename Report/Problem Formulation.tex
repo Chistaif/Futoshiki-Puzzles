@@ -1,0 +1,125 @@
+\section{Problem Formulation}
+
+  FreeCell can be modeled as a deterministic, fully observable, single-agent search problem
+  \[
+  P = (\mathcal{S}, \mathcal{A}, T, s_0, G, c),
+  \]
+  where \(\mathcal{S}\) is the set of legal game states, \(\mathcal{A}\) is the set of legal actions, \(T\) is the transition model, \(s_0\) is the
+  initial state, \(G\) is the goal test, and \(c\) is the step-cost function. Since all cards are visible from the beginning and no randomness appears
+  after the initial deal, FreeCell is well suited for classical state-space search.
+
+  \subsection{State Representation}
+
+  A state \(n \in \mathcal{S}\) is represented as
+  \[
+  n = \bigl(\langle C_1, C_2, \dots, C_8 \rangle,\; \langle E_1, E_2, E_3, E_4 \rangle,\; \langle F_C, F_D, F_H, F_S \rangle \bigr),
+  \]
+  where:
+  \begin{itemize}
+      \item \(C_i\) is the \(i\)-th cascade (tableau column), represented as an ordered list of cards;
+      \item \(E_j\) is the \(j\)-th free cell, which is either empty or contains exactly one card;
+      \item \(F_s\) denotes the current top rank stored in the foundation of suit \(s \in \{C,D,H,S\}\), with \(0\) meaning that the foundation is
+  empty.
+  \end{itemize}
+
+  Each card is represented by its \emph{rank} and \emph{suit}, i.e.,
+  \[
+  \text{card} = (r, s),
+  \]
+  where \(r \in \{1,\dots,13\}\) and \(s \in \{C,D,H,S\}\). In particular, \(r=1\) denotes Ace, \(r=11\) denotes Jack, \(r=12\) denotes Queen, and
+  \(r=13\) denotes King.
+
+  \subsection{Initial State}
+
+  The initial state \(s_0\) is generated from a standard 52-card deck dealt face-up into 8 cascades. Specifically:
+  \begin{itemize}
+      \item 4 cascades contain 7 cards each;
+      \item 4 cascades contain 6 cards each;
+      \item all 4 free cells are empty;
+      \item all 4 foundation piles are empty.
+  \end{itemize}
+
+  Formally, in the initial state,
+  \[
+  E_1 = E_2 = E_3 = E_4 = \emptyset
+  \quad \text{and} \quad
+  F_C = F_D = F_H = F_S = 0.
+  \]
+
+  \subsection{Actions (Transition Model)}
+
+  From a state \(n\), a legal action corresponds to one valid move under the standard FreeCell rules. The transition model \(T(n,a)\) deterministically
+  returns the unique successor state obtained after applying action \(a\).
+
+  \begin{description}
+      \item[Single-card moves.]
+      A single top card from a cascade, or a card currently stored in a free cell, may be moved to:
+      \begin{itemize}
+          \item an empty free cell;
+          \item another cascade, if it forms a descending alternating-color sequence with the destination top card;
+          \item an empty cascade;
+          \item its corresponding foundation, if it has the same suit and its rank is exactly one greater than the current top rank of that foundation.
+      \end{itemize}
+
+      \item[Sequence moves between cascades.]
+      A sequence of cards may be moved from one cascade to another if:
+      \begin{itemize}
+          \item the moved sequence itself is a valid descending alternating-color sequence; 
+          \item its length does not exceed the move capacity allowed by the current number of empty free cells and empty cascades.
+      \end{itemize}
+  \end{description}
+
+  Let \(m\) be the number of empty free cells and let \(e\) be the number of empty cascades available as intermediate storage (excluding the
+  destination cascade when it is empty). Then the maximum number of cards that can be moved together is
+  \[
+  ( m + 1 ) 2^e.
+  \]
+
+  Thus, a sequence move of length \(k\) is legal only if
+  \[
+  k \le (m+1)2^e.
+  \]
+
+  \subsection{Goal Test}
+
+  A state \(n\) is a goal state if all cards have been moved to the foundations. Equivalently,
+  \[
+  G(n) = \text{true}
+  \quad \Longleftrightarrow \quad
+  F_C = F_D = F_H = F_S = 13.
+  \]
+  This is equivalent to saying that the total number of cards in the foundations is 52:
+  \[
+  F_C + F_D + F_H + F_S = 52.
+  \]
+
+  \subsection{Path Cost}
+
+\subsubsection{Standard Unit-Cost Model}
+In the general formulation of FreeCell, we primarily adopt a \textbf{unit-cost model}. Every legal move—including single-card moves and valid sequence moves—is assigned a cost of 1. Thus, if a path from the initial state $s_0$ to a state $n$ consists of $d$ legal moves, the path cost is defined as:
+\[
+g(n) = d.
+\]
+Equivalently, for any action $a$:
+\[
+c(n,a,n') = 1.
+\]
+Under this formulation, $g(n)$ measures the total number of moves made so far. To remain consistent with this model, any heuristic $h(n)$ used in informed search (such as $A^*$) estimates the remaining cost in the same unit: the number of moves. This model ensures that BFS, IDS, and $A^*$ find the \textbf{optimal solution} in terms of the minimum number of steps.
+
+\subsubsection{Weighted Strategic Cost Model (UCS Implementation)}
+To guide the \textbf{Uniform-Cost Search (UCS)} more efficiently through the state space, we implement a \textbf{weighted cost model} as detailed in Algorithm 7 and the source code \texttt{ucs.py}. This model assigns dynamic costs based on the strategic value of each move:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Move Type} & \textbf{Cost} & \textbf{Strategic Reasoning} \\ \hline
+To Foundation & 1 & Highest priority; directly advances toward the goal. \\ \hline
+Emptying a Cascade & 5 & High priority; creates empty columns for better mobility. \\ \hline
+Cascade to Cascade & 10 & Standard move; default cost for tableau maneuvers. \\ \hline
+To Free Cell & 50 & Penalty cost; discourages filling limited storage slots. \\ \hline
+\end{tabular}
+\caption{Dynamic move costs used in UCS expansion.}
+\end{table}
+
+While this weighted model might not minimize the absolute number of moves, it significantly reduces the number of expanded nodes by prioritizing strategically "productive" paths over stalling maneuvers.

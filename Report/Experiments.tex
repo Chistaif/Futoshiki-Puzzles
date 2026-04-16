@@ -1,0 +1,209 @@
+\section{Experimental Evaluation}
+This section presents a comprehensive evaluation of four search algorithms: Breadth-First Search (BFS), Depth-First Search (DFS), Uniform Cost Search (UCS), and $A^*$ applied to the FreeCell card game solver.
+
+\subsection{Experimental Setup}
+To ensure a fair comparison, all algorithms were tested under the following conditions:
+\begin{itemize}
+    \item \textbf{Performance Metrics:} Assessment was based on peak memory usage, expanded nodes, runtime, solution step quality, and success rate.
+    \item \textbf{Resource Constraints:} A maximum of 500,000 nodes and a 30-second timeout per game instance.
+    \item \textbf{Test Data:} 10 benchmark cases (\texttt{game\_00} through \texttt{game\_09}) executed under identical hardware conditions.
+\end{itemize}
+
+\subsection{Performance Summary}
+The empirical data shows that \textbf{$A^*$} delivers the best overall performance, particularly in runtime and success rate.
+\begin{figure}[H] % [H] sẽ giữ ảnh đúng vị trí này
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/overview_table.png}
+    \caption{Summary of average performance across all metrics. Green = best, Red = worst}
+    \label{fig:performance_chart}
+\end{figure}
+
+\subsection{Metric 01 --- Peak Memory Usage}
+\label{metric-01-peak-memory-usage}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/average_peak_memory_usage.png}
+    \caption{Average Peak Memory Usage by Algorithm (10 Test Cases) }
+    \label{fig:memory_usage}
+\end{figure}
+
+\subsubsection{Analysis}
+\label{analysis}
+
+\begin{description}
+    \item[DFS (84.5 MB) --- Best:] 
+    The Iterative Deepening Search (IDS) implementation in \texttt{dfs.py} uses an explicit recursion stack that only holds the current path to the active node, plus a visited dictionary scoped to the current depth iteration. Crucially, this dictionary is discarded and rebuilt at each new depth limit, meaning DFS never accumulates a large persistent frontier. The memory footprint grows roughly linearly with the depth limit, not exponentially with the branching factor.
+
+    \item[A* (142.7 MB) --- Second Best:] 
+    $A^*$ in \texttt{a\_star.py} maintains a heap-based frontier and a \texttt{best\_cost} dictionary. The heuristic functions (\texttt{heuristic\_blocking} and \texttt{heuristic\_foundation\_gap}) actively guide the search toward productive states, meaning fewer states are ever added to the heap. The blocking heuristic specifically penalizes states with many cards blocking foundation targets, causing the algorithm to prune entire subtrees before they enter memory.
+
+    \item[BFS (209.8 MB) --- High:]  
+    BFS in \texttt{bfs.py} maintains a reached set containing every state ever enqueued --- a strict BFS graph-search rule that prevents re-expansion but requires storing the full exploration frontier. Since FreeCell has a very high branching factor, this set grows rapidly. The \texttt{deque} queue itself also holds full state objects, contributing significantly to the memory total.
+
+    \item[UCS (228.6 MB) --- Worst:]  
+    UCS in \texttt{ucs.py} maintains both a \texttt{heapq} priority queue and a \texttt{best\_g} dictionary mapping visited states to their lowest costs. Because UCS re-expands states when a cheaper path is found, more entries accumulate in \texttt{best\_g} compared to BFS's simple seen-once reached set. The combination of priority queue overhead and the dynamic cost structure means UCS retains the most state objects in memory simultaneously.
+\end{description}
+
+\subsubsection{Key Takeaway}
+\label{key-takeaway}
+
+\textbf{Conclusion on Resource Efficiency:} 
+DFS is the only algorithm suitable for highly memory-constrained environments. $A^*$ offers a practical middle ground. In contrast, BFS and UCS are unsuitable when RAM is a bottleneck, as their memory usage scales with the size of the explored state space rather than the solution depth.
+
+\subsection{Metric 02 --- Average Expanded Nodes}
+\label{metric-02-average-expanded-nodes}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/average_expanded_nodes.png}
+    \caption{Average Expanded Nodes by Algorithm (10 Test Cases)}
+    \label{fig:expanded_nodes}
+\end{figure}
+
+\subsubsection{Analysis}
+\label{analysis-1}
+
+\begin{description}
+    \item[$A^*$ (22,542) --- Best:] 
+    $A^*$ achieves the lowest expansion count by combining actual cost ($g$) with heuristic estimate ($h$). The \texttt{heuristic\_blocking} function counts cards physically blocking the next card needed for foundation piles, providing a tight lower bound that allows $A^*$ to reject large portions of the state space. This demonstrates the core value of informed search, where the algorithm focuses computation only on promising directions.
+
+    \item[UCS (49,317) --- Second Best:] 
+    UCS benefits from the asymmetric cost function defined in \texttt{get\_move\_cost()} within \texttt{ucs.py}. By assigning foundation moves a cost of 1 unit and free cell moves 50 units, the algorithm receives implicit guidance to reward progress. As a result, UCS expands significantly fewer states than BFS despite using similar graph-search guarantees.
+
+    \item[BFS (94,900) --- High:] 
+    BFS expands states in strict order of depth. It treats all moves as equal one-step transitions, making no distinction between a move to foundation and parking in a free cell. Consequently, BFS wastes substantial effort exploring shallow, unproductive states before reaching productive branches of the search tree.
+
+    \item[DFS (156,602) --- Worst:] 
+    The high expansion count is a direct result of the IDS implementation, which must repeat entire DLS iterations for each new depth limit. Because FreeCell solutions rarely exist at shallow depths, DFS iterates through many fruitless limits, repeatedly expanding the same early states and inflating the total count relative to the actual solution depth.
+\end{description}
+
+\subsubsection{Key Takeaway}
+\label{key-takeaway-1}
+
+\textbf{Impact of Informed Search:}
+The nearly 7x difference between $A^*$ (22,542) and DFS (156,602) demonstrates that heuristic design quality is the most critical factor in determining expansion efficiency.
+\subsection{Metric 03 --- Average Runtime}\label{metric-03-average-runtime}
+\begin{figure}[H] % [H] sẽ giữ ảnh đúng vị trí này
+    \centering
+    \includegraphics[width=0.9\textwidth]{image/average_runtime.png}
+    \caption{Average Runtime by Algorithm (10 Test Cases)}
+    \label{fig:performance_chart}
+\end{figure}
+\subsubsection{Analysis}\label{analysis-2}
+
+
+
+
+\begin{description}
+    \item[$A^*$ (30.15 s) --- Best:] 
+    $A^*$'s runtime advantage directly mirrors its node efficiency. By expanding only 22,542 nodes on average, the algorithm performs significantly fewer heap operations ($O(\log n)$), state hash computations, and successor generations. Additionally, the move priority ordering in \texttt{\_move\_priority()} reduces wasted evaluations, making $A^*$ approximately 4.6x faster than DFS and 2.6x faster than BFS.
+
+    \item[UCS (80.06 s) --- Second Best:] 
+    Despite having fewer expansions than BFS, UCS is not drastically faster due to the overhead of priority queue maintenance. Each expansion requires comparing complex tuples and performing \texttt{heapq} operations, which are more computationally expensive than BFS's $O(1)$ operations. However, cost-guided pruning still yields a roughly 8\% speed improvement over BFS.
+
+    \item[BFS (87.46 s) --- Third:] 
+    BFS remains competitive because its \texttt{deque} operations are $O(1)$ compared to the $O(\log n)$ overhead of a heap. This simpler data structure partially compensates for the higher node expansion count. BFS also benefits from "short-circuiting" by checking \texttt{is\_goal()} immediately when a successor is generated.
+
+    \item[DFS (137.60 s) --- Worst:] 
+    DFS suffers from the massive redundancy of IDS re-execution. For a solution at depth 60, DFS executes 59 failed search passes before the successful one, making the total runtime proportional to the sum of work across all depth iterations. Furthermore, the recursive \texttt{\_dls()} function incurs Python call stack overhead, adding significant latency.
+\end{description}
+
+\subsubsection{Key Takeaway}
+\label{key-takeaway-2}
+
+\textbf{Computational Efficiency:}
+Runtime correlates strongly with node expansions but is heavily influenced by data structure overhead. $A^*$ is the only algorithm capable of operating within a tight real-time budget, as the others frequently approach or exceed the 30-second timeout in complex game instances.
+
+\subsection{Metric 04 --- Average Solution Steps}
+\label{metric-04-average-solution-steps}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/average_solution_steps.png}
+    \caption{Average Solution Steps by Algorithm (10 Test Cases)}
+    \label{fig:solution_steps_chart}
+\end{figure}
+
+\subsubsection{Analysis}
+\label{analysis-3}
+
+\begin{description}
+    \item[BFS (59.8 steps) --- Best:] 
+    BFS is theoretically guaranteed to return the shortest path for unit-cost problems because it explores all states at depth $d$ before any state at $d+1$. Since it treats every move as equal, the first time it reaches a goal, it has arrived via the minimum number of steps. The 59.8 average represents the true optimal step count for this test set.
+
+    \item[DFS (60.5 steps) --- Near-Optimal:] 
+    The IDS implementation produces solutions nearly as short as BFS because it finds a solution at the smallest depth limit where one exists. The minor gap of 0.7 steps occurs because IDS uses a path-based visited check rather than a global one, occasionally allowing for slightly suboptimal paths at the same depth level.
+
+    \item[UCS (69.8 steps) --- Cost-Optimal:] 
+    UCS is designed to minimize total accumulated cost rather than the number of steps. Due to asymmetric weights in \texttt{get\_move\_cost()} (foundation moves cost 1 while free cell moves cost 50), UCS may prefer a longer path that avoids expensive free cell parking. The 69.8 average reflects this trade-off between total cost and total steps.
+
+    \item[$A^*$ (90.0 steps) --- Longest:] 
+    $A^*$ produces the longest solutions because it optimizes for the combined cost $f = g + h$ using the same asymmetric weights as UCS. The \texttt{heuristic\_blocking} function reinforces this by penalizing states that block foundations. This often leads $A^*$ through "cleaner" but physically longer routes to minimize the overall game cost.
+\end{description}
+
+\subsubsection{Key Takeaway}
+\label{key-takeaway-3}
+
+\textbf{Path Quality vs. Cost Efficiency:}
+While BFS and DFS (IDS) provide the shortest paths, UCS and $A^*$ prioritize cost efficiency. If minimizing the raw number of moves is the priority, BFS is the ideal choice. However, for applications where avoiding board congestion (free cell usage) is more critical, $A^*$ and UCS produce structurally superior solutions despite their length.
+
+\subsection{Metric 05 --- Success Rate}
+\label{metric-05-success-rate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/success_rate.png}
+    \caption{Success Rate by Algorithm (10 Test Cases)}
+    \label{fig:success_rate_chart}
+\end{figure}
+
+\subsubsection{Analysis}
+\label{analysis-4}
+
+\begin{description}
+    \item[$A^*$ (90\%) --- Best:] 
+    $A^*$ successfully solves 9 out of 10 games because its heuristic dramatically reduces the effective search space. Even on harder instances where BFS and UCS exhaust the 500,000-node budget, $A^*$'s guided expansion finds solutions using far fewer resources. The 10\% failure rate likely occurs in "heavily locked" board configurations where foundation targets are deeply buried, providing insufficient guidance for the heuristic.
+
+    \item[DFS (50\%) --- Second:] 
+    DFS benefits from a low memory footprint, avoiding the out-of-memory issues that affect BFS and UCS. However, the overhead of IDS re-execution often causes DFS to hit the 30-second time limit, especially in games requiring more than 80 moves. Its success rate reflects a direct balance between its memory advantage and its time disadvantage.
+
+    \item[UCS (50\%) --- Second (Tied):] 
+    UCS shares the same success rate as DFS but fails due to node exhaustion rather than time. Its broad expansion pattern and 228.6 MB memory usage often fill the priority queue and hit the 500,000-node limit before finding a solution. While cost-guided search provides an advantage over plain BFS, the lack of a true heuristic remains a bottleneck for complex boards.
+
+    \item[BFS (40\%) --- Worst:] 
+    Despite being theoretically complete, BFS is the most wasteful algorithm under real-world constraints. It expands states blindly in breadth order without prioritizing promising paths, causing it to reach binding node and time limits prematurely. BFS succeeds only on simpler instances where the solution is reachable within the narrow constraint window.
+\end{description}
+
+\subsubsection{Key Takeaway}
+\label{key-takeaway-4}
+
+\textbf{Practical Necessity of Heuristics:}
+Under strict resource constraints, success rate is the ultimate performance metric. The 50-percentage-point gap between $A^*$ and BFS demonstrates that heuristic search is not merely an optimization but a practical necessity for solving FreeCell games of non-trivial difficulty.
+
+\subsection{Overview --- Holistic Comparison}
+\label{overview-holistic-comparison}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/overview_radar.png}
+    \caption{Overview Performance Radar Across 10 Test Cases}
+    \label{fig:holistic_radar}
+\end{figure}
+
+\subsubsection{Cross-Metric Insights}
+\label{cross-metric-insights}
+
+\begin{description}
+    \item[1. The Memory-Speed Paradox in DFS:] 
+    DFS exhibits a highly counterintuitive profile by utilizing the least memory (84.5 MB) while being the slowest algorithm (137.60s) and expanding the most nodes (156,602). This occurs because the IDS mechanism saves memory by discarding previously computed work, requiring 60--90 complete search passes to find a solution at those depths.
+
+    \item[2. The $A^*$ Step-Count Paradox:] 
+    Despite being the fastest and most resource-efficient, $A^*$ produces the longest average solutions at 90.0 steps. This is a direct consequence of optimizing a non-uniform cost function where foundation moves (cost 1) are heavily favored over free cell moves (cost 50), leading to longer but more cost-efficient routes.
+
+    \item[3. Success Rate as the Binding Constraint:] 
+    Under limited resources, success rate becomes the dominant metric. $A^*$'s ability to solve 90\% of games within 30 seconds proves that for production deployment, a well-tuned heuristic search is a practical necessity rather than a mere optimization.
+
+    \item[4. UCS vs. BFS Trade-off:] 
+    UCS expands nearly 50\% fewer nodes than BFS, yet only yields a modest 8\% runtime improvement. This demonstrates that the priority queue overhead partially negates the benefits of fewer expansions, supporting the case that a true heuristic ($A^*$) is required for substantial performance gains.
+\end{description}
