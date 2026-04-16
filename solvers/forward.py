@@ -2,6 +2,10 @@ from solvers.solver import Solver
 from solvers.fol_kb import FOLKB
 from collections import defaultdict, deque
 import copy
+from typing import Callable, Optional
+
+
+StepCallback = Callable[[int, int, int], None]
 
 
 class ForwardBacktrackSolver(Solver):
@@ -9,7 +13,7 @@ class ForwardBacktrackSolver(Solver):
         super().__init__(name="Forward Chaining (DPLL)")
         self.kb = None
 
-    def solve(self, puzzle):
+    def solve(self, puzzle, step_callback: Optional[StepCallback] = None):
         """
         Thực hiện giải bài toán bằng thuật toán DPLL (Forward Chaining + Backtracking)
         Method này được gọi bởi self.run(puzzle) của class Solver
@@ -28,7 +32,7 @@ class ForwardBacktrackSolver(Solver):
                 agenda.append(clause[0])
 
         # 3. Bắt đầu thuật toán đệ quy DPLL
-        result_model = self._dpll(clauses, agenda, {})
+        result_model = self._dpll(clauses, agenda, {}, step_callback)
 
         return self._translate_model_to_grid(result_model) if result_model else None
 
@@ -53,7 +57,7 @@ class ForwardBacktrackSolver(Solver):
     # Thuật toán DPLL
     # --------------------------------------------------------------------------
 
-    def _dpll(self, clauses, agenda, model):
+    def _dpll(self, clauses, agenda, model, step_callback: Optional[StepCallback] = None):
         """Đệ quy DPLL: propagate -> chọn biến -> branch -> backtrack"""
         # Fix #2: Chỉ đếm node tại đây (mỗi lần branch = 1 node)
         self.increment_nodes()
@@ -61,7 +65,7 @@ class ForwardBacktrackSolver(Solver):
         # Bước 1: Unit Propagation (Forward Chaining)
         # Rebuild index từ clauses hiện tại để đảm bảo đồng bộ
         literal_to_clauses = self._build_index(clauses)
-        if not self._propagate(clauses, literal_to_clauses, agenda, model):
+        if not self._propagate(clauses, literal_to_clauses, agenda, model, step_callback):
             return None
 
         # Bước 2: Kiểm tra hoàn thành — Fix #3: truyền clauses vào MRV
@@ -73,21 +77,28 @@ class ForwardBacktrackSolver(Solver):
         saved_clauses = copy.deepcopy(clauses)
         saved_model = model.copy()
 
-        # Thử nhánh True (literal dương)
-        model[unassigned_var] = True
-        result = self._dpll(clauses, deque([unassigned_var]), model)
+        # Thử nhánh True (literal dương) qua agenda để propagate xử lý đầy đủ
+        result = self._dpll(clauses, deque([unassigned_var]), model, step_callback)
         if result:
             return result
 
         # Quay lui, thử nhánh False (literal âm = True)
+        if step_callback is not None:
+            for literal in self._model_positive_deltas(model, saved_model):
+                decoded = self._decode_positive_literal(literal)
+                if decoded is None:
+                    continue
+                row, col, _ = decoded
+                step_callback(row, col, 0)
+
         clauses[:] = saved_clauses   # restore in-place để giữ reference
         model.clear()
         model.update(saved_model)
         neg_var = -unassigned_var
-        model[neg_var] = True
-        return self._dpll(clauses, deque([neg_var]), model)
+        # Không gán trực tiếp model; để propagate gán và simplify nhất quán
+        return self._dpll(clauses, deque([neg_var]), model, step_callback)
 
-    def _propagate(self, clauses, literal_to_clauses, agenda, model):
+    def _propagate(self, clauses, literal_to_clauses, agenda, model, step_callback: Optional[StepCallback] = None):
         """
         Unit Propagation — cốt lõi Forward Chaining.
         Nhận literal_to_clauses được build từ clauses hiện tại
@@ -102,6 +113,11 @@ class ForwardBacktrackSolver(Solver):
 
             if p not in model:
                 model[p] = True
+                if step_callback is not None:
+                    decoded = self._decode_positive_literal(p)
+                    if decoded is not None:
+                        row, col, value = decoded
+                        step_callback(row, col, value)
 
                 # Xét các clause chứa -p: bỏ -p ra khỏi clause (đã biết False)
                 for clause in list(literal_to_clauses.get(neg_p, [])):
@@ -120,6 +136,26 @@ class ForwardBacktrackSolver(Solver):
                         clauses.remove(clause)
 
         return True
+
+    @staticmethod
+    def _model_positive_deltas(model, saved_model):
+        current_positive = {lit for lit in model if lit > 0 and model.get(lit) is True}
+        saved_positive = {lit for lit in saved_model if lit > 0 and saved_model.get(lit) is True}
+        return current_positive - saved_positive
+
+    def _decode_positive_literal(self, literal):
+        if literal <= 0:
+            return None
+        max_var = self.kb.n ** 3
+        if literal > max_var:
+            return None
+
+        var_id = literal - 1
+        row = var_id // (self.kb.n * self.kb.n)
+        rem = var_id % (self.kb.n * self.kb.n)
+        col = rem // self.kb.n
+        value = rem % self.kb.n + 1
+        return row, col, value
 
     def _get_unassigned_variable(self, clauses, model):
         """

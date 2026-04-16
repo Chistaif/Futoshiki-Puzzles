@@ -13,7 +13,9 @@ from typing import Any, Callable, Deque, Optional, Tuple
 
 from file import PuzzleCase
 from solvers.astar import AStarSolver
+from solvers.backward import BackwardSolver
 from solvers.backtrack import Backtracking
+from solvers.forward import ForwardBacktrackSolver
 from solvers.sat_solver import SATSolver
 
 
@@ -61,10 +63,14 @@ class AISolverManager:
         normalized_solver = str(solver_name).strip().lower()
         if normalized_solver in ("a*", "a_star"):
             normalized_solver = "astar"
+        elif normalized_solver in ("backward_chaining", "backward_solver"):
+            normalized_solver = "backward"
+        elif normalized_solver in ("forward_chaining", "dpll", "forward_solver"):
+            normalized_solver = "forward"
         elif normalized_solver in ("sat", "sat_solver", "pysat"):
             normalized_solver = "sat"
 
-        if normalized_solver not in ("backtracking", "astar", "sat"):
+        if normalized_solver not in ("backtracking", "backward", "forward", "astar", "sat"):
             raise ValueError(f"Unsupported solver: {solver_name}")
 
         self.pending_steps = deque()
@@ -76,6 +82,8 @@ class AISolverManager:
         self.solver_key = normalized_solver
         solver_display_names = {
             "backtracking": "Backtracking",
+            "backward": "Backward Chaining",
+            "forward": "Forward Chaining",
             "astar": "A* Search",
             "sat": "SAT Solver",
         }
@@ -127,6 +135,7 @@ class AISolverManager:
         cancel_event: threading.Event,
     ) -> None:
         try:
+
             def on_step(row: int, col: int, value: int) -> None:
                 if cancel_event.is_set():
                     raise RuntimeError("solver-cancelled")
@@ -134,12 +143,20 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
+                solved_grid = solver.solve(step_callback=on_step)
             elif solver_name == "sat":
                 solver = SATSolver(case)
+                solved_grid = solver.solve(step_callback=on_step)
+            elif solver_name == "backward":
+                solver = BackwardSolver()
+                solved_grid = solver.solve(case, step_callback=on_step)
+            elif solver_name == "forward":
+                solver = ForwardBacktrackSolver()
+                solved_grid = solver.solve(case, step_callback=on_step)
             else:
                 solver = Backtracking(case)
+                solved_grid = solver.solve(step_callback=on_step)
 
-            solved_grid = solver.solve(step_callback=on_step)
             if cancel_event.is_set():
                 event_queue.put(("cancelled", None))
                 return

@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+import ctypes
+import sys
+
 import pygame
 
 from gui.constants import DEFAULT_GRID_SIZE, FPS, SCREEN_HEIGHT, SCREEN_WIDTH, WINDOW_TITLE
@@ -24,8 +28,63 @@ def _compute_window_size_2_by_3() -> tuple[int, int]:
     return target_width, target_height
 
 
+def _set_app_icon() -> None:
+    """Set custom app icon if icon file exists and can be loaded."""
+    icon_path = Path(__file__).resolve().parent / "assets" / "picture" / "icon_game.png"
+    if not icon_path.exists():
+        return
+
+    try:
+        icon_surface = pygame.image.load(icon_path.as_posix())
+        icon_surface = _normalize_icon_surface(icon_surface, target_size=256)
+        pygame.display.set_icon(icon_surface)
+    except pygame.error:
+        # Keep default icon when image format/loading is not supported.
+        return
+
+
+def _normalize_icon_surface(surface: pygame.Surface, target_size: int = 256) -> pygame.Surface:
+    """Trim transparent padding and fit icon into a square canvas for better visibility."""
+    bounds = surface.get_bounding_rect(min_alpha=1)
+    if bounds.width > 0 and bounds.height > 0:
+        content = surface.subsurface(bounds).copy()
+    else:
+        content = surface.copy()
+
+    content_w, content_h = content.get_size()
+    if content_w <= 0 or content_h <= 0:
+        return surface
+
+    scale = min(target_size / content_w, target_size / content_h)
+    scaled_w = max(1, int(content_w * scale))
+    scaled_h = max(1, int(content_h * scale))
+    scaled = pygame.transform.smoothscale(content, (scaled_w, scaled_h))
+
+    canvas = pygame.Surface((target_size, target_size), pygame.SRCALPHA)
+    offset_x = (target_size - scaled_w) // 2
+    offset_y = (target_size - scaled_h) // 2
+    canvas.blit(scaled, (offset_x, offset_y))
+    return canvas
+
+
+def _set_windows_app_user_model_id() -> None:
+    """Set a custom Windows AppUserModelID so taskbar can use app identity/icon."""
+    if not sys.platform.startswith("win"):
+        return
+
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            "futoshiki.puzzles.app"
+        )
+    except Exception:
+        # Non-critical on unsupported environments.
+        return
+
+
 def run() -> None:
+    _set_windows_app_user_model_id()
     pygame.init()
+    _set_app_icon()
     pygame.display.set_caption(WINDOW_TITLE)
 
     default_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
@@ -34,6 +93,7 @@ def run() -> None:
         window_size = default_size
 
     surface = pygame.display.set_mode(window_size)
+    _set_app_icon()
     clock = pygame.time.Clock()
 
     menu_screen = MenuScreen(surface.get_rect())

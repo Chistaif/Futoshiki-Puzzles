@@ -17,6 +17,7 @@ Tạo code:
 - Code phải **self-explanatory**, comment chi tiết
 - Tránh viết code "hack", "tạm bợ"
 - Mỗi file / function chỉ nên có **1 trách nhiệm chính (Single Responsibility)**
+- Nếu có yêu cầu viết file Markdown thì ngôn ngữ sẽ luôn là Tiếng Việt
 
 ---
 

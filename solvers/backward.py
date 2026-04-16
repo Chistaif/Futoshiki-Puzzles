@@ -1,19 +1,23 @@
 import copy
+from typing import Callable, Optional
 
 from solvers.horn_converter import HornConverter
 from solvers.solver import Solver
 from solvers.utils import standardize_variables, subst, unify
 
 
+StepCallback = Callable[[int, int, int], None]
+
+
 class BackwardSolver(Solver):
-    def solve(self, puzzle):
+    def solve(self, puzzle, step_callback: Optional[StepCallback] = None):
         converter = HornConverter(puzzle)
         kb = converter.build()
 
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
 
-        if self._backtrack(kb):
+        if self._backtrack(kb, step_callback):
             return self.grid
         return None
 
@@ -74,7 +78,7 @@ class BackwardSolver(Solver):
         for theta_prime in BackwardSolver.fol_bc_or(kb, first, theta):
             yield from BackwardSolver.fol_bc_and(kb, rest, theta_prime)
 
-    def _backtrack(self, kb) -> bool:
+    def _backtrack(self, kb, step_callback: Optional[StepCallback] = None) -> bool:
         self.increment_nodes()
         empty = self._find_empty()
         if empty is None:
@@ -86,12 +90,16 @@ class BackwardSolver(Solver):
                 continue
 
             self.grid[i][j] = v
+            if step_callback is not None:
+                step_callback(i, j, v)
             kb.facts.append(("val", (i, j, v)))
 
-            if self._backtrack(kb):
+            if self._backtrack(kb, step_callback):
                 return True
 
             self.grid[i][j] = 0
+            if step_callback is not None:
+                step_callback(i, j, 0)
             kb.facts.pop()
 
         return False

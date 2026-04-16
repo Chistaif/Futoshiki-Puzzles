@@ -1,0 +1,61 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Project Overview}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Objectives and Scope}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Team Information}{3}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Project Planning and Task Distribution}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Work Breakdown}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Member Responsibilities}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Completion Percentage per Member}{3}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Project Management Board}{3}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Problem Formulation}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Puzzle Rules}{3}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}First-Order Logic Formalization}{4}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Predicate Vocabulary}{4}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Core Axioms}{4}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Skolemization and CNF Conversion}{4}{subsubsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.3}From FOL to Inference}{4}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Ground Knowledge Base and CNF Generation}{4}{subsection.3.4}%
+\contentsline {section}{\numberline {4}Algorithm Description}{4}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Forward Chaining}{4}{subsection.4.1}%
+\contentsline {subsubsection}{\numberline {4.1.1}Idea}{4}{subsubsection.4.1.1}%
+\contentsline {subsubsection}{\numberline {4.1.2}Pseudocode}{4}{subsubsection.4.1.2}%
+\contentsline {subsubsection}{\numberline {4.1.3}Illustration}{4}{subsubsection.4.1.3}%
+\contentsline {subsubsection}{\numberline {4.1.4}Algorithm Analysis}{5}{subsubsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.2}Backward Chaining (SLD Resolution)}{5}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Idea}{5}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Pseudocode}{5}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Illustration}{5}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.4}Algorithm Analysis}{5}{subsubsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.3}A* Search}{5}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Idea}{5}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Heuristic Function and Admissibility}{5}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.3}Pseudocode}{5}{subsubsection.4.3.3}%
+\contentsline {subsubsection}{\numberline {4.3.4}Illustration}{5}{subsubsection.4.3.4}%
+\contentsline {subsubsection}{\numberline {4.3.5}Algorithm Analysis}{6}{subsubsection.4.3.5}%
+\contentsline {subsection}{\numberline {4.4}Brute-force and Backtracking}{6}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Idea}{6}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Pseudocode}{6}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Illustration}{6}{subsubsection.4.4.3}%
+\contentsline {subsubsection}{\numberline {4.4.4}Algorithm Analysis}{6}{subsubsection.4.4.4}%
+\contentsline {subsection}{\numberline {4.5}SAT Solver (Using SAT Library)}{6}{subsection.4.5}%
+\contentsline {subsubsection}{\numberline {4.5.1}Idea}{6}{subsubsection.4.5.1}%
+\contentsline {subsubsection}{\numberline {4.5.2}Constraint Encoding}{6}{subsubsection.4.5.2}%
+\contentsline {subsubsection}{\numberline {4.5.3}Pseudocode}{6}{subsubsection.4.5.3}%
+\contentsline {subsubsection}{\numberline {4.5.4}Illustration}{6}{subsubsection.4.5.4}%
+\contentsline {subsubsection}{\numberline {4.5.5}Algorithm Analysis}{7}{subsubsection.4.5.5}%
+\contentsline {section}{\numberline {5}Experiments and Evaluation}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Experimental Setup}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Input and Output Test Cases}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Evaluation Metrics}{7}{subsection.5.3}%
+\contentsline {subsubsection}{\numberline {5.3.1}Runtime}{7}{subsubsection.5.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.2}Memory Usage}{7}{subsubsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3}Number of Inferences or Expansions}{7}{subsubsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.4}Comparative Analysis Across Algorithms}{7}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Self-evaluation Against Project Criteria}{7}{subsection.5.5}%
+\contentsline {section}{\numberline {6}References}{8}{section.6}%
+\contentsline {section}{\numberline {A}Appendix}{8}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Pseudocode}{8}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}Demo Video Links}{8}{subsection.A.2}%
+\contentsline {subsection}{\numberline {A.3}Additional Tables and Charts}{8}{subsection.A.3}%
+\contentsline {subsection}{\numberline {A.4}Submission Checklist}{8}{subsection.A.4}%
