@@ -5,22 +5,25 @@ from __future__ import annotations
 import pygame
 
 from .constants import (
+    COLOR_AI_HIGHLIGHT,
     BUTTON_RADIUS,
     BUTTON_SHADOW_OFFSET,
     CELL_BORDER_WIDTH,
     CELL_RADIUS,
     COLOR_BACKGROUND,
-    COLOR_BORDER,
     COLOR_BUTTON,
     COLOR_BUTTON_HOVER,
     COLOR_BUTTON_TEXT,
-    COLOR_CELL,
     COLOR_CLUE,
     COLOR_ERROR,
     COLOR_ERROR_SOFT,
-    COLOR_SELECTED,
+    COLOR_GAME_ACCENT,
+    COLOR_GAME_CELL,
+    COLOR_GAME_CELL_BORDER,
+    COLOR_GAME_CELL_SHADOW,
     COLOR_SHADOW,
     COLOR_SOLVER,
+    COLOR_SOLVER_BACKTRACK,
 )
 from .utils import _mix
 
@@ -98,6 +101,10 @@ class Timer:
         seconds = total % 60
         return f"{minutes:02d}:{seconds:02d}"
 
+    def get_time(self) -> str:
+        """Return formatted elapsed time for UI displays."""
+        return self.format_time()
+
 
 class Cell:
     """Grid cell with selected and invalid visual states."""
@@ -117,6 +124,8 @@ class Cell:
         self.is_clue = is_clue
         self.is_selected = False
         self.is_invalid = False
+        self.is_ai_focus = False
+        self.is_ai_backtrack = False
 
     def contains(self, pos: tuple[int, int]) -> bool:
         return self.rect.collidepoint(pos)
@@ -126,17 +135,30 @@ class Cell:
             self.value = value
 
     def draw(self, surface: pygame.Surface, font: pygame.font.Font) -> None:
+        shadow_rect = self.rect.move(0, 2)
+        pygame.draw.rect(surface, COLOR_GAME_CELL_SHADOW, shadow_rect, border_radius=CELL_RADIUS)
+
         if self.is_invalid:
             fill = COLOR_ERROR_SOFT
-        elif self.is_selected:
-            fill = COLOR_SELECTED
+        elif self.is_ai_focus:
+            fill = _mix(COLOR_AI_HIGHLIGHT, COLOR_GAME_CELL, 0.45)
         else:
-            fill = COLOR_CELL
+            fill = COLOR_GAME_CELL
 
         pygame.draw.rect(surface, fill, self.rect, border_radius=CELL_RADIUS)
 
-        border_color = COLOR_ERROR if self.is_invalid else COLOR_BORDER
-        border_width = CELL_BORDER_WIDTH + 1 if self.is_selected else CELL_BORDER_WIDTH
+        if self.is_invalid:
+            border_color = COLOR_ERROR
+        elif self.is_selected:
+            border_color = COLOR_GAME_ACCENT
+        elif self.is_ai_focus and self.is_ai_backtrack:
+            border_color = COLOR_SOLVER_BACKTRACK
+        elif self.is_ai_focus:
+            border_color = COLOR_GAME_ACCENT
+        else:
+            border_color = COLOR_GAME_CELL_BORDER
+
+        border_width = CELL_BORDER_WIDTH + 1 if (self.is_selected or self.is_ai_focus) else CELL_BORDER_WIDTH
         pygame.draw.rect(
             surface,
             border_color,
@@ -146,7 +168,12 @@ class Cell:
         )
 
         if self.value != 0:
-            text_color = COLOR_CLUE if self.is_clue else COLOR_SOLVER
+            if self.is_clue:
+                text_color = COLOR_CLUE
+            elif self.is_ai_focus and self.is_ai_backtrack:
+                text_color = COLOR_SOLVER_BACKTRACK
+            else:
+                text_color = COLOR_SOLVER
             text_surface = font.render(str(self.value), True, text_color)
             text_rect = text_surface.get_rect(center=self.rect.center)
             surface.blit(text_surface, text_rect)

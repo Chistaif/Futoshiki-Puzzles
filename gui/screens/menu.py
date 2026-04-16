@@ -1,134 +1,192 @@
-"""Màn hình menu của giao diện Futoshiki.
-
-File này chịu trách nhiệm hiển thị ảnh nền menu và nút Play ở giữa màn hình.
-Mục tiêu là giữ layout thật gọn, chỉ có những thành phần cần thiết cho màn mở đầu.
-"""
+﻿"""Minimalist Japanese-style main menu."""
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any, Dict, Optional
 
 import pygame
 
+from ..components import Button
 from ..constants import (
     BUTTON_HEIGHT,
+    COLOR_BUTTON,
+    COLOR_BUTTON_HOVER,
+    COLOR_BUTTON_TEXT,
     FONT_BUTTON_SIZE,
     FONT_FAMILY,
-    MENU_IMAGE_CANDIDATES,
 )
 from ..utils import _draw_soft_background
 
 Transition = Optional[Dict[str, Any]]
 
-MENU_FRAME_RATIO = 2 / 3  # width / height
-PLAY_BUTTON_WIDTH = 230
-PLAY_BUTTON_RADIUS = 16
-
-PLAY_BUTTON_BG = (255, 255, 255, 220)
-PLAY_BUTTON_BG_HOVER = (242, 242, 242, 220)
-PLAY_BUTTON_BORDER = (68, 68, 68, 120)
-PLAY_BUTTON_TEXT = (30, 30, 30)
-
-
-def _load_menu_background() -> Optional[pygame.Surface]:
-    """Tìm và nạp ảnh nền menu từ các vị trí có thể có trong project.
-
-    Làm theo kiểu thử nhiều đường dẫn để project vẫn chạy được dù cấu trúc thư mục
-    ảnh có thể khác nhau giữa các phiên bản.
-    """
-    root_path = Path(__file__).resolve().parents[2]
-    for parts in MENU_IMAGE_CANDIDATES:
-        candidate = root_path.joinpath(*parts)
-        if candidate.exists():
-            return pygame.image.load(candidate.as_posix()).convert()
-    return None
-
-
-def _compute_menu_frame(surface_rect: pygame.Rect) -> pygame.Rect:
-    """Tính khung ảnh dọc theo tỷ lệ 2:3 và căn giữa màn hình."""
-    available_width = max(120, surface_rect.width)
-    available_height = max(180, surface_rect.height)
-
-    frame_width = min(available_width, int(available_height * MENU_FRAME_RATIO))
-    frame_height = int(frame_width / MENU_FRAME_RATIO)
-
-    frame = pygame.Rect(0, 0, frame_width, frame_height)
-    frame.center = surface_rect.center
-    return frame
-
-
-def _scale_contain(source: pygame.Surface, target_rect: pygame.Rect) -> tuple[pygame.Surface, pygame.Rect]:
-    """Scale ảnh sao cho vừa khung mà không bị cắt mất chi tiết.
-
-    Cách này ưu tiên giữ toàn bộ ảnh gốc, kể cả khi sẽ xuất hiện khoảng trống
-    thừa bên trong khung mục tiêu.
-    """
-    src_width, src_height = source.get_size()
-    if src_width <= 0 or src_height <= 0:
-        return source, source.get_rect(center=target_rect.center)
-
-    ratio = min(target_rect.width / src_width, target_rect.height / src_height)
-    scaled_width = max(1, int(src_width * ratio))
-    scaled_height = max(1, int(src_height * ratio))
-    scaled = pygame.transform.smoothscale(source, (scaled_width, scaled_height))
-    scaled_rect = scaled.get_rect(center=target_rect.center)
-    return scaled, scaled_rect
-
 
 class MenuScreen:
-    """Màn hình mở đầu với ảnh nền và nút Play."""
+    """Minimal menu with Play, AI Solver, and Exit actions."""
 
     def __init__(self, surface_rect: pygame.Rect) -> None:
         self.surface_rect = surface_rect
-        self.background_image = _load_menu_background()
-        self.button_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE, bold=True)
-        self.play_button_rect = pygame.Rect(0, 0, PLAY_BUTTON_WIDTH, BUTTON_HEIGHT)
-        self.is_play_hovered = False
-        self._center_play_button()
+        self.button_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 2, bold=True)
+        self.small_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 8, bold=True)
 
-    def _center_play_button(self) -> None:
-        """Đưa nút Play về chính giữa màn hình."""
-        self.play_button_rect.center = self.surface_rect.center
+        self.selected_ai_solver = "backtracking"
+        self.solver_options = ("backtracking", "astar")
+        self.solver_dropdown_open = False
+        self.hovered_solver: Optional[str] = None
+        self.solver_option_rects: list[tuple[str, pygame.Rect]] = []
+        self.dropdown_anim_progress = 0.0
+        self.dropdown_anim_duration = 0.16
 
-    def _draw_play_button(self, surface: pygame.Surface) -> None:
-        """Vẽ nút Play với nền trắng đục và hiệu ứng hover."""
-        button_layer = pygame.Surface(self.play_button_rect.size, pygame.SRCALPHA)
-        bg_color = PLAY_BUTTON_BG_HOVER if self.is_play_hovered else PLAY_BUTTON_BG
-        pygame.draw.rect(button_layer, bg_color, button_layer.get_rect(), border_radius=PLAY_BUTTON_RADIUS)
-        pygame.draw.rect(
-            button_layer,
-            PLAY_BUTTON_BORDER,
-            button_layer.get_rect(),
-            width=1,
-            border_radius=PLAY_BUTTON_RADIUS,
+        self.play_button = Button(
+            pygame.Rect(0, 0, 248, BUTTON_HEIGHT),
+            "Play",
+            self.button_font,
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
+            text_color=COLOR_BUTTON_TEXT,
         )
-        surface.blit(button_layer, self.play_button_rect.topleft)
+        self.ai_button = Button(
+            pygame.Rect(0, 0, 248, BUTTON_HEIGHT),
+            "AI Solver",
+            self.button_font,
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
+            text_color=COLOR_BUTTON_TEXT,
+        )
+        self.exit_button = Button(
+            pygame.Rect(0, 0, 190, 50),
+            "Exit",
+            self.button_font,
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
+            text_color=COLOR_BUTTON_TEXT,
+        )
 
-        label = self.button_font.render("Play", True, PLAY_BUTTON_TEXT)
-        label_rect = label.get_rect(center=self.play_button_rect.center)
-        surface.blit(label, label_rect)
+        self._update_layout()
+
+    def _update_layout(self) -> None:
+        center_x = self.surface_rect.centerx
+        play_center_y = self.surface_rect.centery + 84
+
+        self.play_button.rect.center = (center_x, play_center_y)
+        self.ai_button.rect.center = (center_x, play_center_y + BUTTON_HEIGHT + 18)
+        self.exit_button.rect.center = (center_x, self.surface_rect.bottom - 52)
+
+        self.solver_option_rects = []
+        for index, solver_name in enumerate(self.solver_options):
+            rect = pygame.Rect(
+                self.ai_button.rect.left,
+                self.ai_button.rect.bottom + 10 + index * (BUTTON_HEIGHT - 8),
+                self.ai_button.rect.width,
+                BUTTON_HEIGHT - 12,
+            )
+            self.solver_option_rects.append((solver_name, rect))
+
+    @staticmethod
+    def _format_solver_label(solver_name: str) -> str:
+        if solver_name == "astar":
+            return "A* Search"
+        return "Backtracking"
+
+    @staticmethod
+    def _ease_out_cubic(value: float) -> float:
+        clamped = max(0.0, min(1.0, value))
+        return 1.0 - (1.0 - clamped) ** 3
+
+    @staticmethod
+    def _blend_rgba(color: tuple[int, int, int], alpha: int) -> tuple[int, int, int, int]:
+        return color[0], color[1], color[2], max(0, min(255, alpha))
 
     def handle_event(self, event: pygame.event.Event) -> Transition:
-        """Xử lý chuột: hover để đổi màu và click để sang màn chọn level."""
-        if event.type == pygame.MOUSEMOTION:
-            self.is_play_hovered = self.play_button_rect.collidepoint(event.pos)
+        self._update_layout()
 
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.play_button_rect.collidepoint(event.pos):
-            return {"state": "level_select"}
+        if event.type == pygame.MOUSEMOTION and self.solver_dropdown_open:
+            self.hovered_solver = None
+            for solver_name, rect in self.solver_option_rects:
+                if rect.collidepoint(event.pos):
+                    self.hovered_solver = solver_name
+                    break
+
+        if self.play_button.handle_event(event):
+            self.solver_dropdown_open = False
+            return {"state": "deal_select", "mode": "play"}
+
+        if self.ai_button.handle_event(event):
+            self.solver_dropdown_open = not self.solver_dropdown_open
+            return None
+
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.solver_dropdown_open:
+            for solver_name, rect in self.solver_option_rects:
+                if rect.collidepoint(event.pos):
+                    self.selected_ai_solver = solver_name
+                    self.solver_dropdown_open = False
+                    return {
+                        "state": "deal_select",
+                        "mode": "ai",
+                        "solver_name": self.selected_ai_solver,
+                    }
+
+            self.solver_dropdown_open = False
+
+        if self.exit_button.handle_event(event):
+            return {"state": "exit"}
+
         return None
 
-    def update(self, _dt: float) -> None:
-        pass
+    def update(self, dt: float) -> None:
+        if self.dropdown_anim_duration <= 0:
+            self.dropdown_anim_progress = 1.0 if self.solver_dropdown_open else 0.0
+            return
+
+        delta = dt / self.dropdown_anim_duration
+        if self.solver_dropdown_open:
+            self.dropdown_anim_progress = min(1.0, self.dropdown_anim_progress + delta)
+        else:
+            self.dropdown_anim_progress = max(0.0, self.dropdown_anim_progress - delta)
 
     def draw(self, surface: pygame.Surface) -> None:
-        """Vẽ toàn bộ màn menu theo đúng thứ tự nền -> ảnh -> nút."""
-        self._center_play_button()
+        self._update_layout()
         _draw_soft_background(surface)
 
-        menu_frame = _compute_menu_frame(self.surface_rect)
-        if self.background_image is not None:
-            image, image_rect = _scale_contain(self.background_image, menu_frame)
-            surface.blit(image, image_rect)
+        self.play_button.draw(surface)
+        self.ai_button.draw(surface)
 
-        self._draw_play_button(surface)
+        if self.dropdown_anim_progress > 0.0:
+            for index, (solver_name, rect) in enumerate(self.solver_option_rects):
+                stagger = index * 0.12
+                if self.dropdown_anim_progress <= stagger:
+                    continue
+
+                local_progress = (self.dropdown_anim_progress - stagger) / (1.0 - stagger)
+                eased = self._ease_out_cubic(local_progress)
+                alpha = int(255 * eased)
+                slide_y = int((1.0 - eased) * 16)
+
+                animated_rect = rect.move(0, slide_y)
+                option_surface = pygame.Surface((animated_rect.width, animated_rect.height), pygame.SRCALPHA)
+
+                is_selected = solver_name == self.selected_ai_solver
+                is_hovered = solver_name == self.hovered_solver
+                fill = COLOR_BUTTON_HOVER if is_selected or is_hovered else COLOR_BUTTON
+
+                pygame.draw.rect(
+                    option_surface,
+                    self._blend_rgba(fill, alpha),
+                    option_surface.get_rect(),
+                    border_radius=10,
+                )
+                pygame.draw.rect(
+                    option_surface,
+                    self._blend_rgba(COLOR_BUTTON_TEXT, alpha),
+                    option_surface.get_rect(),
+                    width=1,
+                    border_radius=10,
+                )
+
+                label = self._format_solver_label(solver_name)
+                label_surface = self.small_font.render(label, True, COLOR_BUTTON_TEXT)
+                label_surface.set_alpha(alpha)
+                option_surface.blit(label_surface, label_surface.get_rect(center=option_surface.get_rect().center))
+
+                surface.blit(option_surface, animated_rect.topleft)
+
+        self.exit_button.draw(surface)
