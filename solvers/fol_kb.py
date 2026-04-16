@@ -62,7 +62,7 @@ class FOLKB:
         """
         for i in range(self.n):
             for j in range(self.n - 1):
-                sign = self.horizontal[i, j]
+                sign = self.horizontal[i][j]
 
                 if sign == 0: continue # Bỏ qua nếu không có ràng buộc
                 
@@ -82,7 +82,7 @@ class FOLKB:
         """
         for i in range(self.n - 1):
             for j in range(self.n):
-                sign = self.vertical[i, j]
+                sign = self.vertical[i][j]
 
                 if sign == 0: continue # Bỏ qua nếu không có ràng buộc
                 
@@ -99,9 +99,8 @@ class FOLKB:
         """A9: Ô được gán giá trị cho sẵn thì cố định lại"""
         for i in range(self.n):
             for j in range(self.n):
-                if self.grid[i, j] != 0:
-                    v = self.grid[i, j]
-
+                if self.grid[i][j] != 0:
+                    v = self.grid[i][j]
                     self.clauses.append([self.var(i, j, v)])
 
     """A10: đã được encode ngầm => không thể có value ngoài [1..N]"""
