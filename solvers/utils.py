@@ -122,4 +122,3 @@ def standardize_variables(rule):
     new_consequent = subst(theta, consequent)
 
     return (new_antecedents, new_consequent)
-
