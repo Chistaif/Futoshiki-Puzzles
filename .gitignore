@@ -9,6 +9,7 @@ __pycache__/
 [Oo]bj/
 *.user
 *.suo
+.idea/
 
 .venv/
 .env/

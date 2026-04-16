@@ -1,5 +1,6 @@
 _var_counter = 0
 
+
 def is_variable(x):
     """
     Kiểm tra xem x có phải là biến logic hay không.
@@ -7,6 +8,7 @@ def is_variable(x):
     Hằng số là số nguyên hoặc chuỗi viết hoa (vd: 1, 2, 'A').
     """
     return isinstance(x, str) and x[0].islower()
+
 
 def subst(theta, q):
     """
@@ -22,6 +24,7 @@ def subst(theta, q):
         # Nếu q là số hoặc kiểu dữ liệu khác, giữ nguyên
         return q
 
+
 def occur_check(var, x, theta):
     """
     Kiểm tra xem biến 'var' có xuất hiện bên trong 'x' hay không để tránh vòng lặp đệ quy vô hạn.
@@ -33,6 +36,7 @@ def occur_check(var, x, theta):
     elif isinstance(x, tuple):
         return any(occur_check(var, arg, theta) for arg in x)
     return False
+
 
 def unify_var(var, x, theta):
     """Hàm hỗ trợ gán biến cho UNIFY."""
@@ -46,6 +50,7 @@ def unify_var(var, x, theta):
         new_theta = theta.copy()
         new_theta[var] = x
         return new_theta
+
 
 def unify(x, y, theta=None):
     """
@@ -75,6 +80,7 @@ def unify(x, y, theta=None):
     else:
         return "failure"
 
+
 def standardize_variables(rule):
     """
     Hàm STANDARDIZE-VARIABLES: Đổi tên các biến trong một luật để đảm bảo 
@@ -84,9 +90,9 @@ def standardize_variables(rule):
     global _var_counter
     _var_counter += 1
     suffix = f"_{_var_counter}"  # Ví dụ: _1, _2, _3
-    
+
     variables = set()
-    
+
     # Hàm đệ quy con để tìm tất cả các biến logic có trong biểu thức
     def find_vars(expr):
         if is_variable(expr):
@@ -95,24 +101,24 @@ def standardize_variables(rule):
         elif isinstance(expr, (tuple, list)):
             # Bỏ qua phần tử đầu tiên (thường là tên Vị từ như 'Val', 'Less')
             # Quét đệ quy các tham số còn lại
-            for arg in expr[1:]: 
+            for arg in expr[1:]:
                 find_vars(arg)
-                
+
     # Giải nén rule thành 2 phần rõ ràng để tránh nhầm lẫn index
     antecedents, consequent = rule
-                
+
     # 1. Quét tìm tất cả các biến trong vế trái (antecedents)
-    for premise in antecedents: 
+    for premise in antecedents:
         find_vars(premise)
-        
+
     # 2. Quét tìm tất cả các biến trong vế phải (consequent)
     find_vars(consequent)
-    
+
     # 3. Tạo tập phép thế theta để đổi tên. Ví dụ: {'x': 'x_1', 'y': 'y_1'}
     theta = {v: f"{v}{suffix}" for v in variables}
-    
+
     # 4. Áp dụng phép thế theta vào luật cũ để tạo ra luật mới
     new_antecedents = tuple(subst(theta, p) for p in antecedents)
     new_consequent = subst(theta, consequent)
-    
+
     return (new_antecedents, new_consequent)
