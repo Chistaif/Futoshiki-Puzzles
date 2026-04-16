@@ -9,6 +9,7 @@ vscode/
 [Oo]bj/
 *.user
 *.suo
+.idea/
 
 .venv/
 .env/
