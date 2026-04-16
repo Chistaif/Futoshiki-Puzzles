@@ -1,26 +1,26 @@
-from collections import deque
+import time
+import tracemalloc
+from collections import defaultdict, deque
+import copy
 
-class ForwardChainingSolver:
-    def __init__(self, cnf_clauses, initial_facts):
-        """
-        Khởi tạo bộ giải Forward Chaining.
-        :param cnf_clauses: Danh sách các mệnh đề (clauses) từ FOL_KB. 
-                            Mỗi mệnh đề là một list/tuple các literals.
-                            VD: [('V_0_0_1', 'V_0_0_2'), ('-V_0_0_1', '-V_0_1_1')]
-        :param initial_facts: Các sự kiện ban đầu (các ô đã có sẵn số).
-                            VD: ['V_0_0_4', 'V_1_2_3']
-        """
-        # Copy lại KB để không làm hỏng dữ liệu gốc khi rút gọn
-        self.clauses = [list(c) for c in cnf_clauses]
-
-        # Hàng đợi chứa các sự kiện chắc chắn đúng (Agenda)
-        self.agenda = deque(initial_facts)
-
-        # Dictionary lưu kết quả suy diễn (Model): literal -> True
+class ForwardBacktrackSolver:
+    def __init__(self, kb):
+        self.clauses = copy.deepcopy(kb.clauses)
         self.model = {}
-
-        # Khởi tạo thêm các unit clause từ KB để suy diễn tiến đúng cho các clause đơn
-        self._enqueue_unit_clauses()
+        self.agenda = deque()
+        self.literal_to_clauses = defaultdict(list)
+        
+        # Các biến lưu trữ thống kê
+        self.inferences = 0 
+        self.run_time = 0.0
+        self.memory_usage = 0.0
+        
+        for clause in self.clauses:
+            if len(clause) == 1:
+                self.agenda.append(clause[0])
+            else:
+                for literal in clause:
+                    self.literal_to_clauses[literal].append(clause)
 
     def _enqueue_unit_clauses(self):
         for clause in self.clauses:
@@ -30,54 +30,108 @@ class ForwardChainingSolver:
                     self.agenda.append(literal)
 
     def solve(self):
-        """
-        Thực thi thuật toán suy diễn tiến.
-        :return: model (dict) nếu tìm được nghiệm, False nếu KB chứa mâu thuẫn.
-        """
-        while self.agenda:
-            # Lấy sự kiện đầu tiên ra khỏi hàng đợi
-            p = self.agenda.popleft()
+        """Hàm thực thi chính: Vừa giải vừa đo lường"""
+        tracemalloc.start()
+        start_time = time.perf_counter()
+
+        # Chạy thuật toán
+        is_solved = self._dpll()
+
+        # Chốt số liệu
+        end_time = time.perf_counter()
+        current_mem, peak_mem = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        self.run_time = end_time - start_time
+        self.memory_usage = peak_mem / (1024 * 1024) # Chuyển sang MB
+
+        return is_solved
+    
+    def get_stats(self):
+        """Hàm trả về dữ liệu đo được cho UI hoặc Terminal gọi"""
+        return {
+            "time_sec": self.run_time,
+            "memory_mb": self.memory_usage,
+            "inferences": self.inferences
+        }
+
+    def _dpll(self):
+        # Bước 1: Lan truyền hệ quả (Forward Chaining)
+        if not self.propagate():
+            return False # Nhánh này sinh mâu thuẫn, báo False để quay lui
             
-            # Nếu phủ định của p đã nằm trong model -> Xảy ra mâu thuẫn (Ví dụ: vừa có V_0_0_1 vừa có -V_0_0_1)
-            if self._negate(p) in self.model:
-                return False 
-                
-            if p not in self.model:
-                # Đánh dấu sự kiện này là đúng
-                self.model[p] = True
-                
-                new_clauses = []
-                for clause in self.clauses:
-                    # 1. Nếu p có trong mệnh đề -> Mệnh đề này đã luôn đúng (True), có thể loại bỏ khỏi KB
-                    if p in clause:
-                        continue
-                    
-                    # 2. Nếu phủ định của p có trong mệnh đề -> Literal này sai, xóa nó khỏi mệnh đề
-                    neg_p = self._negate(p)
-                    if neg_p in clause:
-                        clause.remove(neg_p)
-                        
-                    # 3. Mâu thuẫn: Nếu mệnh đề bị xóa hết sạch các phần tử (rỗng) -> Không thể thỏa mãn
-                    if len(clause) == 0:
-                        return False
-                        
-                    # 4. Suy diễn: Nếu mệnh đề chỉ còn đúng 1 phần tử -> Phần tử đó chắc chắn đúng
-                    if len(clause) == 1:
-                        new_fact = clause[0]
-                        if new_fact not in self.agenda and new_fact not in self.model:
-                            self.agenda.append(new_fact)
-                            
-                    # Giữ lại các mệnh đề chưa được giải quyết xong
-                    new_clauses.append(clause)
-                
-                # Cập nhật lại KB bằng các mệnh đề đã được rút gọn
-                self.clauses = new_clauses
-                
-        # Trả về toàn bộ các sự kiện đã suy diễn được
-        return self.model
+        # Bước 2: Kiểm tra xem đã giải xong chưa
+        unassigned_var = self._get_unassigned_variable()
+        if unassigned_var is None:
+            return True # Không còn biến nào để gán -> Đã tìm được Model hợp lệ!
+
+        # Bước 3: BACKTRACKING - Bị đứng, bắt đầu đoán
+        # Vì đây là đệ quy và các clause/model bị thay đổi inplace (list.remove),
+        # ta BẮT BUỘC phải lưu lại trạng thái trước khi đi vào nhánh rẽ.
+        saved_clauses = copy.deepcopy(self.clauses)
+        saved_literal_to_clauses = copy.deepcopy(self.literal_to_clauses)
+        saved_model = self.model.copy()
+        
+        # --- Nhánh 1: Đoán biến bằng True ---
+        self.agenda.append(unassigned_var) # Nhét thử vào agenda
+        if self._dpll():
+            return True # Nhánh này đúng thì kết thúc luôn
+            
+        # --- Nhánh 2: Nếu nhánh 1 sai, phục hồi trạng thái và đoán biến bằng False ---
+        # Khôi phục trạng thái cũ
+        self.clauses = saved_clauses
+        self.literal_to_clauses = saved_literal_to_clauses
+        self.model = saved_model
+        self.agenda.clear() # Dọn dẹp agenda
+        
+        # Ép biến đó bằng False (tức là neg_var bằng True)
+        self.agenda.append(self._negate(unassigned_var))
+        
+        # Thử lại nhánh False, kết quả của nhánh này cũng là kết quả cuối cùng của node hiện tại
+        return self._dpll()
+        
         
     def _negate(self, literal):
-        """Hàm phụ trợ lấy phủ định của một literal (VD: 'V_0_0_1' -> '-V_0_0_1')"""
-        if literal.startswith('-'):
-            return literal[1:]
-        return '-' + literal
+        return -literal if isinstance(literal, int) else ('-' + literal[1:] if literal.startswith('-') else '-' + literal)
+    
+    def propagate(self):
+        """Hàm này chỉ thực hiện Forward Chaining mà không cần suy diễn ngược (Backtracking)."""
+        while self.agenda:
+            p = self.agenda.popleft()
+            self.inferences += 1
+            
+            if self._negate(p) in self.model:
+                return False # Mâu thuẫn logic -> nhánh này vô nghiệm
+                
+            if p not in self.model:
+                self.model[p] = True
+                neg_p = self._negate(p)
+                
+                # CHỈ DUYỆT các mệnh đề chứa neg_p thay vì toàn bộ clauses
+                clauses_to_check = self.literal_to_clauses[neg_p]
+                for clause in clauses_to_check:
+                    if neg_p in clause:
+                        clause.remove(neg_p)
+                        # Nếu mệnh đề rỗng -> mâu thuẫn
+                        if len(clause) == 0:
+                            return False
+                        # Nếu mệnh đề chỉ còn 1 phần tử -> thành sự thật mới
+                        if len(clause) == 1:
+                            new_fact = clause[0]
+                            if new_fact not in self.model and new_fact not in self.agenda:
+                                self.agenda.append(new_fact)
+                                
+        return True # Trả về True nghĩa là chưa có mâu thuẫn (có thể chưa giải xong)
+    
+    def _get_unassigned_variable(self):
+        """Hàm này tìm một literal bất kỳ trong các mệnh đề có độ dài > 1 để thử gán giá trị (Backtracking)."""
+        # Tìm một literal bất kỳ trong các mệnh đề có độ dài > 1
+        for clause in self.clauses:
+            if len(clause) > 1: # Bỏ qua mệnh đề đã thỏa mãn hoặc trống
+                for literal in clause:
+                    # Chú ý: Cần kiểm tra biến gốc đã có trong model chưa (cả dạng khẳng định và phủ định)
+                    pos_var = abs(literal) if isinstance(literal, int) else literal.replace('-', '')
+                    neg_var = self._negate(pos_var)
+                    if pos_var not in self.model and neg_var not in self.model:
+                        return pos_var # Chọn một biến dương để thử
+        return None
