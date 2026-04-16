@@ -1,5 +1,5 @@
 __pycache__/
-vscode/
+.vscode/
 
 *.pyc
 .DS_Store
@@ -9,6 +9,7 @@ vscode/
 [Oo]bj/
 *.user
 *.suo
+.idea/
 
 .venv/
 .env/
