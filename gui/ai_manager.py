@@ -14,6 +14,7 @@ from typing import Any, Callable, Deque, Optional, Tuple
 from file import PuzzleCase
 from solvers.astar import AStarSolver
 from solvers.backtrack import Backtracking
+from solvers.sat_solver import SATSolver
 
 
 StepHandler = Callable[[int, int, int], None]
@@ -60,8 +61,10 @@ class AISolverManager:
         normalized_solver = str(solver_name).strip().lower()
         if normalized_solver in ("a*", "a_star"):
             normalized_solver = "astar"
+        elif normalized_solver in ("sat", "sat_solver", "pysat"):
+            normalized_solver = "sat"
 
-        if normalized_solver not in ("backtracking", "astar"):
+        if normalized_solver not in ("backtracking", "astar", "sat"):
             raise ValueError(f"Unsupported solver: {solver_name}")
 
         self.pending_steps = deque()
@@ -71,7 +74,12 @@ class AISolverManager:
         self.solver_running = True
         self.animating = True
         self.solver_key = normalized_solver
-        self.solver_name = "A* Search" if normalized_solver == "astar" else "Backtracking"
+        solver_display_names = {
+            "backtracking": "Backtracking",
+            "astar": "A* Search",
+            "sat": "SAT Solver",
+        }
+        self.solver_name = solver_display_names[normalized_solver]
 
         self._start_ai_worker(case, normalized_solver)
 
@@ -126,6 +134,8 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
+            elif solver_name == "sat":
+                solver = SATSolver(case)
             else:
                 solver = Backtracking(case)
 

@@ -29,7 +29,7 @@ class MenuScreen:
         self.small_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 8, bold=True)
 
         self.selected_ai_solver = "backtracking"
-        self.solver_options = ("backtracking", "astar")
+        self.solver_options = ("backtracking", "astar", "sat")
         self.solver_dropdown_open = False
         self.hovered_solver: Optional[str] = None
         self.solver_option_rects: list[tuple[str, pygame.Rect]] = []
@@ -85,6 +85,8 @@ class MenuScreen:
     def _format_solver_label(solver_name: str) -> str:
         if solver_name == "astar":
             return "A* Search"
+        if solver_name == "sat":
+            return "SAT Solver"
         return "Backtracking"
 
     @staticmethod
