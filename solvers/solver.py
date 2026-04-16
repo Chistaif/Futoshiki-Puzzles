@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+import tracemalloc
 import time
+from typing import Any, Dict, Optional
+
 
 class Solver(ABC):
     """
@@ -10,6 +12,7 @@ class Solver(ABC):
     - Định nghĩa interface chung
     - Mọi class con trong solvers đều phải kế thừa và implement hàm solve
     """
+
     def __init__(self, name: Optional[str] = None):
         self.name = name or self.__class__.__name__
 
@@ -22,18 +25,27 @@ class Solver(ABC):
         """
         Wrapper cho mọi solver
         """
+        print(f"{self.name} is Solving ...")
+
+        tracemalloc.start()
         start_time = time.perf_counter()
+
         solution = self.solve(puzzle)
+
         end_time = time.perf_counter()
+        current, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
 
         self.execution_time = end_time - start_time
+        self.memory_used = peak / 1024 / 1024  # MB
 
+        print(f"{self.name} Done")
         return {
             "solver": self.name,
             "solution": solution,
             "time": self.execution_time,
             "node_expanded": self.node_expanded,
-            "memory":    self.memory_used,
+            "memory": self.memory_used,
         }
 
     # TODO: các thuật toán solver khác phải implement hàm này
@@ -58,4 +70,4 @@ class Solver(ABC):
 
     def increment_nodes(self, count: int = 1):
         """Dùng trong search algorithm"""
-        self.nodes_expanded += count
+        self.node_expanded += count
