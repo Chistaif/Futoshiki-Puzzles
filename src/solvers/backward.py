@@ -36,7 +36,7 @@ class BackwardSolver(Solver):
 
     @staticmethod
     def _clause_to_rule(clause):
-        """Chuáº©n hÃ³a clause vá» dáº¡ng (antecedents, consequent)."""
+        """Chuẩn hóa clause về dạng (antecedents, consequent)."""
         if hasattr(clause, "head") and hasattr(clause, "body"):
             return tuple(clause.body), clause.head
         return tuple(), clause

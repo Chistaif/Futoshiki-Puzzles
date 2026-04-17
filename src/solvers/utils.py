@@ -3,31 +3,31 @@
 
 def is_variable(x):
     """
-    Kiá»ƒm tra xem x cÃ³ pháº£i lÃ  biáº¿n logic hay khÃ´ng.
-    Quy Æ°á»›c: Biáº¿n lÃ  chuá»—i báº¯t Ä‘áº§u báº±ng chá»¯ cÃ¡i viáº¿t thÆ°á»ng (vd: 'x', 'y', 'i', 'j').
-    Háº±ng sá»‘ lÃ  sá»‘ nguyÃªn hoáº·c chuá»—i viáº¿t hoa (vd: 1, 2, 'A').
+    Kiểm tra xem x có phải là biến logic hay không.
+    Quy ước: Biến là chuỗi bắt đầu bằng chữ cái viết thường (vd: 'x', 'y', 'i', 'j').
+    Hằng số là số nguyên hoặc chuỗi viết hoa (vd: 1, 2, 'A').
     """
     return isinstance(x, str) and x[0].islower()
 
 
 def subst(theta, q):
     """
-    HÃ m SUBST: Ãp dá»¥ng phÃ©p tháº¿ theta vÃ o biá»ƒu thá»©c q.
+    Hàm SUBST: Áp dụng phép thế theta vào biểu thức q.
     """
     if isinstance(q, str):
-        # Náº¿u q lÃ  biáº¿n vÃ  cÃ³ trong theta, tráº£ vá» giÃ¡ trá»‹ thay tháº¿. Náº¿u khÃ´ng, giá»¯ nguyÃªn.
+        # Nếu q là biến và có trong theta, trả về giá trị thay thế. Nếu không, giữ nguyên.
         return theta.get(q, q)
     elif isinstance(q, (list, tuple)):
-        # Náº¿u q lÃ  biá»ƒu thá»©c phá»©c há»£p (VD: ('Val', 'i', 'j', 'v')), Ä‘á»‡ quy Ã¡p dá»¥ng cho tá»«ng pháº§n tá»­.
+        # Nếu q là biểu thức phức hợp (VD: ('Val', 'i', 'j', 'v')), đệ quy áp dụng cho từng phần tử.
         return tuple(subst(theta, arg) for arg in q)
     else:
-        # Náº¿u q lÃ  sá»‘ hoáº·c kiá»ƒu dá»¯ liá»‡u khÃ¡c, giá»¯ nguyÃªn
+        # Nếu q là số hoặc kiểu dữ liệu khác, giữ nguyên.
         return q
 
 
 def occur_check(var, x, theta):
     """
-    Kiá»ƒm tra xem biáº¿n 'var' cÃ³ xuáº¥t hiá»‡n bÃªn trong 'x' hay khÃ´ng Ä‘á»ƒ trÃ¡nh vÃ²ng láº·p Ä‘á»‡ quy vÃ´ háº¡n.
+    Kiểm tra xem biến 'var' có xuất hiện bên trong 'x' hay không để tránh vòng lặp đệ quy vô hạn.
     """
     if var == x:
         return True
@@ -39,7 +39,7 @@ def occur_check(var, x, theta):
 
 
 def unify_var(var, x, theta):
-    """HÃ m há»— trá»£ gÃ¡n biáº¿n cho UNIFY."""
+    """Hàm hỗ trợ gán biến cho UNIFY."""
     if var in theta:
         return unify(theta[var], x, theta)
     elif x in theta:
@@ -54,8 +54,8 @@ def unify_var(var, x, theta):
 
 def unify(x, y, theta=None):
     """
-    HÃ m UNIFY: TÃ¬m Most General Unifier (MGU) cá»§a x vÃ  y.
-    Tráº£ vá» má»™t dictionary chá»©a phÃ©p tháº¿, hoáº·c chuá»—i "failure" náº¿u khÃ´ng thá»ƒ há»£p nháº¥t.
+    Hàm UNIFY: Tìm Most General Unifier (MGU) của x và y.
+    Trả về một dictionary chứa phép thế, hoặc chuỗi "failure" nếu không thể hợp nhất.
     """
     if theta is None:
         theta = {}
@@ -69,7 +69,7 @@ def unify(x, y, theta=None):
     elif is_variable(y):
         return unify_var(y, x, theta)
     elif isinstance(x, tuple) and isinstance(y, tuple):
-        # Há»£p nháº¥t 2 tuple: há»£p nháº¥t pháº§n tá»­ Ä‘áº§u tiÃªn, sau Ä‘Ã³ dÃ¹ng káº¿t quáº£ Ä‘á»ƒ há»£p nháº¥t pháº§n cÃ²n láº¡i
+        # Hợp nhất 2 tuple: hợp nhất phần tử đầu tiên, sau đó dùng kết quả để hợp nhất phần còn lại.
         if len(x) != len(y):
             return "failure"
         return unify(x[1:], y[1:], unify(x[0], y[0], theta))
@@ -83,41 +83,41 @@ def unify(x, y, theta=None):
 
 def standardize_variables(rule):
     """
-    HÃ m STANDARDIZE-VARIABLES: Äá»•i tÃªn cÃ¡c biáº¿n trong má»™t luáº­t Ä‘á»ƒ Ä‘áº£m báº£o 
-    cÃ¡c luáº­t cÃ³ khÃ´ng gian biáº¿n Ä‘á»™c láº­p.
-    Äáº§u vÃ o 'rule' cÃ³ dáº¡ng: (antecedents, consequent)
+    Hàm STANDARDIZE-VARIABLES: Đổi tên các biến trong một luật để đảm bảo
+    các luật có không gian biến độc lập.
+    Đầu vào 'rule' có dạng: (antecedents, consequent)
     """
     global _var_counter
     _var_counter += 1
-    suffix = f"_{_var_counter}"  # VÃ­ dá»¥: _1, _2, _3
+    suffix = f"_{_var_counter}"  # Ví dụ: _1, _2, _3
 
     variables = set()
 
-    # HÃ m Ä‘á»‡ quy con Ä‘á»ƒ tÃ¬m táº¥t cáº£ cÃ¡c biáº¿n logic cÃ³ trong biá»ƒu thá»©c
+    # Hàm đệ quy con để tìm tất cả các biến logic có trong biểu thức
     def find_vars(expr):
         if is_variable(expr):
             variables.add(expr)
-        # Há»— trá»£ quÃ©t cáº£ tuple vÃ  list
+        # Hỗ trợ quét cả tuple và list
         elif isinstance(expr, (tuple, list)):
-            # Bá» qua pháº§n tá»­ Ä‘áº§u tiÃªn (thÆ°á»ng lÃ  tÃªn Vá»‹ tá»« nhÆ° 'Val', 'Less')
-            # QuÃ©t Ä‘á»‡ quy cÃ¡c tham sá»‘ cÃ²n láº¡i
+            # Bỏ qua phần tử đầu tiên (thường là tên Vị từ như 'Val', 'Less')
+            # Quét đệ quy các tham số còn lại
             for arg in expr[1:]:
                 find_vars(arg)
 
-    # Giáº£i nÃ©n rule thÃ nh 2 pháº§n rÃµ rÃ ng Ä‘á»ƒ trÃ¡nh nháº§m láº«n index
+    # Giải nén rule thành 2 phần rõ ràng để tránh nhầm lẫn index
     antecedents, consequent = rule
 
-    # 1. QuÃ©t tÃ¬m táº¥t cáº£ cÃ¡c biáº¿n trong váº¿ trÃ¡i (antecedents)
+    # 1. Quét tìm tất cả các biến trong vế trái (antecedents)
     for premise in antecedents:
         find_vars(premise)
 
-    # 2. QuÃ©t tÃ¬m táº¥t cáº£ cÃ¡c biáº¿n trong váº¿ pháº£i (consequent)
+    # 2. Quét tìm tất cả các biến trong vế phải (consequent)
     find_vars(consequent)
 
-    # 3. Táº¡o táº­p phÃ©p tháº¿ theta Ä‘á»ƒ Ä‘á»•i tÃªn. VÃ­ dá»¥: {'x': 'x_1', 'y': 'y_1'}
+    # 3. Tạo tập phép thế theta để đổi tên. Ví dụ: {'x': 'x_1', 'y': 'y_1'}
     theta = {v: f"{v}{suffix}" for v in variables}
 
-    # 4. Ãp dá»¥ng phÃ©p tháº¿ theta vÃ o luáº­t cÅ© Ä‘á»ƒ táº¡o ra luáº­t má»›i
+    # 4. Áp dụng phép thế theta vào luật cũ để tạo ra luật mới
     new_antecedents = tuple(subst(theta, p) for p in antecedents)
     new_consequent = subst(theta, consequent)
 

@@ -1,11 +1,11 @@
 ﻿"""SAT-based solver for Futoshiki using PySAT.
 
-Module nÃ y chuyá»ƒn bá»™ má»‡nh Ä‘á» CNF tá»« FOLKB sang SAT solver vÃ  giáº£i tá»± Ä‘á»™ng.
-Luá»“ng xá»­ lÃ½ chÃ­nh:
-1) Sinh KB á»Ÿ dáº¡ng CNF clauses báº±ng FOLKB.
-2) ÄÆ°a toÃ n bá»™ clauses vÃ o Glucose3.
-3) Náº¿u SAT, giáº£i mÃ£ model -> lÆ°á»›i N x N hoÃ n chá»‰nh.
-4) Náº¿u UNSAT, tráº£ vá» None.
+Module này chuyển bộ mệnh đề CNF từ FOLKB sang SAT solver và giải tự động.
+Luồng xử lý chính:
+1) Sinh KB ở dạng CNF clauses bằng FOLKB.
+2) Đưa toàn bộ clauses vào Glucose3.
+3) Nếu SAT, giải mã model -> lưới N x N hoàn chỉnh.
+4) Nếu UNSAT, trả về None.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ from src.kb.fol_kb import FOLKB
 
 try:
     from pysat.solvers import Glucose3
-except Exception:  # pragma: no cover - phá»¥ thuá»™c mÃ´i trÆ°á»ng cÃ i Ä‘áº·t
+except Exception:  # pragma: no cover - phụ thuộc môi trường cài đặt
     Glucose3 = None
 
 
@@ -25,33 +25,33 @@ StepCallback = Callable[[int, int, int], None]
 
 
 class SATSolver:
-    """Giáº£i Futoshiki báº±ng SAT solver (PySAT/Glucose3).
+    """Giải Futoshiki bằng SAT solver (PySAT/Glucose3).
 
-    Class nÃ y tuÃ¢n theo cÃ¹ng interface solve(step_callback) nhÆ° cÃ¡c solver khÃ¡c
-    Ä‘á»ƒ cÃ³ thá»ƒ tÃ­ch há»£p vÃ o GUI manager khi cáº§n.
+    Class này tuân theo cùng interface solve(step_callback) như các solver khác
+    để có thể tích hợp vào GUI manager khi cần.
     """
 
     def __init__(self, puzzle: PuzzleCase) -> None:
-        """Khá»Ÿi táº¡o SAT solver tá»« dá»¯ liá»‡u puzzle.
+        """Khởi tạo SAT solver từ dữ liệu puzzle.
 
         Args:
-            puzzle: PuzzleCase chá»©a n, grid vÃ  cÃ¡c rÃ ng buá»™c báº¥t Ä‘áº³ng thá»©c.
+            puzzle: PuzzleCase chứa n, grid và các ràng buộc bất đẳng thức.
         """
         self.puzzle = puzzle
         self.n = puzzle.n
         self.kb_builder = FOLKB(puzzle)
 
     def solve(self, step_callback: Optional[StepCallback] = None) -> Optional[List[List[int]]]:
-        """Giáº£i puzzle báº±ng SAT vÃ  tráº£ vá» lÆ°á»›i hoÃ n chá»‰nh.
+        """Giải puzzle bằng SAT và trả về lưới hoàn chỉnh.
 
         Args:
-            step_callback: Callback tÃ¹y chá»n Ä‘á»ƒ stream tá»«ng bÆ°á»›c gÃ¡n giÃ¡ trá»‹.
+            step_callback: Callback tùy chọn để stream từng bước gán giá trị.
 
         Returns:
-            LÆ°á»›i N x N náº¿u SAT, hoáº·c None náº¿u UNSAT/khÃ´ng thá»ƒ giáº£i.
+            Lưới N x N nếu SAT, hoặc None nếu UNSAT/không thể giải.
 
         Raises:
-            RuntimeError: Náº¿u PySAT chÆ°a Ä‘Æ°á»£c cÃ i hoáº·c cÃ³ lá»—i ná»™i bá»™ khi gá»i solver.
+            RuntimeError: Nếu PySAT chưa được cài hoặc có lỗi nội bộ khi gọi solver.
         """
         if Glucose3 is None:
             raise RuntimeError(
@@ -82,16 +82,16 @@ class SATSolver:
             raise RuntimeError(f"SAT solving failed: {exc}") from exc
 
     def _decode_model_to_grid(self, model: Sequence[int]) -> List[List[int]]:
-        """Giáº£i mÃ£ model SAT thÃ nh lÆ°á»›i káº¿t quáº£ N x N.
+        """Giải mã model SAT thành lưới kết quả N x N.
 
-        CÃ´ng thá»©c encode trong FOLKB:
+        Công thức encode trong FOLKB:
             ID = i * N^2 + j * N + v
-        vá»›i:
-            i, j thuá»™c [0, N-1]
-            v thuá»™c [1, N]
-            ID thuá»™c [1, N^3]
+        với:
+            i, j thuộc [0, N-1]
+            v thuộc [1, N]
+            ID thuộc [1, N^3]
 
-        á»ž Ä‘Ã¢y ta decode ngÆ°á»£c tá»« literal dÆ°Æ¡ng trong model.
+        Ở đây ta decode ngược từ literal dương trong model.
         """
         grid: List[List[int]] = [[0 for _ in range(self.n)] for _ in range(self.n)]
 
@@ -99,13 +99,13 @@ class SATSolver:
             if literal <= 0:
                 continue
             if literal > self.n ** 3:
-                # Biáº¿n ngoÃ i miá»n Futoshiki, bá» qua Ä‘á»ƒ an toÃ n.
+                # Biến ngoài miền Futoshiki, bỏ qua để an toàn.
                 continue
 
             row, col, value = self._decode_variable_id(literal)
             grid[row][col] = value
 
-        # Kiá»ƒm tra háº­u Ä‘iá»u kiá»‡n: táº¥t cáº£ Ã´ pháº£i Ä‘Æ°á»£c gÃ¡n.
+        # Kiểm tra hậu điều kiện: tất cả ô phải được gán.
         for row in range(self.n):
             for col in range(self.n):
                 if grid[row][col] == 0:
@@ -116,9 +116,9 @@ class SATSolver:
         return grid
 
     def _decode_variable_id(self, variable_id: int) -> tuple[int, int, int]:
-        """Decode biáº¿n nguyÃªn -> (row, col, value).
+        """Decode biến nguyên -> (row, col, value).
 
-        Biáº¿n Ä‘á»•i ngÆ°á»£c tá»«:
+        Biến đổi ngược từ:
             ID = i * N^2 + j * N + v
         """
         zero_based_id = variable_id - 1

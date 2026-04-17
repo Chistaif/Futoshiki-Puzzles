@@ -7,21 +7,21 @@ StepCallback = Callable[[int, int, int], None]
 
 
 class Backtracking:
-    """Giáº£i bÃ i toÃ¡n Futoshiki báº±ng thuáº­t toÃ¡n quay lui (Backtracking).
+    """Giải bài toán Futoshiki bằng thuật toán quay lui (Backtracking).
 
-    Ã tÆ°á»Ÿng chÃ­nh:
-    - Duyá»‡t tá»«ng Ã´ trá»‘ng trÃªn báº£ng
-    - Thá»­ gÃ¡n cÃ¡c giÃ¡ trá»‹ tá»« 1 â†’ n
-    - Kiá»ƒm tra há»£p lá»‡ (row, column, inequality)
-    - Náº¿u há»£p lá»‡ thÃ¬ tiáº¿p tá»¥c Ä‘á»‡ quy
-    - Náº¿u khÃ´ng thÃ¬ quay lui (backtrack)
+    Ý tưởng chính:
+    - Duyệt từng ô trống trên bảng.
+    - Thử gán các giá trị từ 1 -> n.
+    - Kiểm tra hợp lệ (row, column, inequality).
+    - Nếu hợp lệ thì tiếp tục đệ quy.
+    - Nếu không thì quay lui (backtrack).
     """
 
     def __init__(self, puzzle: PuzzleCase):
-        """Khá»Ÿi táº¡o solver tá»« má»™t PuzzleCase.
+        """Khởi tạo solver từ một PuzzleCase.
 
-        - Sao chÃ©p grid Ä‘á»ƒ trÃ¡nh lÃ m thay Ä‘á»•i dá»¯ liá»‡u gá»‘c
-        - LÆ°u láº¡i cÃ¡c rÃ ng buá»™c ngang vÃ  dá»c
+        - Sao chép grid để tránh làm thay đổi dữ liệu gốc.
+        - Lưu lại các ràng buộc ngang và dọc.
         """
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
@@ -29,94 +29,94 @@ class Backtracking:
         self.vertical = puzzle.vertical
 
     def is_valid(self, row: int, col: int, val: int) -> bool:
-        """Kiá»ƒm tra xem cÃ³ thá»ƒ Ä‘áº·t giÃ¡ trá»‹ val vÃ o Ã´ (row, col) hay khÃ´ng.
+        """Kiểm tra xem có thể đặt giá trị val vào ô (row, col) hay không.
 
-        CÃ¡c Ä‘iá»u kiá»‡n cáº§n thá»a:
-        1. KhÃ´ng trÃ¹ng trong hÃ ng
-        2. KhÃ´ng trÃ¹ng trong cá»™t
-        3. Thá»a rÃ ng buá»™c ngang (< hoáº·c >)
-        4. Thá»a rÃ ng buá»™c dá»c (< hoáº·c >)
+        Các điều kiện cần thỏa:
+        1. Không trùng trong hàng.
+        2. Không trùng trong cột.
+        3. Thỏa ràng buộc ngang (< hoặc >).
+        4. Thỏa ràng buộc dọc (< hoặc >).
         """
 
         # ========================
-        # 1. Kiá»ƒm tra hÃ ng (row)
+        # 1. Kiểm tra hàng (row)
         # ========================
         for c in range(self.n):
             if self.grid[row][c] == val:
                 return False
 
         # ========================
-        # 2. Kiá»ƒm tra cá»™t (column)
+        # 2. Kiểm tra cột (column)
         # ========================
         for r in range(self.n):
             if self.grid[r][col] == val:
                 return False
 
         # ========================
-        # 3. Kiá»ƒm tra rÃ ng buá»™c ngang
+        # 3. Kiểm tra ràng buộc ngang
         # ========================
 
-        # Ã” bÃªn pháº£i (row, col+1)
+        # Ô bên phải (row, col+1)
         if col < self.n - 1:
             sign = self.horizontal[row][col]
 
-            # Chá»‰ kiá»ƒm tra khi cÃ³ rÃ ng buá»™c vÃ  Ã´ bÃªn pháº£i Ä‘Ã£ cÃ³ giÃ¡ trá»‹
+            # Chỉ kiểm tra khi có ràng buộc và ô bên phải đã có giá trị
             if sign != 0 and self.grid[row][col + 1] != 0:
-                # sign == 1: Ã´ trÃ¡i < Ã´ pháº£i
+                # sign == 1: ô trái < ô phải
                 if sign == 1 and not (val < self.grid[row][col + 1]):
                     return False
-                # sign == -1: Ã´ trÃ¡i > Ã´ pháº£i
+                # sign == -1: ô trái > ô phải
                 if sign == -1 and not (val > self.grid[row][col + 1]):
                     return False
 
-        # Ã” bÃªn trÃ¡i (row, col-1)
+        # Ô bên trái (row, col-1)
         if col > 0:
             sign = self.horizontal[row][col - 1]
 
             if sign != 0 and self.grid[row][col - 1] != 0:
-                # sign == 1: Ã´ trÃ¡i < Ã´ pháº£i
+                # sign == 1: ô trái < ô phải
                 if sign == 1 and not (self.grid[row][col - 1] < val):
                     return False
-                # sign == -1: Ã´ trÃ¡i > Ã´ pháº£i
+                # sign == -1: ô trái > ô phải
                 if sign == -1 and not (self.grid[row][col - 1] > val):
                     return False
 
         # ========================
-        # 4. Kiá»ƒm tra rÃ ng buá»™c dá»c
+        # 4. Kiểm tra ràng buộc dọc
         # ========================
 
-        # Ã” phÃ­a dÆ°á»›i (row+1, col)
+        # Ô phía dưới (row+1, col)
         if row < self.n - 1:
             sign = self.vertical[row][col]
 
             if sign != 0 and self.grid[row + 1][col] != 0:
-                # sign == 1: Ã´ trÃªn < Ã´ dÆ°á»›i
+                # sign == 1: ô trên < ô dưới
                 if sign == 1 and not (val < self.grid[row + 1][col]):
                     return False
-                # sign == -1: Ã´ trÃªn > Ã´ dÆ°á»›i
+                # sign == -1: ô trên > ô dưới
                 if sign == -1 and not (val > self.grid[row + 1][col]):
                     return False
 
-        # Ã” phÃ­a trÃªn (row-1, col)
+        # Ô phía trên (row-1, col)
         if row > 0:
             sign = self.vertical[row - 1][col]
 
             if sign != 0 and self.grid[row - 1][col] != 0:
-                # sign == 1: Ã´ trÃªn < Ã´ dÆ°á»›i
+                # sign == 1: ô trên < ô dưới
                 if sign == 1 and not (self.grid[row - 1][col] < val):
                     return False
-                # sign == -1: Ã´ trÃªn > Ã´ dÆ°á»›i
+                # sign == -1: ô trên > ô dưới
                 if sign == -1 and not (self.grid[row - 1][col] > val):
                     return False
 
         return True
 
     def find_empty(self):
-        """TÃ¬m má»™t Ã´ trá»‘ng (giÃ¡ trá»‹ = 0) trÃªn báº£ng.
+        """Tìm một ô trống (giá trị = 0) trên bảng.
 
-        Tráº£ vá»:
-        - (row, col) náº¿u cÃ²n Ã´ trá»‘ng
-        - None náº¿u báº£ng Ä‘Ã£ Ä‘áº§y
+        Trả về:
+        - (row, col) nếu còn ô trống.
+        - None nếu bảng đã đầy.
         """
         for i in range(self.n):
             for j in range(self.n):
@@ -125,32 +125,32 @@ class Backtracking:
         return None
 
     def backtrack(self, step_callback: Optional[StepCallback] = None) -> bool:
-        """Thuáº­t toÃ¡n quay lui chÃ­nh.
+        """Thuật toán quay lui chính.
 
-        Quy trÃ¬nh:
-        - TÃ¬m Ã´ trá»‘ng
-        - Thá»­ táº¥t cáº£ giÃ¡ trá»‹ há»£p lá»‡
-        - Náº¿u Ä‘áº·t Ä‘Æ°á»£c thÃ¬ gá»i Ä‘á»‡ quy
-        - Náº¿u tháº¥t báº¡i thÃ¬ quay lui
+        Quy trình:
+        - Tìm ô trống.
+        - Thử tất cả giá trị hợp lệ.
+        - Nếu đặt được thì gọi đệ quy.
+        - Nếu thất bại thì quay lui.
         """
 
         empty = self.find_empty()
 
-        # Náº¿u khÃ´ng cÃ²n Ã´ trá»‘ng â†’ Ä‘Ã£ giáº£i xong
+        # Nếu không còn ô trống -> đã giải xong
         if not empty:
             return True
 
         i, j = empty
 
-        # Thá»­ cÃ¡c giÃ¡ trá»‹ tá»« 1 â†’ n
+        # Thử các giá trị từ 1 -> n
         for val in range(1, self.n + 1):
             if self.is_valid(i, j, val):
-                # GÃ¡n thá»­
+                # Gán thử
                 self.grid[i][j] = val
                 if step_callback is not None:
                     step_callback(i, j, val)
 
-                # Äá»‡ quy
+                # Đệ quy
                 if self.backtrack(step_callback):
                     return True
 
@@ -162,11 +162,11 @@ class Backtracking:
         return False
 
     def solve(self, step_callback: Optional[StepCallback] = None):
-        """HÃ m public Ä‘á»ƒ giáº£i puzzle.
+        """Hàm public để giải puzzle.
 
-        Tráº£ vá»:
-        - grid Ä‘Ã£ giáº£i náº¿u cÃ³ nghiá»‡m
-        - None náº¿u khÃ´ng cÃ³ nghiá»‡m
+        Trả về:
+        - grid đã giải nếu có nghiệm.
+        - None nếu không có nghiệm.
         """
         if self.backtrack(step_callback):
             return self.grid

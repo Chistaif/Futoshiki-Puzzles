@@ -1,10 +1,10 @@
 ﻿from src.domain.puzzle import PuzzleCase
 
 class FOLKB:
-    """Tá»± Ä‘á»™ng táº¡o CNF cho KB"""
+    """Tự động tạo CNF cho KB."""
 
     def __init__(self, puzzle: PuzzleCase):
-        """Khá»Ÿi táº¡o ban Ä‘áº§u. List clause sáº½ lÆ°u toÃ n bá»™ má»‡nh Ä‘á» Ä‘Ã£ táº¡o"""
+        """Khởi tạo ban đầu. List clause sẽ lưu toàn bộ mệnh đề đã tạo."""
         self.n = puzzle.n
         self.grid = puzzle.grid
         self.horizontal = puzzle.horizontal
@@ -13,16 +13,16 @@ class FOLKB:
 
     def var(self, i: int, j: int, v: int) -> int:
         """
-        Ãnh xáº¡ (i, j, v) thÃ nh sá»‘ int ID, ID lÃ  sá»‘ thá»© tá»± cá»§a má»‡nh Ä‘á» trong clause
+        Ánh xạ (i, j, v) thành số nguyên ID, là số thứ tự của mệnh đề trong clause.
         i, j = [0, n-1]
         v = [1, n]
         => ID = [1, N^3]
-        CÃ´ng thá»©c: ID = i*N^2 + j*N + v
+        Công thức: ID = i*N^2 + j*N + v
         """
         return i*self.n*self.n + j*self.n + v
 
     def cell_at_least_one(self):
-        """A1: Má»—i Ã´ chá»©a Ã­t nháº¥t má»™t giÃ¡ trá»‹"""
+        """A1: Mỗi ô chứa ít nhất một giá trị."""
         for i in range(self.n):
             for j in range(self.n):
                 clause = []
@@ -31,7 +31,7 @@ class FOLKB:
                 self.clauses.append(clause)
 
     def cell_at_most_one(self):
-        """A2: Má»—i Ã´ cÃ³ nhiá»u nháº¥t má»™t giÃ¡ trá»‹"""
+        """A2: Mỗi ô có nhiều nhất một giá trị."""
         for i in range(self.n):
             for j in range(self.n):
                 for a in range(1, self.n + 1):
@@ -39,7 +39,7 @@ class FOLKB:
                         self.clauses.append([-self.var(i, j, a), -self.var(i, j, b)])
 
     def row_constraints(self):
-        """A3: CÃ¡c Ã´ trÃªn cÃ¹ng má»™t hÃ ng khÃ´ng Ä‘Æ°á»£c cÃ¹ng giÃ¡ trá»‹"""
+        """A3: Các ô trên cùng một hàng không được cùng giá trị."""
         for i in range(self.n):
             for v in range(1, self.n + 1):
                 for j1 in range(self.n):
@@ -47,7 +47,7 @@ class FOLKB:
                         self.clauses.append([-self.var(i, j1, v), -self.var(i, j2, v)])
     
     def col_constraints(self):
-        """A4: CÃ¡c Ã´ trÃªn cÃ¹ng má»™t cá»™t khÃ´ng Ä‘Æ°á»£c cÃ¹ng giÃ¡ trá»‹"""
+        """A4: Các ô trên cùng một cột không được cùng giá trị."""
         for j in range(self.n):
             for v in range(1, self.n + 1):
                 for i1 in range(self.n):
@@ -64,14 +64,14 @@ class FOLKB:
             for j in range(self.n - 1):
                 sign = self.horizontal[i][j]
 
-                if sign == 0: continue # Bá» qua náº¿u khÃ´ng cÃ³ rÃ ng buá»™c
+                if sign == 0: continue # Bỏ qua nếu không có ràng buộc
                 
                 for a in range(1, self.n + 1):
                     for b in range(1, self.n + 1):
-                        # Dáº¥u <
+                        # Dấu <
                         if sign == 1 and not (a < b):
                             self.clauses.append([-self.var(i, j, a), -self.var(i, j + 1, b)])
-                        # Dáº¥u >
+                        # Dấu >
                         elif sign == -1 and not (a > b):
                             self.clauses.append([-self.var(i, j, a), -self.var(i, j + 1, b)])
     
@@ -84,27 +84,27 @@ class FOLKB:
             for j in range(self.n):
                 sign = self.vertical[i][j]
 
-                if sign == 0: continue # Bá» qua náº¿u khÃ´ng cÃ³ rÃ ng buá»™c
+                if sign == 0: continue # Bỏ qua nếu không có ràng buộc
                 
                 for a in range(1, self.n + 1):
                     for b in range(1, self.n + 1):
-                        # Dáº¥u ^
+                        # Dấu ^
                         if sign == 1 and not (a < b):
                             self.clauses.append([-self.var(i, j, a), -self.var(i + 1, j, b)])
-                        # Dáº¥u v
+                        # Dấu v
                         elif sign == -1 and not (a > b):
                             self.clauses.append([-self.var(i, j, a), -self.var(i + 1, j, b)])
     
     def given_constraints(self):
-        """A9: Ã” Ä‘Æ°á»£c gÃ¡n giÃ¡ trá»‹ cho sáºµn thÃ¬ cá»‘ Ä‘á»‹nh láº¡i"""
+        """A9: Ô được gán giá trị cho sẵn thì cố định lại."""
         for i in range(self.n):
             for j in range(self.n):
                 if self.grid[i][j] != 0:
                     v = self.grid[i][j]
                     self.clauses.append([self.var(i, j, v)])
 
-    """A10: Ä‘Ã£ Ä‘Æ°á»£c encode ngáº§m => khÃ´ng thá»ƒ cÃ³ value ngoÃ i [1..N]"""
-    """A11: Ä‘Ã£ cÃ³ not(a < b) thay vÃ¬ less"""
+    """A10: đã được encode ngầm => không thể có value ngoài [1..N]."""
+    """A11: đã có not(a < b) thay vì less."""
 
     def build_KB(self):
         self.clauses = []

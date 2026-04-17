@@ -15,37 +15,37 @@ class ForwardBacktrackSolver(Solver):
 
     def solve(self, puzzle, step_callback: Optional[StepCallback] = None):
         """
-        Thá»±c hiá»‡n giáº£i bÃ i toÃ¡n báº±ng thuáº­t toÃ¡n DPLL (Forward Chaining + Backtracking)
-        Method nÃ y Ä‘Æ°á»£c gá»i bá»Ÿi self.run(puzzle) cá»§a class Solver
+        Thực hiện giải bài toán bằng thuật toán DPLL (Forward Chaining + Backtracking).
+        Method này được gọi bởi self.run(puzzle) của class Solver.
         """
-        # 1. Khá»Ÿi táº¡o Knowledge Base tá»« puzzle
+        # 1. Khởi tạo Knowledge Base từ puzzle
         self.kb = FOLKB(puzzle)
         clauses = self.kb.build_KB()
 
-        # DÃ¹ng frozenset Ä‘á»ƒ clause immutable, trÃ¡nh mutation in-place
+        # Dùng frozenset để clause immutable, tránh mutation in-place
         clauses = [list(c) for c in clauses]
 
-        # 2. Táº¡o agenda tá»« cÃ¡c unit clause ban Ä‘áº§u
+        # 2. Tạo agenda từ các unit clause ban đầu
         agenda = deque()
         for clause in clauses:
             if len(clause) == 1:
                 agenda.append(clause[0])
 
-        # 3. Báº¯t Ä‘áº§u thuáº­t toÃ¡n Ä‘á»‡ quy DPLL
+        # 3. Bắt đầu thuật toán đệ quy DPLL
         result_model = self._dpll(clauses, agenda, {}, step_callback)
 
         return self._translate_model_to_grid(result_model) if result_model else None
 
     # --------------------------------------------------------------------------
-    # HÃ m tiá»‡n Ã­ch ná»™i bá»™
+    # Hàm tiện ích nội bộ
     # --------------------------------------------------------------------------
 
     @staticmethod
     def _build_index(clauses):
         """
-        XÃ¢y dá»±ng láº¡i chá»‰ má»¥c literal -> danh sÃ¡ch clause chá»©a nÃ³.
-        Gá»i sau má»—i láº§n clauses thay Ä‘á»•i (deepcopy khi backtrack).
-        ÄÃ¢y lÃ  fix cho Bug #1: literal_to_clauses khÃ´ng Ä‘Æ°á»£c Ä‘á»“ng bá»™ vá»›i clauses.
+        Xây dựng lại chỉ mục literal -> danh sách clause chứa nó.
+        Gọi sau mỗi lần clauses thay đổi (deepcopy khi backtrack).
+        Đây là fix cho Bug #1: literal_to_clauses không được đồng bộ với clauses.
         """
         index = defaultdict(list)
         for clause in clauses:
@@ -54,35 +54,35 @@ class ForwardBacktrackSolver(Solver):
         return index
 
     # --------------------------------------------------------------------------
-    # Thuáº­t toÃ¡n DPLL
+    # Thuật toán DPLL
     # --------------------------------------------------------------------------
 
     def _dpll(self, clauses, agenda, model, step_callback: Optional[StepCallback] = None):
-        """Äá»‡ quy DPLL: propagate -> chá»n biáº¿n -> branch -> backtrack"""
-        # Fix #2: Chá»‰ Ä‘áº¿m node táº¡i Ä‘Ã¢y (má»—i láº§n branch = 1 node)
+        """Đệ quy DPLL: propagate -> chọn biến -> branch -> backtrack."""
+        # Fix #2: Chỉ đếm node tại đây (mỗi lần branch = 1 node)
         self.increment_nodes()
 
-        # BÆ°á»›c 1: Unit Propagation (Forward Chaining)
-        # Rebuild index tá»« clauses hiá»‡n táº¡i Ä‘á»ƒ Ä‘áº£m báº£o Ä‘á»“ng bá»™
+        # Bước 1: Unit Propagation (Forward Chaining)
+        # Rebuild index từ clauses hiện tại để đảm bảo đồng bộ
         literal_to_clauses = self._build_index(clauses)
         if not self._propagate(clauses, literal_to_clauses, agenda, model, step_callback):
             return None
 
-        # BÆ°á»›c 2: Kiá»ƒm tra hoÃ n thÃ nh â€” Fix #3: truyá»n clauses vÃ o MRV
+        # Bước 2: Kiểm tra hoàn thành — Fix #3: truyền clauses vào MRV
         unassigned_var = self._get_unassigned_variable(clauses, model)
         if unassigned_var is None:
-            return model  # Táº¥t cáº£ biáº¿n Ä‘Ã£ gÃ¡n -> thÃ nh cÃ´ng
+            return model  # Tất cả biến đã gán -> thành công
 
-        # BÆ°á»›c 3: Backtracking â€” deepcopy cáº£ clauses láº«n model
+        # Bước 3: Backtracking — deepcopy cả clauses lẫn model
         saved_clauses = copy.deepcopy(clauses)
         saved_model = model.copy()
 
-        # Thá»­ nhÃ¡nh True (literal dÆ°Æ¡ng) qua agenda Ä‘á»ƒ propagate xá»­ lÃ½ Ä‘áº§y Ä‘á»§
+        # Thử nhánh True (literal dương) qua agenda để propagate xử lý đầy đủ
         result = self._dpll(clauses, deque([unassigned_var]), model, step_callback)
         if result:
             return result
 
-        # Quay lui, thá»­ nhÃ¡nh False (literal Ã¢m = True)
+        # Quay lui, thử nhánh False (literal âm = True)
         if step_callback is not None:
             for literal in self._model_positive_deltas(model, saved_model):
                 decoded = self._decode_positive_literal(literal)
@@ -91,23 +91,23 @@ class ForwardBacktrackSolver(Solver):
                 row, col, _ = decoded
                 step_callback(row, col, 0)
 
-        clauses[:] = saved_clauses   # restore in-place Ä‘á»ƒ giá»¯ reference
+        clauses[:] = saved_clauses   # restore in-place để giữ reference
         model.clear()
         model.update(saved_model)
         neg_var = -unassigned_var
-        # KhÃ´ng gÃ¡n trá»±c tiáº¿p model; Ä‘á»ƒ propagate gÃ¡n vÃ  simplify nháº¥t quÃ¡n
+        # Không gán trực tiếp model; để propagate gán và simplify nhất quán
         return self._dpll(clauses, deque([neg_var]), model, step_callback)
 
     def _propagate(self, clauses, literal_to_clauses, agenda, model, step_callback: Optional[StepCallback] = None):
         """
-        Unit Propagation â€” cá»‘t lÃµi Forward Chaining.
-        Nháº­n literal_to_clauses Ä‘Æ°á»£c build tá»« clauses hiá»‡n táº¡i
+        Unit Propagation — cốt lõi Forward Chaining.
+        Nhận literal_to_clauses được build từ clauses hiện tại.
         """
         while agenda:
             p = agenda.popleft()
             neg_p = -p
 
-            # MÃ¢u thuáº«n: p vÃ  -p cÃ¹ng Ä‘Æ°á»£c gÃ¡n True
+            # Mâu thuẫn: p và -p cùng được gán True
             if neg_p in model:
                 return False
 
@@ -119,18 +119,18 @@ class ForwardBacktrackSolver(Solver):
                         row, col, value = decoded
                         step_callback(row, col, value)
 
-                # XÃ©t cÃ¡c clause chá»©a -p: bá» -p ra khá»i clause (Ä‘Ã£ biáº¿t False)
+                # Xét các clause chứa -p: bỏ -p ra khỏi clause (đã biết False)
                 for clause in list(literal_to_clauses.get(neg_p, [])):
                     if neg_p in clause:
                         clause.remove(neg_p)
                         if len(clause) == 0:
-                            return False  # Clause rá»—ng -> mÃ¢u thuáº«n
+                            return False  # Clause rỗng -> mâu thuẫn
                         if len(clause) == 1:
                             unit = clause[0]
                             if unit not in model and unit not in agenda:
                                 agenda.append(unit)
 
-                # XoÃ¡ cÃ¡c clause chá»©a p (Ä‘Ã£ thoáº£ mÃ£n, khÃ´ng cáº§n xÃ©t ná»¯a)
+                # Xóa các clause chứa p (đã thỏa mãn, không cần xét nữa)
                 for clause in list(literal_to_clauses.get(p, [])):
                     if clause in clauses:
                         clauses.remove(clause)
@@ -159,7 +159,7 @@ class ForwardBacktrackSolver(Solver):
 
     def _get_unassigned_variable(self, clauses, model):
         """
-        Clause ngáº¯n nháº¥t = bá»‹ rÃ ng buá»™c nhiá»u nháº¥t -> giáº£i quyáº¿t sá»›m giáº£m backtrack.
+        Clause ngắn nhất = bị ràng buộc nhiều nhất -> giải quyết sớm giảm backtrack.
         """
         shortest = None
         for clause in clauses:
@@ -169,15 +169,15 @@ class ForwardBacktrackSolver(Solver):
             if shortest is None or len(unassigned) < len(shortest):
                 shortest = unassigned
 
-        # Tráº£ vá» literal dÆ°Æ¡ng Ä‘áº§u tiÃªn trong clause ngáº¯n nháº¥t
+        # Trả về literal dương đầu tiên trong clause ngắn nhất
         if shortest:
             lit = shortest[0]
             return lit if lit > 0 else -lit
 
-        return None  # Táº¥t cáº£ Ä‘Ã£ gÃ¡n
+        return None  # Tất cả đã gán
 
     def _translate_model_to_grid(self, model):
-        """Chuyá»ƒn Model logic sang máº£ng 2 chiá»u Puzzle"""
+        """Chuyển Model logic sang mảng 2 chiều Puzzle."""
         grid = [[0] * self.kb.n for _ in range(self.kb.n)]
         for i in range(self.kb.n):
             for j in range(self.kb.n):

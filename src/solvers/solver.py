@@ -8,9 +8,9 @@ class Solver(ABC):
     """
     Base class for all solvers.
 
-    Má»¥c tiÃªu:
-    - Äá»‹nh nghÄ©a interface chung
-    - Má»i class con trong solvers Ä‘á»u pháº£i káº¿ thá»«a vÃ  implement hÃ m solve
+    Mục tiêu:
+    - Định nghĩa interface chung.
+    - Mọi class con trong solvers đều phải kế thừa và implement hàm solve.
     """
 
     def __init__(self, name: Optional[str] = None):
@@ -23,7 +23,7 @@ class Solver(ABC):
 
     def run(self, puzzle) -> Dict[str, Any]:
         """
-        Wrapper cho má»i solver
+        Wrapper cho mọi solver.
         """
         print(f"{self.name} is Solving ...")
 
@@ -48,27 +48,27 @@ class Solver(ABC):
             "memory": self.memory_used,
         }
 
-    # TODO: cÃ¡c thuáº­t toÃ¡n solver khÃ¡c pháº£i implement hÃ m nÃ y
+    # TODO: các thuật toán solver khác phải implement hàm này
     @abstractmethod
     def solve(self, puzzle):
         """
-        Method chÃ­nh Ä‘á»ƒ cÃ¡c solver implement
+        Method chính để các solver implement.
 
         Input:
-            puzzle (domain.Puzzle) (sáº½ refactor project sau)
+            puzzle (domain.Puzzle) (sẽ refactor project sau)
         Output:
-            - tráº¡ng thÃ¡i solved (grid)
-            - hoáº¡c None náº¿u k giáº£i Ä‘c thÃ¬
+            - trạng thái solved (grid)
+            - hoặc None nếu không giải được
         """
         pass
 
     def reset_metrics(self):
-        """Reset láº¡i metrics trÆ°á»›c má»—i láº§n cháº¡y"""
+        """Reset lại metrics trước mỗi lần chạy."""
         self.execution_time = 0
         self.node_expanded = 0
         self.memory_used = None
 
     def increment_nodes(self, count: int = 1):
-        """DÃ¹ng trong search algorithm"""
+        """Dùng trong search algorithm."""
         self.node_expanded += count
 
