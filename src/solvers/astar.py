@@ -28,10 +28,10 @@ class AStarSolver:
 	- A state is a partial assignment of the board.
 	- 0 means unassigned.
 
-	Cost model (kept exactly as requested):
-	- g(s): number of filled cells.
-	- h(s): number of empty domains after constraint propagation.
-	  If at least one domain is empty, h(s) = inf (dead state).
+	Cost model:
+	- g(s): number of assignments made from the initial state.
+	- h(s): number of unassigned cells U(s).
+	  If AC-3 detects inconsistency (empty domain), h(s) = inf (dead state).
 	- f(s) = g(s) + h(s).
 	"""
 
@@ -57,6 +57,7 @@ class AStarSolver:
 
 		self.cells: List[Cell] = [(row, col) for row in range(self.n) for col in range(self.n)]
 		self.neighbors: Dict[Cell, Set[Cell]] = self._build_neighbors()
+		self.initial_filled_cells = len(self.givens)
 
 	def solve(self, step_callback: Optional[StepCallback] = None) -> Optional[List[List[int]]]:
 		"""Return solved grid or None if no solution exists."""
@@ -69,7 +70,7 @@ class AStarSolver:
 		if start_h == float("inf"):
 			return None
 
-		start_g = self._count_filled_cells(start_state)
+		start_g = self._count_assignments_from_initial(start_state)
 		pq: List[Tuple[float, float, int, int, State, DomainMap]] = []
 		serial = count()
 		heapq.heappush(
@@ -108,7 +109,7 @@ class AStarSolver:
 				return solved_grid
 
 			row, col = target_cell
-			current_g = self._count_filled_cells(state)
+			current_g = self._count_assignments_from_initial(state)
 
 			for value in sorted(domains[target_cell]):
 				if not self._is_value_consistent(state, row, col, value):
@@ -151,12 +152,13 @@ class AStarSolver:
 		return None
 
 	def evaluate_heuristic(self, state: State) -> Tuple[float, DomainMap]:
-		"""Compute h(s) from domain propagation.
+		"""Compute h(s) with admissible unassigned-cells heuristic.
 
 		AC-3 mode:
 		- Build domains from current partial assignment.
 		- Run AC-3 to propagate row/column + inequality constraints.
-		- h(s) = number of empty domains; inf if any domain is empty.
+		- If any domain becomes empty, state is inconsistent and h(s)=inf.
+		- Otherwise, h(s) = number of unassigned cells U(s).
 
 		Non-AC-3 mode (fallback):
 		- Skip AC-3 and rely on MRV only for variable ordering.
@@ -167,11 +169,10 @@ class AStarSolver:
 			if not self._ac3(domains):
 				return float("inf"), domains
 
-		empty_domain_count = sum(1 for values in domains.values() if len(values) == 0)
-		if empty_domain_count > 0:
+		if any(len(values) == 0 for values in domains.values()):
 			return float("inf"), domains
 
-		return float(empty_domain_count), domains
+		return float(self._count_unassigned_cells(state)), domains
 
 	def _initialize_domains(self, state: State) -> DomainMap:
 		domains: DomainMap = {}
@@ -384,8 +385,14 @@ class AStarSolver:
 					return False
 		return True
 
+	def _count_unassigned_cells(self, state: State) -> int:
+		return sum(1 for row in state for value in row if value == 0)
+
 	def _count_filled_cells(self, state: State) -> int:
 		return sum(1 for row in state for value in row if value != 0)
+
+	def _count_assignments_from_initial(self, state: State) -> int:
+		return self._count_filled_cells(state) - self.initial_filled_cells
 
 	def _assign_value(self, state: State, row: int, col: int, value: int) -> State:
 		grid = [list(line) for line in state]

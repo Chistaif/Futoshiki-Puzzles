@@ -1,5 +1,6 @@
 \documentclass[12pt, a4paper]{article}
 \usepackage{graphicx}
+\usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{makecell}
@@ -29,13 +30,36 @@
 \newpage
 \section{Introduction}
 \subsection{Project Overview}
-[Chèn nội dung tại đây]
+This project implements a complete pipeline for solving \textit{Futoshiki} logic puzzles in the context of CSC14003 --- Introduction to Artificial Intelligence. A Futoshiki puzzle is an \(N \times N\) grid where each row and column must contain numbers from \(1\) to \(N\) without repetition, while inequality symbols between adjacent cells must also be satisfied.
+
+Our system is organized into clear modules: data I/O, domain modeling, knowledge-base construction, solver implementations, and a GUI for interaction and visualization. The codebase supports loading multiple input instances, running selected solving methods, and exporting results in a reproducible format. This report focuses on two representative approaches: A* search and SAT-based solving.
 
 \subsection{Objectives and Scope}
-[Chèn nội dung tại đây]
+The main objectives of this project are:
+\begin{itemize}
+	\item Model Futoshiki constraints correctly and consistently for both search-based and logic-based solving.
+	\item Implement and evaluate AI solving strategies with readable, modular, and reusable code.
+	\item Build a practical interface for testing puzzle instances of different sizes and difficulties.
+	\item Compare algorithm behavior through solution quality and computational efficiency.
+\end{itemize}
+
+Scope of this report:
+\begin{itemize}
+	\item We present the overall project context.
+	\item In the algorithm chapter, we provide detailed descriptions for only two methods: \textbf{A* Search} and \textbf{SAT Solver (using a SAT library)}.
+	\item Other implemented methods are part of the codebase but are not expanded in detail here.
+\end{itemize}
 
 \subsection{Team Information}
-[Chèn nội dung tại đây]
+The project was completed by four students from the Faculty of Information Technology, University of Science --- VNU-HCM:
+\begin{itemize}
+	\item Nguyễn Khánh Toàn --- MSSV: 24127252
+	\item Nguyễn Chí Tài --- MSSV: 24127529
+	\item Nguyễn Ngọc Thiên --- MSSV: 24127545
+	\item Phan Quang Tiến --- MSSV: 24127250
+\end{itemize}
+
+The team collaborated on problem modeling, implementation, testing, and report writing, with task assignments summarized in the planning section.
 
 \input{Planning}
 \input{Problem Formulation}
