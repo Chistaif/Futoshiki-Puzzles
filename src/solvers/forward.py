@@ -1,8 +1,7 @@
-﻿from src.solvers.solver import Solver
+from src.solvers.solver import Solver
 from src.kb.fol_kb import FOLKB
 from collections import defaultdict, deque
-import copy
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 
 StepCallback = Callable[[int, int, int], None]
@@ -12,28 +11,36 @@ class ForwardBacktrackSolver(Solver):
     def __init__(self):
         super().__init__(name="Forward Chaining (DPLL)")
         self.kb = None
+        self.max_var = 0
+        self.literal_frequency = None
 
     def solve(self, puzzle, step_callback: Optional[StepCallback] = None):
-        """
-        Thực hiện giải bài toán bằng thuật toán DPLL (Forward Chaining + Backtracking).
-        Method này được gọi bởi self.run(puzzle) của class Solver.
-        """
-        # 1. Khởi tạo Knowledge Base từ puzzle
         self.kb = FOLKB(puzzle)
         clauses = self.kb.build_KB()
-
-        # Dùng frozenset để clause immutable, tránh mutation in-place
         clauses = [list(c) for c in clauses]
 
-        # 2. Tạo agenda từ các unit clause ban đầu
+        self.max_var = self.kb.n ** 3
+        literal_to_clauses = self._build_index(clauses)
+        self.literal_frequency = self._count_literal_frequency(clauses)
+        model = [0] * (self.max_var + 1)
+
         agenda = deque()
+        agenda_set = set()
         for clause in clauses:
             if len(clause) == 1:
-                agenda.append(clause[0])
+                unit = clause[0]
+                if unit not in agenda_set:
+                    agenda.append(unit)
+                    agenda_set.add(unit)
 
-        # 3. Bắt đầu thuật toán đệ quy DPLL
-        result_model = self._dpll(clauses, agenda, {}, step_callback)
-
+        result_model = self._dpll(
+            clauses,
+            literal_to_clauses,
+            agenda,
+            agenda_set,
+            model,
+            step_callback,
+        )
         return self._translate_model_to_grid(result_model) if result_model else None
 
     # --------------------------------------------------------------------------
@@ -42,147 +49,200 @@ class ForwardBacktrackSolver(Solver):
 
     @staticmethod
     def _build_index(clauses):
-        """
-        Xây dựng lại chỉ mục literal -> danh sách clause chứa nó.
-        Gọi sau mỗi lần clauses thay đổi (deepcopy khi backtrack).
-        Đây là fix cho Bug #1: literal_to_clauses không được đồng bộ với clauses.
-        """
         index = defaultdict(list)
         for clause in clauses:
             for literal in clause:
                 index[literal].append(clause)
         return index
 
+    @staticmethod
+    def _count_literal_frequency(clauses):
+        frequency = defaultdict(int)
+        for clause in clauses:
+            for literal in clause:
+                frequency[abs(literal)] += 1
+        return frequency
+
     # --------------------------------------------------------------------------
     # Thuật toán DPLL
     # --------------------------------------------------------------------------
 
-    def _dpll(self, clauses, agenda, model, step_callback: Optional[StepCallback] = None):
-        """Đệ quy DPLL: propagate -> chọn biến -> branch -> backtrack."""
-        # Fix #2: Chỉ đếm node tại đây (mỗi lần branch = 1 node)
+    def _dpll(
+        self,
+        clauses,
+        literal_to_clauses,
+        agenda,
+        agenda_set,
+        model,
+        step_callback: Optional[StepCallback] = None,
+    ):
         self.increment_nodes()
 
-        # Bước 1: Unit Propagation (Forward Chaining)
-        # Rebuild index từ clauses hiện tại để đảm bảo đồng bộ
-        literal_to_clauses = self._build_index(clauses)
-        if not self._propagate(clauses, literal_to_clauses, agenda, model, step_callback):
+        if not self._propagate(clauses, literal_to_clauses, agenda, agenda_set, model, step_callback):
             return None
 
-        # Bước 2: Kiểm tra hoàn thành — Fix #3: truyền clauses vào MRV
-        unassigned_var = self._get_unassigned_variable(clauses, model)
+        unassigned_var = self._get_unassigned_variable(model)
         if unassigned_var is None:
-            return model  # Tất cả biến đã gán -> thành công
+            return model
 
-        # Bước 3: Backtracking — deepcopy cả clauses lẫn model
-        saved_clauses = copy.deepcopy(clauses)
         saved_model = model.copy()
 
-        # Thử nhánh True (literal dương) qua agenda để propagate xử lý đầy đủ
-        result = self._dpll(clauses, deque([unassigned_var]), model, step_callback)
+        result = self._dpll(
+            clauses,
+            literal_to_clauses,
+            deque([unassigned_var]),
+            {unassigned_var},
+            model,
+            step_callback,
+        )
         if result:
             return result
 
-        # Quay lui, thử nhánh False (literal âm = True)
         if step_callback is not None:
-            for literal in self._model_positive_deltas(model, saved_model):
-                decoded = self._decode_positive_literal(literal)
-                if decoded is None:
-                    continue
-                row, col, _ = decoded
-                step_callback(row, col, 0)
+            for var_id in range(1, self.max_var + 1):
+                if model[var_id] != saved_model[var_id] and model[var_id] == 1:
+                    decoded = self._decode_literal(var_id)
+                    if decoded is not None:
+                        step_callback(decoded[0], decoded[1], 0)
 
-        clauses[:] = saved_clauses   # restore in-place để giữ reference
-        model.clear()
-        model.update(saved_model)
+        model[:] = saved_model
+
         neg_var = -unassigned_var
-        # Không gán trực tiếp model; để propagate gán và simplify nhất quán
-        return self._dpll(clauses, deque([neg_var]), model, step_callback)
+        return self._dpll(
+            clauses,
+            literal_to_clauses,
+            deque([neg_var]),
+            {neg_var},
+            model,
+            step_callback,
+        )
 
-    def _propagate(self, clauses, literal_to_clauses, agenda, model, step_callback: Optional[StepCallback] = None):
-        """
-        Unit Propagation — cốt lõi Forward Chaining.
-        Nhận literal_to_clauses được build từ clauses hiện tại.
-        """
+    def _propagate(
+        self,
+        clauses,
+        literal_to_clauses,
+        agenda,
+        agenda_set,
+        model,
+        step_callback: Optional[StepCallback] = None,
+    ):
         while agenda:
             p = agenda.popleft()
-            neg_p = -p
-
-            # Mâu thuẫn: p và -p cùng được gán True
-            if neg_p in model:
+            agenda_set.discard(p)
+            if self._is_false_literal(p, model):
                 return False
 
-            if p not in model:
-                model[p] = True
-                if step_callback is not None:
-                    decoded = self._decode_positive_literal(p)
-                    if decoded is not None:
-                        row, col, value = decoded
-                        step_callback(row, col, value)
+            if not self._is_true_literal(p, model):
+                self._assign_literal(p, model)
+                if step_callback is not None and p > 0:
+                    decoded = self._decode_literal(p)
+                    if decoded:
+                        step_callback(decoded[0], decoded[1], decoded[2])
 
-                # Xét các clause chứa -p: bỏ -p ra khỏi clause (đã biết False)
-                for clause in list(literal_to_clauses.get(neg_p, [])):
-                    if neg_p in clause:
-                        clause.remove(neg_p)
-                        if len(clause) == 0:
-                            return False  # Clause rỗng -> mâu thuẫn
-                        if len(clause) == 1:
-                            unit = clause[0]
-                            if unit not in model and unit not in agenda:
-                                agenda.append(unit)
+            for clause in literal_to_clauses.get(-p, []):
+                is_satisfied = False
+                unassigned_count = 0
+                unit_literal = 0
 
-                # Xóa các clause chứa p (đã thỏa mãn, không cần xét nữa)
-                for clause in list(literal_to_clauses.get(p, [])):
-                    if clause in clauses:
-                        clauses.remove(clause)
+                for lit in clause:
+                    if self._is_true_literal(lit, model):
+                        is_satisfied = True
+                        break
+                    if not self._is_assigned(abs(lit), model):
+                        unassigned_count += 1
+                        unit_literal = lit
+                        if unassigned_count > 1:
+                            break
 
+                if is_satisfied:
+                    continue
+                if unassigned_count == 0:
+                    return False
+                if unassigned_count == 1 and unit_literal not in agenda_set:
+                    agenda.append(unit_literal)
+                    agenda_set.add(unit_literal)
         return True
 
-    @staticmethod
-    def _model_positive_deltas(model, saved_model):
-        current_positive = {lit for lit in model if lit > 0 and model.get(lit) is True}
-        saved_positive = {lit for lit in saved_model if lit > 0 and saved_model.get(lit) is True}
-        return current_positive - saved_positive
+    def _assign_literal(self, literal, model):
+        model[abs(literal)] = 1 if literal > 0 else -1
 
-    def _decode_positive_literal(self, literal):
+    def _is_assigned(self, var_id, model):
+        return model[var_id] != 0
+
+    def _is_true_literal(self, literal, model):
+        if literal > 0:
+            return model[abs(literal)] == 1
+        return model[abs(literal)] == -1
+
+    def _is_false_literal(self, literal, model):
+        if literal > 0:
+            return model[abs(literal)] == -1
+        return model[abs(literal)] == 1
+
+    def _decode_literal(self, literal: int):
         if literal <= 0:
             return None
-        max_var = self.kb.n ** 3
+        n = self.kb.n
+        max_var = n ** 3
         if literal > max_var:
             return None
 
-        var_id = literal - 1
-        row = var_id // (self.kb.n * self.kb.n)
-        rem = var_id % (self.kb.n * self.kb.n)
-        col = rem // self.kb.n
-        value = rem % self.kb.n + 1
+        zero_based = literal - 1
+        row = zero_based // (n * n)
+        rem = zero_based % (n * n)
+        col = rem // n
+        value = rem % n + 1
         return row, col, value
 
-    def _get_unassigned_variable(self, clauses, model):
-        """
-        Clause ngắn nhất = bị ràng buộc nhiều nhất -> giải quyết sớm giảm backtrack.
-        """
-        shortest = None
-        for clause in clauses:
-            unassigned = [lit for lit in clause if lit not in model and -lit not in model]
-            if not unassigned:
-                continue
-            if shortest is None or len(unassigned) < len(shortest):
-                shortest = unassigned
+    def _get_unassigned_variable(self, model):
+        n = self.kb.n
+        best_literal = None
+        best_domain_size = None
+        best_frequency = -1
 
-        # Trả về literal dương đầu tiên trong clause ngắn nhất
-        if shortest:
-            lit = shortest[0]
-            return lit if lit > 0 else -lit
+        for i in range(n):
+            for j in range(n):
+                cell_assigned = False
+                for v in range(1, n + 1):
+                    if model[self.kb.var(i, j, v)] == 1:
+                        cell_assigned = True
+                        break
+                if cell_assigned:
+                    continue
 
-        return None  # Tất cả đã gán
+                domain_literals = []
+                for v in range(1, n + 1):
+                    var_id = self.kb.var(i, j, v)
+                    if model[var_id] != -1:
+                        domain_literals.append(var_id)
+
+                if not domain_literals:
+                    continue
+
+                domain_size = len(domain_literals)
+                literal = max(domain_literals, key=lambda lit: self.literal_frequency.get(lit, 0))
+                frequency = self.literal_frequency.get(literal, 0)
+
+                if best_domain_size is None:
+                    best_domain_size = domain_size
+                    best_literal = literal
+                    best_frequency = frequency
+                elif domain_size < best_domain_size:
+                    best_domain_size = domain_size
+                    best_literal = literal
+                    best_frequency = frequency
+                elif domain_size == best_domain_size and frequency > best_frequency:
+                    best_literal = literal
+                    best_frequency = frequency
+
+        return best_literal
 
     def _translate_model_to_grid(self, model):
-        """Chuyển Model logic sang mảng 2 chiều Puzzle."""
         grid = [[0] * self.kb.n for _ in range(self.kb.n)]
         for i in range(self.kb.n):
             for j in range(self.kb.n):
                 for v in range(1, self.kb.n + 1):
-                    if model.get(self.kb.var(i, j, v)) is True:
+                    if model[self.kb.var(i, j, v)] == 1:
                         grid[i][j] = v
                         break
         return grid
