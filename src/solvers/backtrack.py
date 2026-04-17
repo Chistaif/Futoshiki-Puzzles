@@ -1,12 +1,13 @@
 ﻿import copy
 from src.domain.puzzle import PuzzleCase
+from src.solvers.solver import Solver
 from typing import Callable, Optional
 
 
 StepCallback = Callable[[int, int, int], None]
 
 
-class Backtracking:
+class Backtracking(Solver):
     """Giải bài toán Futoshiki bằng thuật toán quay lui (Backtracking).
 
     Ý tưởng chính:
@@ -23,6 +24,7 @@ class Backtracking:
         - Sao chép grid để tránh làm thay đổi dữ liệu gốc.
         - Lưu lại các ràng buộc ngang và dọc.
         """
+        super().__init__(name="Backtracking")
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.horizontal = puzzle.horizontal
@@ -134,6 +136,7 @@ class Backtracking:
         - Nếu thất bại thì quay lui.
         """
 
+        self.increment_nodes()
         empty = self.find_empty()
 
         # Nếu không còn ô trống -> đã giải xong

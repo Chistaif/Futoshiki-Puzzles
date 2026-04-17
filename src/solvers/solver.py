@@ -1,7 +1,12 @@
 ﻿from abc import ABC, abstractmethod
+import csv
 import tracemalloc
 import time
+from pathlib import Path
 from typing import Any, Dict, Optional
+
+CSV_FILE_NAME = "solved.csv"
+CSV_FIELDNAMES = ["solver", "solved", "time", "node_expanded", "memory"]
 
 
 class Solver(ABC):
@@ -21,16 +26,17 @@ class Solver(ABC):
         self.node_expanded: int = 0
         self.memory_used: Optional[float] = None
 
-    def run(self, puzzle) -> Dict[str, Any]:
+    def run(self, *args, **kwargs) -> Dict[str, Any]:
         """
         Wrapper cho mọi solver.
         """
         print(f"{self.name} is Solving ...")
 
+        self.reset_metrics()
         tracemalloc.start()
         start_time = time.perf_counter()
 
-        solution = self.solve(puzzle)
+        solution = self.solve(*args, **kwargs)
 
         end_time = time.perf_counter()
         current, peak = tracemalloc.get_traced_memory()
@@ -38,6 +44,16 @@ class Solver(ABC):
 
         self.execution_time = end_time - start_time
         self.memory_used = peak / 1024 / 1024  # MB
+
+        metrics = {
+            "solver": self.name,
+            "solved": solution is not None,
+            "time": self.execution_time,
+            "node_expanded": self.node_expanded,
+            "memory": self.memory_used,
+        }
+
+        self._append_metrics_to_csv(metrics)
 
         print(f"{self.name} Done")
         return {
@@ -47,6 +63,15 @@ class Solver(ABC):
             "node_expanded": self.node_expanded,
             "memory": self.memory_used,
         }
+
+    def _append_metrics_to_csv(self, metrics: Dict[str, Any]) -> None:
+        file_path = Path(CSV_FILE_NAME)
+        write_header = not file_path.exists()
+        with file_path.open("a", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELDNAMES)
+            if write_header:
+                writer.writeheader()
+            writer.writerow({key: metrics.get(key) for key in CSV_FIELDNAMES})
 
     # TODO: các thuật toán solver khác phải implement hàm này
     @abstractmethod

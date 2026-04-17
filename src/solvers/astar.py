@@ -13,6 +13,7 @@ from itertools import count
 from typing import Callable, Deque, Dict, List, Optional, Set, Tuple
 
 from src.domain.puzzle import PuzzleCase
+from src.solvers.solver import Solver
 
 
 StepCallback = Callable[[int, int, int], None]
@@ -21,7 +22,7 @@ State = Tuple[Tuple[int, ...], ...]
 DomainMap = Dict[Cell, Set[int]]
 
 
-class AStarSolver:
+class AStarSolver(Solver):
 	"""Solve Futoshiki with A* + AC-3 heuristic.
 
 	State definition:
@@ -41,6 +42,7 @@ class AStarSolver:
 		use_ac3: bool = True,
 		emit_search_trace: bool = False,
 	):
+		super().__init__(name="A* Search")
 		self.n = puzzle.n
 		self.grid = copy.deepcopy(puzzle.grid)
 		self.horizontal = puzzle.horizontal
@@ -87,6 +89,7 @@ class AStarSolver:
 			if state in closed:
 				continue
 
+			self.increment_nodes()
 			closed.add(state)
 			if self._is_goal_state(state):
 				solved_grid = self._state_to_grid(state)

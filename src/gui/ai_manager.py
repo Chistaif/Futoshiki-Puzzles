@@ -143,19 +143,19 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
-                solved_grid = solver.solve(step_callback=on_step)
+                solved_grid = solver.run(step_callback=on_step)["solution"]
             elif solver_name == "sat":
                 solver = SATSolver(case)
-                solved_grid = solver.solve(step_callback=on_step)
+                solved_grid = solver.run(step_callback=on_step)["solution"]
             elif solver_name == "backward":
                 solver = BackwardSolver()
-                solved_grid = solver.solve(case, step_callback=on_step)
+                solved_grid = solver.run(case, step_callback=on_step)["solution"]
             elif solver_name == "forward":
                 solver = ForwardBacktrackSolver()
-                solved_grid = solver.solve(case, step_callback=on_step)
+                solved_grid = solver.run(case, step_callback=on_step)["solution"]
             else:
                 solver = Backtracking(case)
-                solved_grid = solver.solve(step_callback=on_step)
+                solved_grid = solver.run(step_callback=on_step)["solution"]
 
             if cancel_event.is_set():
                 event_queue.put(("cancelled", None))

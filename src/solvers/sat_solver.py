@@ -14,6 +14,7 @@ from typing import Callable, List, Optional, Sequence
 
 from src.domain.puzzle import PuzzleCase
 from src.kb.fol_kb import FOLKB
+from src.solvers.solver import Solver
 
 try:
     from pysat.solvers import Glucose3
@@ -24,7 +25,7 @@ except Exception:  # pragma: no cover - phụ thuộc môi trường cài đặt
 StepCallback = Callable[[int, int, int], None]
 
 
-class SATSolver:
+class SATSolver(Solver):
     """Giải Futoshiki bằng SAT solver (PySAT/Glucose3).
 
     Class này tuân theo cùng interface solve(step_callback) như các solver khác
@@ -37,6 +38,7 @@ class SATSolver:
         Args:
             puzzle: PuzzleCase chứa n, grid và các ràng buộc bất đẳng thức.
         """
+        super().__init__(name="SAT Solver")
         self.puzzle = puzzle
         self.n = puzzle.n
         self.kb_builder = FOLKB(puzzle)
