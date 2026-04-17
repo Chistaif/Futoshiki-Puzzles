@@ -1,7 +1,7 @@
 ﻿import copy
 from typing import Callable, Optional
 
-from src.kb.horn_converter import HornConverter
+from src.kb.horn_converter import HornClause, HornConverter
 from src.solvers.solver import Solver
 from src.solvers.utils import standardize_variables, subst, unify
 
@@ -29,10 +29,37 @@ class BackwardSolver(Solver):
         return None
 
     def _is_valid_by_logic(self, kb, i: int, j: int, v: int) -> bool:
-        goal = ("not_val", (i, j, v))
-        for _ in self.fol_bc_ask(kb, goal):
-            return False
-        return True
+        """Kiểm tra val(i,j,v) có nhất quán với KB không bằng cách BC.
+
+        Cách làm đúng theo yêu cầu đề (chứng minh dựa vào val(i,j,?)):
+        1. Thêm val(i,j,v) vào KB như một GIẢI THUYẾT (hypothesis).
+        2. BC mục tiêu: chứng minh not_val(i,j,v) từ KB + giả thuyết.
+           - Chứng minh được  → giả thuyết tự mâu thuẫn → v KHÔNG hợp lệ.
+           - Không chứng minh → KB nhất quán với val(i,j,v) → v HỢP LỆ.
+        3. Rút giả thuyết ra khỏi KB (không ảnh hưởng đến bước sau).
+
+        Vì sao cần thêm giả thuyết trước?
+        Khi val(i,j,v) có trong KB, các rule sau mới kích hoạt được:
+          - cell_uniqueness: val(i,j,v) ∧ neq(v,v2) → not_val(i,j,v2)
+          - horizontal:      less_h(i,j) ∧ val(i,j,v) → not_val(i,j+1,v2)
+          - vertical:        less_v(i,j) ∧ val(i,j,v) → not_val(i+1,j,v2)
+        Nếu bỏ qua bước này, BC chỉ dựa vào các ô đã gán trước đó,
+        bỏ sót mâu thuẫn phát sinh từ chính ô (i,j) với các ô lân cận.
+        """
+        # Bước 1: Giả thuyết — gán tạm val(i,j,v) vào KB
+        hypothesis = HornClause(head=("val", (i, j, v)))
+        kb.facts.append(hypothesis)
+
+        # Bước 2: BC — chứng minh not_val(i,j,v) có dẫn đến mâu thuẫn không?
+        contradiction = False
+        for _ in self.fol_bc_ask(kb, ("not_val", (i, j, v))):
+            contradiction = True
+            break
+
+        # Bước 3: Rút giả thuyết ra (dù kết quả thế nào)
+        kb.facts.pop()
+
+        return not contradiction
 
     @staticmethod
     def _clause_to_rule(clause):
@@ -92,7 +119,8 @@ class BackwardSolver(Solver):
             self.grid[i][j] = v
             if step_callback is not None:
                 step_callback(i, j, v)
-            kb.facts.append(("val", (i, j, v)))
+            # Gán chính thức vào KB (dùng HornClause để nhất quán với _is_valid_by_logic)
+            kb.facts.append(HornClause(head=("val", (i, j, v))))
 
             if self._backtrack(kb, step_callback):
                 return True
@@ -103,4 +131,3 @@ class BackwardSolver(Solver):
             kb.facts.pop()
 
         return False
-
