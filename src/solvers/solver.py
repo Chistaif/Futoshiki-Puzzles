@@ -1,0 +1,99 @@
+﻿from abc import ABC, abstractmethod
+import csv
+import tracemalloc
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+CSV_FILE_NAME = "solved.csv"
+CSV_FIELDNAMES = ["solver", "solved", "time", "node_expanded", "memory"]
+
+
+class Solver(ABC):
+    """
+    Base class for all solvers.
+
+    Mục tiêu:
+    - Định nghĩa interface chung.
+    - Mọi class con trong solvers đều phải kế thừa và implement hàm solve.
+    """
+
+    def __init__(self, name: Optional[str] = None):
+        self.name = name or self.__class__.__name__
+
+        # metrics
+        self.execution_time: float = 0.0
+        self.node_expanded: int = 0
+        self.memory_used: Optional[float] = None
+
+    def run(self, *args, **kwargs) -> Dict[str, Any]:
+        """
+        Wrapper cho mọi solver.
+        """
+        print(f"{self.name} is Solving ...")
+
+        self.reset_metrics()
+        tracemalloc.start()
+        start_time = time.perf_counter()
+
+        solution = self.solve(*args, **kwargs)
+
+        end_time = time.perf_counter()
+        current, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+
+        self.execution_time = end_time - start_time
+        self.memory_used = peak / 1024 / 1024  # MB
+
+        metrics = {
+            "solver": self.name,
+            "solved": solution is not None,
+            "time": self.execution_time,
+            "node_expanded": self.node_expanded,
+            "memory": self.memory_used,
+        }
+
+        self._append_metrics_to_csv(metrics)
+
+        print(f"{self.name} Done")
+        return {
+            "solver": self.name,
+            "solution": solution,
+            "time": self.execution_time,
+            "node_expanded": self.node_expanded,
+            "memory": self.memory_used,
+        }
+
+    def _append_metrics_to_csv(self, metrics: Dict[str, Any]) -> None:
+        file_path = Path(CSV_FILE_NAME)
+        write_header = not file_path.exists()
+        with file_path.open("a", newline="", encoding="utf-8") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELDNAMES)
+            if write_header:
+                writer.writeheader()
+            writer.writerow({key: metrics.get(key) for key in CSV_FIELDNAMES})
+
+    # TODO: các thuật toán solver khác phải implement hàm này
+    @abstractmethod
+    def solve(self, puzzle):
+        """
+        Method chính để các solver implement.
+
+        Input:
+            puzzle (domain.Puzzle) (sẽ refactor project sau)
+        Output:
+            - trạng thái solved (grid)
+            - hoặc None nếu không giải được
+        """
+        pass
+
+    def reset_metrics(self):
+        """Reset lại metrics trước mỗi lần chạy."""
+        self.execution_time = 0
+        self.node_expanded = 0
+        self.memory_used = None
+
+    def increment_nodes(self, count: int = 1):
+        """Dùng trong search algorithm."""
+        self.node_expanded += count
+

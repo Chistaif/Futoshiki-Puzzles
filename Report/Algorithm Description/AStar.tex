@@ -1,0 +1,127 @@
+\subsection{A* Search}
+\subsubsection{Idea}
+In this project, each search state is a partial Futoshiki assignment, where value \(0\) denotes an unfilled cell. The A* solver expands states according to
+\[
+f(s) = g(s) + h(s),
+\]
+with the following cost model:
+\begin{itemize}
+\item Each action assigns exactly one value to one empty cell, so each step has unit cost.
+\item \(g(s)\) is the number of assignments already made from the initial state.
+\item \(h(s)\) estimates the minimum number of assignments still needed to reach a complete solution.
+\end{itemize}
+
+The transition model assigns one value to one unfilled cell. To reduce branching, the solver selects the next variable by MRV (Minimum Remaining Values), i.e., the cell with the smallest candidate domain. Before evaluating child states, domains are filtered by row/column uniqueness and inequality constraints; optional AC-3 propagation is then applied to remove unsupported values.
+
+This design combines informed search (A*) with CSP-style filtering (MRV + AC-3), making the exploration significantly more directed than naive uninformed expansion.
+
+\subsubsection{Heuristic Function and Admissibility}
+Let \(U(s)\) be the number of unassigned cells in state \(s\). We choose:
+\[
+h(s)=U(s).
+\]
+
+Equivalently, if \(N\) is board size and \(A(s)\) is number of assigned cells, then
+\[
+h(s)=N^2-A(s).
+\]
+
+Feasibility pruning with AC-3 is used as a separate consistency check: if propagation yields an empty domain, the state is discarded as inconsistent.
+
+\textbf{Why this heuristic is admissible:}
+\begin{itemize}
+\item From a partial state with \(U(s)\) empty cells, any complete solution must assign all those \(U(s)\) cells.
+\item Each action can assign at most one cell.
+\item Therefore the true remaining cost \(h^*(s)\) satisfies \(h^*(s) \ge U(s)=h(s)\).
+\end{itemize}
+
+Hence \(h(s)\) never overestimates the optimal remaining cost, so it is admissible.
+
+\textbf{Consistency (monotonicity):}
+\begin{itemize}
+\item After one valid assignment \(s\rightarrow s'\), we have \(U(s')=U(s)-1\).
+\item With unit step cost \(c(s,s')=1\):
+\[
+h(s)=U(s)=1+U(s')=c(s,s')+h(s').
+\]
+\item So \(h\) is consistent as well.
+\end{itemize}
+
+\subsubsection{Pseudocode}
+\begin{algorithm}[H]
+\caption{A* for Futoshiki (with MRV and AC-3)}
+\begin{algorithmic}[1]
+\State Build initial state \(s_0\) from puzzle
+\State Validate givens; if invalid then return \textbf{failure}
+\State Compute domains and heuristic for \(s_0\)
+\State Initialize \textit{closed} as an empty set
+\State Initialize \textit{best\_g}[\(s_0\)]
+\State Push \(s_0\) into priority queue by key \((f, h, -g)\)
+\While{priority queue not empty}
+	\State Pop best state \(s\)
+	\If{\(s \in\) \textit{closed}} \State \textbf{continue} \EndIf
+	\State Add \(s\) to \textit{closed}
+	\If{\(s\) is goal} \Return solved grid \EndIf
+	\State Select unassigned cell \((r,c)\) by MRV
+	\For{each value \(v\) in domain\((r,c)\)}
+		\If{assigning \(v\) is consistent}
+			\State Create child state \(s'\)
+			\If{\(s' \in\) \textit{closed}} \State \textbf{continue} \EndIf
+			\State Compute \(g(s')\)
+			\If{\textit{best\_g}[\(s'\)] exists and \(g(s')\) is not better}
+				\State \textbf{continue}
+			\EndIf
+			\State Recompute domains (and AC-3 if enabled)
+			\If{no empty domain in \(s'\)}
+				\State Set \(g(s') = g(s)+1\), evaluate \(h(s')\), \(f(s')=g(s')+h(s')\)
+				\State Update \textit{best\_g}[\(s'\)]
+				\State Push \(s'\) into priority queue
+			\EndIf
+		\EndIf
+	\EndFor
+\EndWhile
+\State \Return \textbf{failure}
+\end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Illustration}
+Consider a \(4 \times 4\) instance. After loading givens and inequalities, the solver:
+\begin{enumerate}
+	\item Initializes domains for all empty cells.
+	\item Runs consistency filtering; if AC-3 is enabled, unsupported values are removed transitively.
+	\item Chooses the most constrained empty cell by MRV.
+	\item Expands candidate assignments in priority order according to \(f=g+h\).
+\end{enumerate}
+
+Example progression:
+\begin{itemize}
+	\item State \(s_0\): 4 cells fixed from clues, several constrained inequalities.
+	\item State \(s_1\): assign value to the MRV cell (domain size 1 or 2), causing further domain reduction.
+	\item State \(s_2\): another forced assignment appears after propagation.
+	\item Goal state: all cells filled, row/column uniqueness and inequalities all satisfied.
+\end{itemize}
+
+This illustrates how propagation shrinks the search tree before deep branching happens.
+
+\subsubsection{Algorithm Analysis}
+Let \(N\) be puzzle size (grid \(N^2\) cells), and let \(b\) be average branching factor after filtering.
+
+\textbf{Time complexity (worst case):}
+\begin{itemize}
+	\item Search may still be exponential in the number of unassigned cells, roughly \(O(b^d)\) with depth \(d \le N^2\).
+	\item AC-3 propagation on each evaluated state adds polynomial overhead; practical runtime is dominated by number of expanded states.
+\end{itemize}
+
+\textbf{Space complexity:}
+\begin{itemize}
+	\item A* stores open/closed states and domain data, so memory usage is higher than depth-first methods.
+	\item In worst case, space is also exponential in search depth.
+\end{itemize}
+
+\textbf{Practical behavior:}
+\begin{itemize}
+	\item The heuristic \(h(s)=U(s)\) is admissible and easy to justify, which is suitable for the project requirement on heuristic correctness.
+	\item Because this heuristic is simple, most practical speedup comes from MRV ordering and AC-3 pruning.
+	\item The \textit{closed} set avoids re-expanding visited states, and \textit{best\_g} avoids keeping inferior paths to the same state.
+	\item The method is robust for medium-sized puzzles, but memory pressure can increase for larger or weakly constrained instances.
+\end{itemize}
