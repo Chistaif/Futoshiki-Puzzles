@@ -17,7 +17,21 @@
 \usepackage{caption}
 \captionsetup[figure]{font=small,labelfont=bf}
 \captionsetup[algorithm]{font=small,labelfont=bf}
+\usepackage{fancyhdr}
 \usepackage{hyperref}
+\fancyhf{} % Xóa hết các cài đặt header/footer mặc định
+
+\setlength{\headheight}{26pt} % Tăng độ cao header để chứa được 2 dòng
+\addtolength{\topmargin}{-14pt} % Bù lại khoảng cách lề trên
+% Cấu hình Header
+\lhead{Project 2} % Bên trái: Report Title
+\rhead{UNIVERSITY OF SCIENCE, VNU-HCM\\
+CSC14003} % Bên phải: Trường + Môn học
+% Cấu hình Footer (ví dụ số trang ở giữa)
+\cfoot{\thepage}
+% Độ dày đường kẻ ngang ở header và footer
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
 
 \setstretch{1.15}
 \setlist{nosep}
@@ -25,9 +39,21 @@
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
 
 \begin{document}
+\pagestyle{empty}
 \input{cover}
+\clearpage
+
+\pagenumbering{roman}
 \tableofcontents
 \newpage
+\listoftables
+\newpage
+\listoffigures
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\pagestyle{fancy}
+
 \section{Introduction}
 \subsection{Project Overview}
 This project implements a complete pipeline for solving \textit{Futoshiki} logic puzzles in the context of CSC14003 --- Introduction to Artificial Intelligence. A Futoshiki puzzle is an \(N \times N\) grid where each row and column must contain numbers from \(1\) to \(N\) without repetition, while inequality symbols between adjacent cells must also be satisfied.
