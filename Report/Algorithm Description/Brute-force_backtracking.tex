@@ -7,36 +7,42 @@ Backtracking is an optimized version of brute-force. Instead of generating all p
 
 \subsubsection{Pseudocode}
 \textbf{Brute-force:}
-\begin{verbatim}
-function BRUTE_FORCE(grid):
-    empty_cells = list of all empty positions
-    for each possible assignment of values to empty_cells:
-        fill grid with assignment
-        if is_valid(grid):
-            return grid
-    return failure
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{Brute-force}
+\begin{algorithmic}[1]
+\State \textbf{function} BRUTE\_FORCE(grid):
+\State \hspace{1.5em} empty\_cells = list of all empty positions
+\State \hspace{1.5em} \textbf{for} each possible assignment of values to empty\_cells:
+\State \hspace{3em} fill grid with assignment
+\State \hspace{3em} \textbf{if} is\_valid(grid):
+\State \hspace{4.5em} \textbf{return} grid
+\State \hspace{1.5em} \textbf{return} failure
+\end{algorithmic}
+\end{algorithm}
 
 \textbf{Backtracking:}
-\begin{verbatim}
-function BACKTRACK(grid):
-    if no empty cell:
-        return grid
-
-    (row, col) = find an empty cell
-
-    for value from 1 to N:
-        if is_valid(row, col, value):
-            grid[row][col] = value
-
-            result = BACKTRACK(grid)
-            if result != failure:
-                return result
-
-            grid[row][col] = empty
-
-    return failure
-\end{verbatim}
+\begin{algorithm}[H]
+\caption{Backtracking}
+\begin{algorithmic}[1]
+\State \textbf{function} BACKTRACK(grid):
+\State \hspace{1.5em} \textbf{if} no empty cell:
+\State \hspace{3em} \textbf{return} grid
+\State
+\State \hspace{1.5em} (row, col) = find an empty cell
+\State
+\State \hspace{1.5em} \textbf{for} value from 1 to N:
+\State \hspace{3em} \textbf{if} is\_valid(row, col, value):
+\State \hspace{4.5em} grid[row][col] = value
+\State
+\State \hspace{4.5em} result = BACKTRACK(grid)
+\State \hspace{4.5em} \textbf{if} result != failure:
+\State \hspace{6em} \textbf{return} result
+\State
+\State \hspace{4.5em} grid[row][col] = empty
+\State
+\State \hspace{1.5em} \textbf{return} failure
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Illustration}
 Consider a $4 \times 4$ Futoshiki puzzle with some empty cells. 
