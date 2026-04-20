@@ -11,10 +11,13 @@
 \usepackage[T5]{fontenc}
 \usepackage[vietnamese, main=english]{babel}
 \usepackage{tabularx}
+\usepackage{array}
+\usepackage{ragged2e}
 \usepackage{setspace}
 \usepackage{titlesec}
 \usepackage{enumitem}
 \usepackage{caption}
+\usepackage[none]{hyphenat}
 \captionsetup[figure]{font=small,labelfont=bf}
 \captionsetup[algorithm]{font=small,labelfont=bf}
 \usepackage{fancyhdr}
@@ -37,6 +40,9 @@ CSC14003} % Bên phải: Trường + Môn học
 \setlist{nosep}
 \titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\emergencystretch=2em
 
 \begin{document}
 \pagestyle{empty}
