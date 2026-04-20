@@ -6,7 +6,15 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 CSV_FILE_NAME = "solved.csv"
-CSV_FIELDNAMES = ["solver", "solved", "time", "node_expanded", "memory"]
+CSV_FIELDNAMES = ["input_file", "solver", "solved", "time", "node_expanded", "memory"]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+MAX_NODES_DEFAULT = 10000000
+MAX_NODES_BRUTE_FORCE = 100000
+MAX_NODES_BACKTRACKING = 1500000
+MAX_NODES_BACKWARD_CHAINING = 1500000
+MAX_NODES_FORWARD_CHAINING = 5000000
+MAX_NODES_ASTAR = 5000000
 
 
 class Solver(ABC):
@@ -20,19 +28,23 @@ class Solver(ABC):
 
     def __init__(self, name: Optional[str] = None):
         self.name = name or self.__class__.__name__
+        self.max_nodes = MAX_NODES_DEFAULT
+        self.input_file: Optional[str] = None
 
         # metrics
         self.execution_time: float = 0.0
         self.node_expanded: int = 0
         self.memory_used: Optional[float] = None
+        self.stop_reason: Optional[str] = None
 
-    def run(self, *args, **kwargs) -> Dict[str, Any]:
+    def run(self, *args, input_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         """
         Wrapper cho mọi solver.
         """
         print(f"{self.name} is Solving ...")
 
         self.reset_metrics()
+        self.input_file = input_file
         tracemalloc.start()
         start_time = time.perf_counter()
 
@@ -46,6 +58,7 @@ class Solver(ABC):
         self.memory_used = peak / 1024 / 1024  # MB
 
         metrics = {
+            "input_file": self.input_file or "",
             "solver": self.name,
             "solved": solution is not None,
             "time": self.execution_time,
@@ -62,10 +75,11 @@ class Solver(ABC):
             "time": self.execution_time,
             "node_expanded": self.node_expanded,
             "memory": self.memory_used,
+            "stop_reason": self.stop_reason,
         }
 
     def _append_metrics_to_csv(self, metrics: Dict[str, Any]) -> None:
-        file_path = Path(CSV_FILE_NAME)
+        file_path = PROJECT_ROOT / CSV_FILE_NAME
         write_header = not file_path.exists()
         with file_path.open("a", newline="", encoding="utf-8") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELDNAMES)
@@ -92,8 +106,20 @@ class Solver(ABC):
         self.execution_time = 0
         self.node_expanded = 0
         self.memory_used = None
+        self.stop_reason = None
+
+    def has_exceeded_max_nodes(self) -> bool:
+        return self.node_expanded > self.max_nodes
+
+    def _mark_node_limit_reached(self) -> None:
+        if self.stop_reason is not None:
+            return
+        self.stop_reason = f"Stopped: reached MAX_NODES={self.max_nodes}"
+        print(f"[{self.name}] {self.stop_reason}")
 
     def increment_nodes(self, count: int = 1):
         """Dùng trong search algorithm."""
         self.node_expanded += count
+        if self.has_exceeded_max_nodes():
+            self._mark_node_limit_reached()
 

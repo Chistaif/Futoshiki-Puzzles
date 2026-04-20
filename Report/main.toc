@@ -71,9 +71,9 @@
 \contentsline {subsubsection}{\numberline {4.3.3}Number of Inferences or Expansions}{33}{subsubsection.4.3.3}%
 \contentsline {subsection}{\numberline {4.4}Comparative Analysis Across Algorithms}{33}{subsection.4.4}%
 \contentsline {subsection}{\numberline {4.5}Self-evaluation Against Project Criteria}{33}{subsection.4.5}%
-\contentsline {section}{\numberline {5}References}{33}{section.5}%
-\contentsline {section}{\numberline {A}Appendix}{33}{appendix.A}%
-\contentsline {subsection}{\numberline {A.1}Pseudocode}{33}{subsection.A.1}%
-\contentsline {subsection}{\numberline {A.2}Demo Video Links}{34}{subsection.A.2}%
-\contentsline {subsection}{\numberline {A.3}Additional Tables and Charts}{34}{subsection.A.3}%
-\contentsline {subsection}{\numberline {A.4}Submission Checklist}{34}{subsection.A.4}%
+\contentsline {section}{\numberline {5}Conclusion}{33}{section.5}%
+\contentsline {section}{\numberline {6}References}{34}{section.6}%
+\contentsline {section}{\numberline {A}Appendix}{34}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Generative AI Usage Disclosure}{34}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}Project Deliverables}{34}{subsection.A.2}%
+\contentsline {subsection}{\numberline {A.3}Additional Tables and Charts}{35}{subsection.A.3}%

@@ -1,4 +1,4 @@
-from src.solvers.solver import Solver
+from src.solvers.solver import MAX_NODES_FORWARD_CHAINING, Solver
 from src.kb.fol_kb import FOLKB
 from collections import defaultdict, deque
 from typing import Callable, List, Optional
@@ -10,6 +10,7 @@ StepCallback = Callable[[int, int, int], None]
 class ForwardBacktrackSolver(Solver):
     def __init__(self):
         super().__init__(name="Forward Chaining (DPLL)")
+        self.max_nodes = MAX_NODES_FORWARD_CHAINING
         self.kb = None
         self.max_var = 0
         self.literal_frequency = None
@@ -77,6 +78,8 @@ class ForwardBacktrackSolver(Solver):
         step_callback: Optional[StepCallback] = None,
     ):
         self.increment_nodes()
+        if self.has_exceeded_max_nodes():
+            return None
 
         if not self._propagate(clauses, literal_to_clauses, agenda, agenda_set, model, step_callback):
             return None

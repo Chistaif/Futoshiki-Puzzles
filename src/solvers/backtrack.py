@@ -1,6 +1,6 @@
 ﻿import copy
 from src.domain.puzzle import PuzzleCase
-from src.solvers.solver import Solver
+from src.solvers.solver import MAX_NODES_BACKTRACKING, Solver
 from typing import Callable, Optional
 
 
@@ -25,6 +25,7 @@ class Backtracking(Solver):
         - Lưu lại các ràng buộc ngang và dọc.
         """
         super().__init__(name="Backtracking")
+        self.max_nodes = MAX_NODES_BACKTRACKING
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.horizontal = puzzle.horizontal
@@ -137,6 +138,8 @@ class Backtracking(Solver):
         """
 
         self.increment_nodes()
+        if self.has_exceeded_max_nodes():
+            return False
         empty = self.find_empty()
 
         # Nếu không còn ô trống -> đã giải xong

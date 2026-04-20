@@ -1,4 +1,4 @@
-﻿from src.solvers.solver import Solver
+﻿from src.solvers.solver import MAX_NODES_BRUTE_FORCE, Solver
 from src.domain.puzzle import PuzzleCase
 import itertools
 import copy
@@ -15,6 +15,7 @@ class BruteForceSolver(Solver):
     """
     def __init__(self, puzzle: PuzzleCase):
         super().__init__(name = "BruteForceSolver")
+        self.max_nodes = MAX_NODES_BRUTE_FORCE
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.horizontal = puzzle.horizontal
@@ -77,6 +78,8 @@ class BruteForceSolver(Solver):
         #thử hết khả năng
         for assignment in itertools.product(values, repeat=len(empty_cells)):
             self.increment_nodes()
+            if self.has_exceeded_max_nodes():
+                return None
 
             #copy lại grid sau mỗi lần thử
             temp_grid = copy.deepcopy(original_grid)
