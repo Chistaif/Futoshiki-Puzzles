@@ -2,7 +2,7 @@
 from src.domain.puzzle import PuzzleCase
 import itertools
 import copy
-from typing import Optional
+from typing import Callable, Optional
 
 class BruteForceSolver(Solver):
     """Giải bài toán bằng thuật toán Brute Force THUẦN
@@ -58,7 +58,7 @@ class BruteForceSolver(Solver):
                     
         return True
     
-    def solve(self, step_callback = None) -> Optional[list]:
+    def solve(self, step_callback: Optional[Callable[[int, int, int], None]] = None) -> Optional[list]:
         """Brute Force Solver"""
 
         #find empty cell
@@ -84,6 +84,8 @@ class BruteForceSolver(Solver):
             #fill toan bo
             for (i, j), val in zip(empty_cells, assignment):
                 temp_grid[i][j] = val
+                if step_callback is not None:
+                    step_callback(i, j, val)
 
             #assign tạm vào self de reuse check
             self.grid = temp_grid
@@ -91,5 +93,10 @@ class BruteForceSolver(Solver):
             #Final -> check
             if self.is_valid():
                 return self.grid
+
+            # Visualize failed full assignment by clearing guessed cells.
+            if step_callback is not None:
+                for i, j in reversed(empty_cells):
+                    step_callback(i, j, 0)
         
         return None

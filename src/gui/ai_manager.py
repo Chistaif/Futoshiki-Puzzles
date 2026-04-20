@@ -15,6 +15,7 @@ from src.domain.puzzle import PuzzleCase
 from src.solvers.astar import AStarSolver
 from src.solvers.backward import BackwardSolver
 from src.solvers.backtrack import Backtracking
+from src.solvers.brute_force import BruteForceSolver
 from src.solvers.forward import ForwardBacktrackSolver
 from src.solvers.sat_solver import SATSolver
 
@@ -63,6 +64,8 @@ class AISolverManager:
         normalized_solver = str(solver_name).strip().lower()
         if normalized_solver in ("a*", "a_star"):
             normalized_solver = "astar"
+        elif normalized_solver in ("bruteforce", "brute-force", "brute force"):
+            normalized_solver = "brute_force"
         elif normalized_solver in ("backward_chaining", "backward_solver"):
             normalized_solver = "backward"
         elif normalized_solver in ("forward_chaining", "dpll", "forward_solver"):
@@ -70,7 +73,7 @@ class AISolverManager:
         elif normalized_solver in ("sat", "sat_solver", "pysat"):
             normalized_solver = "sat"
 
-        if normalized_solver not in ("backtracking", "backward", "forward", "astar", "sat"):
+        if normalized_solver not in ("backtracking", "brute_force", "backward", "forward", "astar", "sat"):
             raise ValueError(f"Unsupported solver: {solver_name}")
 
         self.pending_steps = deque()
@@ -82,6 +85,7 @@ class AISolverManager:
         self.solver_key = normalized_solver
         solver_display_names = {
             "backtracking": "Backtracking",
+            "brute_force": "Brute Force",
             "backward": "Backward Chaining",
             "forward": "Forward Chaining",
             "astar": "A* Search",
@@ -143,6 +147,9 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
+                solved_grid = solver.run(step_callback=on_step)["solution"]
+            elif solver_name == "brute_force":
+                solver = BruteForceSolver(case)
                 solved_grid = solver.run(step_callback=on_step)["solution"]
             elif solver_name == "sat":
                 solver = SATSolver(case)

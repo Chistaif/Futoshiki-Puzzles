@@ -99,6 +99,8 @@ INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\caption\caption3.s
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\caption\caption3.sty
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\caption\ltcaption.sty
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\caption\ltcaption.sty
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\fancyhdr\fancyhdr.sty
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\fancyhdr\fancyhdr.sty
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\hyperref\hyperref.sty
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\hyperref\hyperref.sty
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\generic\iftex\iftex.sty
@@ -207,6 +209,14 @@ INPUT .\main.toc
 INPUT main.toc
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbx12.tfm
 OUTPUT main.toc
+INPUT .\main.lot
+INPUT .\main.lot
+INPUT main.lot
+OUTPUT main.lot
+INPUT .\main.lof
+INPUT .\main.lof
+INPUT main.lof
+OUTPUT main.lof
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnti12.tfm
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\jknappen\ec\tcrm1200.tfm
 INPUT .\Planning.tex
@@ -224,19 +234,33 @@ INPUT .\Algorithm Description\Forward.tex
 INPUT .\Algorithm Description\Forward.tex
 INPUT .\Algorithm Description\Forward.tex
 INPUT Algorithm Description\Forward.tex
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbxti10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr8.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr6.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti12.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti8.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti7.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbx10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vncsc10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vncsc10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vncsc10.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx12.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx8.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx6.tfm
 INPUT .\Algorithm Description\Backward.tex
 INPUT .\Algorithm Description\Backward.tex
 INPUT .\Algorithm Description\Backward.tex
 INPUT .\Algorithm Description\Backward.tex
 INPUT Algorithm Description\Backward.tex
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbx8.tfm
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbx6.tfm
 INPUT .\Algorithm Description\AStar.tex
 INPUT .\Algorithm Description\AStar.tex
 INPUT .\Algorithm Description\AStar.tex
 INPUT .\Algorithm Description\AStar.tex
 INPUT Algorithm Description\AStar.tex
-INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
-INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnbx10.tfm
-INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr10.tfm
 INPUT .\Algorithm Description\Brute-force_backtracking.tex
 INPUT .\Algorithm Description\Brute-force_backtracking.tex
 INPUT .\Algorithm Description\Brute-force_backtracking.tex
@@ -251,8 +275,6 @@ INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\vntex\t5cmtt.fd
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\vntex\t5cmtt.fd
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex\latex\vntex\t5cmtt.fd
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vntt12.tfm
-INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr8.tfm
-INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\tfm\vntex\vnr\vnr6.tfm
 INPUT .\Experiments.tex
 INPUT .\Experiments.tex
 INPUT .\Experiments.tex
@@ -273,22 +295,36 @@ INPUT .\main.out
 INPUT .\main.out
 INPUT C:\Users\LENOVO\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1200.pk
 INPUT C:\Users\LENOVO\AppData\Local\MiKTeX\fonts\pk\ljfour\jknappen\ec\dpi600\tcrm1200.pk
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmex10.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmex10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi12.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi12.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmmi8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr12.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr6.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr6.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmr8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmsy8.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti8.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti8.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbx10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbx10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbx12.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbx12.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbxti10.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnbxti10.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vncsc10.pfb
+INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vncsc10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnr10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnr10.pfb
 INPUT C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\fonts\type1\vntex\vnr\vnr12.pfb
