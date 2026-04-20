@@ -1,21 +1,111 @@
 \section{Problem Formulation}
+
+% 3.1 Rules 
 \subsection{Puzzle Rules}
-[Chèn nội dung tại đây]
+Futoshiki is a square-grid logic puzzle played on an $N \times N$ board. The primary objective is to fill the grid with digits such that each row and each column contains every number from $1$ to $N$ exactly once. The puzzle is governed by three fundamental categories of constraints:
+\begin{enumerate}
+    \item \textbf{Latin Square Property:} Similar to Sudoku, every row and every column must be a permutation of the set $\{1, 2, \dots, N\}$. This implies that no digit can be repeated within the same row or the same column.
+    
+    \item \textbf{Inequality Constraints:} The defining characteristic of Futoshiki is the presence of "less than" ($<$) and "greater than" ($>$) signs between adjacent cells. These signs may be placed horizontally (between cells in the same row) or vertically (between cells in the same column). Any numerical assignment must strictly satisfy these relational constraints.
+    
+    \item \textbf{Pre-filled Clues (Fixed Values):} At the start of the puzzle, some cells may already contain fixed digits (referred to as "Given Clues"). These values are immutable and serve as the starting points for the logical deduction process.
+\end{enumerate}
+
+A puzzle is considered solved when every cell is filled with a valid digit and all structural, permutation, and inequality constraints are simultaneously satisfied. For an $N \times N$ board, the total number of cells to be determined is $N^2$, leading to a search space that grows factorially with $N$.
 
 \subsection{First-Order Logic Formalization}
-[Chèn nội dung tại đây]
-
-\subsubsection{Predicate Vocabulary}
-[Chèn nội dung tại đây]
+\subsubsection{Predicate Symbols}
+The following vocabulary is used to formalize the Futoshiki puzzle rules into First-Order Logic sentences:
+\begin{itemize}
+    \item $Val(i, j, v)$: Cell $(i, j)$ is assigned value $v$
+    \item $Given(i, j, v)$: Cell $(i, j)$ has the pre-filled clue value $v$
+    \item $LessH(i, j)$: Horizontal constraint indicating cell $(i, j) < (i, j+1)$.
+    \item $GreaterH(i, j)$: Horizontal constraint indicating cell $(i, j) > (i, j+1)$.
+    \item $LessV(i, j)$: Vertical constraint indicating cell $(i, j) < (i+1, j)$.
+    \item $GreaterV(i, j)$: Vertical constraint indicating cell $(i, j) > (i+1, j)$.
+    \item $Less(v_1, v_2)$:  Integer $v1 < v2$ (background arithmetic relation)
+\end{itemize}
 
 \subsubsection{Core Axioms}
-[Chèn nội dung tại đây]
+The logic of a Futoshiki puzzle of size $N$x$N$ is encoded using the following universal axioms:
 
-\subsubsection{Skolemization and CNF Conversion}
-[Chèn nội dung tại đây]
+% Trien khai cac axioms 
+\begin{enumerate}
+    \item \textbf{Cell Completeness and Uniqueness:} Each cell must contain exactly one value.
+    \begin{itemize}
+        \item $\forall i \forall j \exists v$ $Val(i, j, v)$
+        \item $\forall i \forall j \forall v_1 \forall v_2 (Val(i, j, v_1) \wedge Val(i, j, v_2) \Rightarrow v_1 = v_2)$
+    \end{itemize}
 
-\subsection{From FOL to Inference}
-[Chèn nội dung tại đây]
+    \item \textbf{Value Domain and Boundary Constraints:} Values must be within the range $[1, N]$.
+    \begin{itemize}
+        \item $\forall i \forall j \forall v (Val(i, j, v) \Rightarrow Less(0, v) \wedge Less(v, N+1))$
+    \end{itemize}
 
-\subsection{Ground Knowledge Base and CNF Generation}
-[Chèn nội dung tại đây]
+    \item \textbf{Permutation Constraints (Row and Column Uniqueness):} Every number appears exactly once in each row and column.
+    \begin{itemize}
+        \item Row: $\forall i \forall j_1 \forall j_2 \forall v (Val(i, j_1, v) \wedge Val(i, j_2, v) \wedge j_1 \neq j_2 \Rightarrow \bot)$
+        \item Column: $\forall i_1 \forall i_2 \forall j \forall v (Val(i_1, j, v) \wedge Val(i_2, j, v) \wedge i_1 \neq i_2 \Rightarrow \bot)$
+    \end{itemize}
+
+    \item \textbf{Inequality Constraints:} Satisfaction of all horizontal and vertical relational signs.
+    \begin{itemize}
+        \item $\forall i \forall j \forall v_1 \forall v_2 (LessH(i, j) \wedge Val(i, j, v_1) \wedge Val(i, j+1, v_2) \Rightarrow Less(v_1, v_2))$
+        \item $\forall i \forall j \forall v_1 \forall v_2 (GreaterH(i, j) \wedge Val(i, j, v_1) \wedge Val(i, j+1, v_2) \Rightarrow Less(v_2, v_1))$
+        \item $\forall i \forall j \forall v_1 \forall v_2 (LessV(i, j) \wedge Val(i, j, v_1) \wedge Val(i+1, j, v_2) \Rightarrow Less(v_1, v_2))$
+        \item $\forall i \forall j \forall v_1 \forall v_2 (GreaterV(i, j) \wedge Val(i, j, v_1) \wedge Val(i+1, j, v_2) \Rightarrow Less(v_2, v_1))$
+    \end{itemize}
+
+    \item \textbf{Given Clues Enforcement:} Pre-filled digits must be assigned to their respective cells.
+    \begin{itemize}
+        \item $\forall i \forall j \forall v (Given(i, j, v) \Rightarrow Val(i, j, v))$
+    \end{itemize}
+
+    \item \textbf{Background Arithmetic (Ordering Properties)}
+    This axiom defines the strict ordering properties of the $Less$ predicate:
+    \begin{itemize}
+        \item \textbf{Irreflexivity:} $\forall v \neg Less(v, v)$
+        \item \textbf{Transitivity:} $\forall v_1 \forall v_2 \forall v_3 (Less(v_1, v_2) \wedge Less(v_2, v_3) \Rightarrow Less(v_1, v_3))$
+    \end{itemize}
+    \textit{Note: For practical implementation, the Knowledge Base is populated with ground facts $Less(a, b)$ for all constant pairs $(a, b)$ where $a$ is numerically smaller than $b$ within the domain $[1, N]$.}
+\end{enumerate}
+
+\subsubsection{Step-by-step CNF Derivation}
+The following examples demonstrate the conversion of FOL axioms into Conjunctive Normal Form (CNF) for use in inference engines.
+
+\paragraph{Example 1: Cell Value Uniqueness}~\\
+FOL Form: $\forall i \forall j \forall v_1 \forall v_2 (Val(i, j, v_1) \wedge Val(i, j, v_2) \Rightarrow v_1 = v_2)$
+\begin{enumerate}
+    \item \textbf{Step 1 (Eliminate Implication):} Apply the rule $A \Rightarrow B \equiv \neg A \vee B$:
+    $$\forall i \forall j \forall v_1 \forall v_2 (\neg (Val(i, j, v_1) \wedge Val(i, j, v_2)) \vee (v_1 = v_2))$$
+    \item \textbf{Step 2 (Move Negation Inward):} Apply De Morgan's Law to distribute the negation:
+    $$\forall i \forall j \forall v_1 \forall v_2 (\neg Val(i, j, v_1) \vee \neg Val(i, j, v_2) \vee (v_1 = v_2))$$
+    \item \textbf{Step 3 (Drop universal quantifiers):} Academic standard
+    $$\neg Val(i, j, v_1) \vee \neg Val(i, j, v_2) \vee (v_1 = v_2)$$
+    \item \textbf{Step 4 (Standardization for Solver) (Practical):} Since we only consider pairs where $v_1 \neq v_2$ during the grounding process, the literal $(v_1 = v_2)$ evaluates to False ($\bot$) and is removed.
+    \textbf{CNF Clause:} $$[\neg Val(i, j, v_1), \neg Val(i, j, v_2)] \quad \forall v_1 \neq v_2$$
+\end{enumerate}
+
+\paragraph{Example 2: Row Uniqueness (Binary Clauses)}~\\
+FOL Form: $\forall i \forall j_1 \forall j_2 \forall v (Val(i, j_1, v) \wedge Val(i, j_2, v) \wedge j_1 \neq j_2 \Rightarrow \bot)$
+\begin{enumerate}
+    \item \textbf{Step 1 (Eliminate Implication):}
+    $$\forall i \forall j_1 \forall j_2 \forall v (\neg (Val(i, j_1, v) \wedge Val(i, j_2, v) \wedge j_1 \neq j_2) \vee \bot)$$
+    \item \textbf{Step 2 (Move Negation Inward):} Apply De Morgan's Law and remove the contradiction constant $\bot$:
+    $$\forall i \forall j_1 \forall j_2 \forall v (\neg Val(i, j_1, v) \vee \neg Val(i, j_2, v) \vee (j_1 = j_2))$$
+    \item \textbf{Step 3 (Drop universal quantifiers):} Academic standard
+    $$\neg Val(i, j_1, v) \vee \neg Val(i, j_2, v) \vee (j_1 = j_2)$$
+    \item \textbf{Step 4 (Refine Difference Constraint) (Practical):} Since the axiom iterates over distinct column indices, this literal is False and is discarded during grounding.
+    \textbf{CNF Clause:} $$[\neg Val(i, j_1, v), \neg Val(i, j_2, v)] \quad \forall j_1 \neq j_2$$
+\end{enumerate}
+
+\paragraph{Example 3: Horizontal Less-than}~\\
+FOL Form: $\forall i \forall j \forall v_1 \forall v_2 (LessH(i, j) \wedge Val(i, j, v_1) \wedge Val(i, j+1, v_2) \Rightarrow Less(v_1, v_2))$
+\begin{enumerate}
+    \item \textbf{Step 1 (Eliminate Implication):}
+    $$\forall i \forall j \forall v_1 \forall v_2 (\neg (LessH(i, j) \wedge Val(i, j, v_1) \wedge Val(i, j+1, v_2)) \vee Less(v_1, v_2))$$
+    \item \textbf{Step 2 (Move Negation Inward):} Apply De Morgan's Law to distribute the negation across the conjunction:
+    $$\forall i \forall j \forall v_1 \forall v_2 (\neg LessH(i, j) \vee \neg Val(i, j, v_1) \vee \neg Val(i, j+1, v_2) \vee Less(v_1, v_2))$$
+    \item \textbf{Step 3 (Drop Universal Quantifiers):} Remove the quantifiers to obtain the final clausal form:
+    \textbf{CNF Clause:} $$[\neg LessH(i, j), \neg Val(i, j, v_1), \neg Val(i, j+1, v_2), Less(v_1, v_2)]$$
+\end{enumerate}

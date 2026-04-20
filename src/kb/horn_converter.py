@@ -100,6 +100,7 @@ class HornConverter:
         self._build_col_uniqueness_rules(kb)
         self._build_horizontal_rules(kb)
         self._build_vertical_rules(kb)
+        self._build_boundary_facts(kb)
         return kb
 
     # =========================================================================
@@ -359,3 +360,26 @@ class HornConverter:
                                     ],
                                 ))
 
+    def _build_boundary_facts(self, kb: HornKB) -> None:
+        """Heuristic Cắt tỉa: Các ràng buộc đơn phân (Unary Constraints) tại biên.
+        Loại bỏ ngay lập tức N tại đầu nhỏ, và 1 tại đầu lớn của dấu bất đẳng thức.
+        """
+        for i in range(self.n):
+            for j in range(self.n - 1):
+                sign = self.horizontal[i][j]
+                if sign == 1:  # (i,j) < (i,j+1)
+                    kb.facts.append(HornClause(head=("not_val", (i, j, self.n))))
+                    kb.facts.append(HornClause(head=("not_val", (i, j + 1, 1))))
+                elif sign == -1:  # (i,j) > (i,j+1)
+                    kb.facts.append(HornClause(head=("not_val", (i, j, 1))))
+                    kb.facts.append(HornClause(head=("not_val", (i, j + 1, self.n))))
+
+        for i in range(self.n - 1):
+            for j in range(self.n):
+                sign = self.vertical[i][j]
+                if sign == 1:  # (i,j) < (i+1,j)
+                    kb.facts.append(HornClause(head=("not_val", (i, j, self.n))))
+                    kb.facts.append(HornClause(head=("not_val", (i + 1, j, 1))))
+                elif sign == -1:  # (i,j) > (i+1,j)
+                    kb.facts.append(HornClause(head=("not_val", (i, j, 1))))
+                    kb.facts.append(HornClause(head=("not_val", (i + 1, j, self.n))))

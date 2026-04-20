@@ -1,13 +1,331 @@
-\section{Algorithm Description}
-\subsection{Forward Chaining}
-\subsubsection{Idea}
-[Chèn nội dung tại đây]
+\subsection{Forward Chaining (DPLL-based SAT Solver)}
 
+% Approach & Architecture
+\subsubsection{Idea}
+The forward-chaining solver developed by our team operates as a hybrid of
+propositional Unit Propagation (the grounded counterpart of FOL Forward
+Chaining) and DPLL backtracking search.
+
+\begin{itemize}
+    \item \textbf{KB construction (\textit{FOLKB}):} Converts a Futoshiki
+    instance into a ground CNF Knowledge Base by fully instantiating all FOL
+    axioms over the finite domain $\{1,\ldots,N\}$.  Every cell-value pair
+    $(i,j,v)$ is mapped to a unique Boolean variable
+    $\mathrm{var}(i,j,v) = i \cdot N^2 + j \cdot N + v \in \{1,\ldots,N^3\}$.
+
+    \item \textbf{Forward-chaining engine (\textit{\_propagate}):} Implements
+    Unit Propagation over the ground Horn KB.  Starting from the unit clauses
+    that encode pre-filled cells and boundary inequalities, the engine
+    repeatedly applies Modus Ponens: whenever all but one literal in a clause
+    are falsified, the remaining literal is forced \emph{True}.  This is
+    exactly FOL Forward Chaining restricted to the grounded domain.
+
+    \item \textbf{Search controller (\textit{\_dpll}):} When Unit Propagation
+    can no longer derive new facts, the controller selects an unassigned
+    variable via the MRV\,+\,Frequency heuristic, branches on its two possible
+    truth values, and backtracks upon conflict.
+\end{itemize}
+
+\paragraph{Why Unit Propagation equals Forward Chaining on a ground KB:}
+The fundamental FOL axiom ``every cell has at least one value''
+($\forall i\,\forall j\,\exists v\;Val(i,j,v)$) contains an existential
+quantifier that cannot be expressed as a definite Horn rule in its general
+form.  After \emph{full grounding} over the finite domain $\{1,\ldots,N\}$,
+however, this axiom becomes the finite disjunction
+$\bigvee_{v=1}^{N} x_{i,j,v}$, which \emph{is} a valid CNF clause.
+Consequently, every step of Unit Propagation on the ground KB is logically
+equivalent to one application of Modus Ponens on the corresponding grounded
+Horn rule --- the defining operation of Forward Chaining.
+
+\paragraph{Technical Implementation Notes:}~
+\begin{itemize}
+    \item \textbf{0-based Indexing:} While the formal FOL axioms in this
+    report use 1-based indexing (as per the mathematical specification
+    $1..N$), the internal variable encoding uses 0-based row/column indices.
+    This aligns naturally with Python's list structures and eliminates
+    redundant $\pm1$ arithmetic at every node expansion.
+
+    \item \textbf{Full Grounding vs.\ Partial Grounding:} Unlike the Backward
+    Chaining solver which keeps some rules in first-order form, this solver
+    grounds the entire KB upfront.  For grid sizes $N \le 9$ the resulting CNF
+    (at most $N^3 \approx 729$ variables and $O(N^4)$ clauses) remains
+    tractable and enables $O(1)$ variable lookup via a direct-indexed model
+    array.
+
+    \item \textbf{Literal-to-clause index:} An inverted index
+    $\mathrm{literal\_to\_clauses}[\ell]$ stores exactly those clauses that
+    contain literal $\ell$.  When literal $p$ is set \emph{True}, only the
+    clauses in $\mathrm{literal\_to\_clauses}[-p]$ need to be re-examined,
+    reducing per-step cost from $O(|\mathcal{C}|)$ to $O(\deg(p))$.
+
+    \item \textbf{Step Callback for visualisation:}
+    $\mathrm{step\_callback}(r,c,v)$ is invoked each time a cell is assigned
+    ($v > 0$) or retracted ($v = 0$), enabling real-time GUI updates without
+    coupling the solver to the display layer.
+\end{itemize}
+
+% -----------------------------------------------------------------------
+\subsubsection{Algorithm Analysis}
+
+\paragraph{CNF Encoding --- Variable Schema}~\\
+Each Boolean variable encodes one cell-value pair:
+\[
+    \mathrm{var}(i,\,j,\,v) \;=\; i \cdot N^2 + j \cdot N + v,
+    \qquad i,j \in \{0,\ldots,N-1\},\quad v \in \{1,\ldots,N\}.
+\]
+The model array $\mathit{model}[1..N^3]$ stores $\{-1,\,0,\,+1\}$ for
+\emph{False}, \emph{unassigned}, and \emph{True} respectively.
+
+\paragraph{CNF Clause Groups}~\\
+The ground KB is built from nine constraint groups:
+\begin{center}
+\begin{tabular}{lll}
+\hline
+\textbf{Group} & \textbf{Clause form} & \textbf{Constraint} \\
+\hline
+A1 & $\bigl(x_{i,j,1} \lor \cdots \lor x_{i,j,N}\bigr)$ & At-least-one per cell \\
+A2 & $(\neg x_{i,j,a} \lor \neg x_{i,j,b}),\; a<b$ & At-most-one per cell \\
+A3 & $(\neg x_{i,j_1,v} \lor \neg x_{i,j_2,v}),\; j_1<j_2$ & Row uniqueness \\
+A4 & $(\neg x_{i_1,j,v} \lor \neg x_{i_2,j,v}),\; i_1<i_2$ & Column uniqueness \\
+A5/A6 & $(\neg x_{i,j,a} \lor \neg x_{i,j+1,b})$ if $a \not< b$ & Horizontal $<$ / $>$ \\
+A7/A8 & $(\neg x_{i,j,a} \lor \neg x_{i+1,j,b})$ if $a \not< b$ & Vertical $\wedge$ / $\vee$ \\
+A9 & $(x_{i,j,v})$ & Pre-filled clues \\
+A10 & \emph{(implicit in encoding)} & Domain $[1..N]$ \\
+A11 & \emph{(implicit, via negation)} & Inequality via $\neg(a < b)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Unit Propagation (Forward Chaining step)}~\\
+When literal $p$ is assigned \emph{True}, every clause in
+$\mathrm{literal\_to\_clauses}[-p]$ is inspected:
+\begin{itemize}
+    \item If the clause already contains a \emph{True} literal: skip.
+    \item If exactly one literal $\ell$ remains unassigned: add $\ell$ to the
+    agenda (Modus Ponens / unit propagation step).
+    \item If no unassigned literal remains and the clause is unsatisfied:
+    \textbf{conflict} --- return \emph{False}.
+\end{itemize}
+
+\paragraph{Variable Selection Heuristic: MRV + Frequency}~\\
+When Unit Propagation halts without completing the assignment, the solver
+must branch.  Variable selection proceeds in two levels:
+\begin{enumerate}
+    \item \textbf{Minimum Remaining Values (MRV):} Among all unassigned cells,
+    choose the cell $(i,j)$ whose \emph{domain size}
+    $|\{v : \mathit{model}[\mathrm{var}(i,j,v)] \neq -1\}|$ is smallest.
+    This \emph{fail-first} principle detects dead ends as early as possible.
+    \item \textbf{Frequency tiebreaker:} Among all domain literals of the
+    chosen cell, select the literal with the highest frequency in the CNF ---
+    assigning a frequent literal satisfies more clauses simultaneously.
+\end{enumerate}
+
+\paragraph{Complexity Analysis}~
+\begin{center}
+\begin{tabular}{llp{6cm}}
+\hline
+\textbf{Aspect} & \textbf{Bound} & \textbf{Remark} \\
+\hline
+Variables & $N^3$ & One Boolean per cell-value pair \\
+Clauses (A1) & $N^2$ & One per cell \\
+Clauses (A2) & $N^2 \binom{N}{2}$ & Pairwise exclusion per cell \\
+Clauses (A3+A4) & $2N\binom{N}{2}N$ & Row and column uniqueness \\
+Max recursion depth & $\le N^2$ & One cell resolved per level \\
+Time (worst case) & $O(N^3 \cdot 2^{N^3})$ & Full Boolean search space \\
+Time (average) & $O(N^3 \cdot C)$ & $C$ = actual backtracks (small) \\
+Space & $O(N^3)$ & Model array + agenda \\
+\hline
+\end{tabular}
+\end{center}
+
+\paragraph{Advantages and Limitations}~
+\begin{itemize}
+    \item \textbf{Complete:} Backtracking guarantees a solution is found if
+    one exists; the solver never misses a valid assignment.
+    \item \textbf{Efficient propagation:} The inverted index restricts each
+    propagation step to $O(\deg(p))$ clause checks instead of $O(|\mathcal{C}|)$.
+    \item \textbf{Low memory footprint:} Only the flat model array and a small
+    agenda deque are maintained; no explicit clause deletion is performed.
+    \item \textbf{No clause learning (CDCL):} The solver does not learn
+    \emph{conflict clauses}, unlike modern industrial SAT solvers (MiniSat,
+    Glucose).  Repeated conflicts in similar sub-trees are not avoided.
+    \item \textbf{Static index:} $\mathrm{literal\_to\_clauses}$ is built once
+    and not updated; satisfied clauses are still visited during propagation,
+    incurring a minor constant overhead.
+\end{itemize}
+
+% -----------------------------------------------------------------------
 \subsubsection{Pseudocode}
-[Chèn nội dung tại đây]
+
+% SOLVE
+\begin{algorithm}[H]
+\caption{Master Coordinator}
+\label{alg:fc-solve}
+\begin{algorithmic}[1]
+\Function{solve}{\textit{puzzle}}
+    \State $kb \gets \Call{FOLKB}{puzzle}$
+    \State $\mathit{clauses} \gets kb.\Call{build\_KB}{}$
+    \State $\mathit{max\_var} \gets N^3$
+    \State $\mathit{lit\_to\_clauses} \gets \Call{BuildIndex}{\mathit{clauses}}$
+    \State $\mathit{freq} \gets \Call{CountFrequency}{\mathit{clauses}}$
+    \State $\mathit{model} \gets \mathbf{array}[0 \ldots \mathit{max\_var}]$ initialised to $0$
+    \State $\mathit{agenda} \gets \Call{deque}{}$
+    \For{each clause $c \in \mathit{clauses}$ with $|c| = 1$}
+        \State $\mathit{agenda}.\Call{append}{c[0]}$
+    \EndFor
+    \State $\mathit{result} \gets \Call{DPLL}{\mathit{clauses},\,\mathit{lit\_to\_clauses},\,\mathit{agenda},\,\mathit{model}}$
+    \If{$\mathit{result} \neq \mathit{None}$}
+        \State \Return $\Call{TranslateToGrid}{\mathit{result}}$
+    \Else
+        \State \Return $\mathit{None}$ \Comment{Puzzle has no solution}
+    \EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% DPLL
+\begin{algorithm}[H]
+\caption{DPLL --- Recursive Branch-and-Propagate}
+\label{alg:fc-dpll}
+\begin{algorithmic}[1]
+\Function{DPLL}{\textit{clauses}, \textit{index}, \textit{agenda}, \textit{model}}
+    \State $\mathit{nodes\_expanded} \mathrel{+}= 1$
+    \If{\textbf{not} $\Call{Propagate}{\mathit{clauses},\,\mathit{index},\,\mathit{agenda},\,\mathit{model}}$}
+        \State \Return $\mathit{None}$ \Comment{Conflict --- backtrack}
+    \EndIf
+    \State $\mathit{best\_var} \gets \Call{GetUnassignedVar}{\mathit{model}}$
+    \If{$\mathit{best\_var} = \mathit{None}$}
+        \State \Return $\mathit{model}$ \Comment{All variables assigned --- solution found}
+    \EndIf
+    % Branch True
+    \State $\mathit{agenda\_true} \gets \Call{deque}{[\mathit{best\_var}]}$
+    \State $\mathit{result} \gets \Call{DPLL}{\mathit{clauses},\,\mathit{index},\,\mathit{agenda\_true},\,\mathit{model}}$
+    \If{$\mathit{result} \neq \mathit{None}$}
+        \State \Return $\mathit{result}$
+    \EndIf
+    \State \Comment{Branch False --- restore snapshot}
+    \State $\mathit{model} \gets \mathit{saved}$
+    \State $\mathit{agenda\_false} \gets \Call{deque}{[-\mathit{best\_var}]}$
+    \State \Return $\Call{DPLL}{\mathit{clauses},\,\mathit{index},\,\mathit{agenda\_false},\,\mathit{model}}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% PROPAGATE
+\begin{algorithm}[H]
+\caption{Unit Propagation --- Forward Chaining Engine}
+\label{alg:fc-propagate}
+\begin{algorithmic}[1]
+\Function{Propagate}{\textit{clauses}, \textit{index}, \textit{agenda}, \textit{model}}
+    \While{$\mathit{agenda}$ is not empty}
+        \State $p \gets \mathit{agenda}.\Call{popleft}{}$
+        \If{$\Call{IsFalse}{p,\,\mathit{model}}$}
+            \State \Return $\mathit{False}$ \Comment{Immediate conflict}
+        \EndIf
+        \If{\textbf{not} $\Call{IsAssigned}{|p|,\,\mathit{model}}$}
+            \State $\Call{Assign}{p,\,\mathit{model}}$ \Comment{Modus Ponens: set literal True}
+            \If{callback $\neq$ None \textbf{and} $p > 0$}
+                \State $\Call{callback}{\mathrm{Decode}(p)}$ \Comment{Notify GUI}
+            \EndIf
+        \EndIf
+        \For{each clause $c \in \mathit{index}[-p]$}
+            \State $\mathit{sat} \gets \mathit{False}$;
+                   $\;\mathit{unassigned} \gets 0$;
+                   $\;\mathit{unit} \gets 0$
+            \For{each literal $\ell \in c$}
+                \If{$\Call{IsTrue}{\ell,\,\mathit{model}}$}
+                    \State $\mathit{sat} \gets \mathit{True}$; \textbf{break}
+                \EndIf
+                \If{\textbf{not} $\Call{IsAssigned}{|\ell|,\,\mathit{model}}$}
+                    \State $\mathit{unassigned} \mathrel{+}= 1$;
+                           $\;\mathit{unit} \gets \ell$
+                    \If{$\mathit{unassigned} > 1$} \textbf{break} \EndIf
+                \EndIf
+            \EndFor
+            \If{$\mathit{sat}$} \textbf{continue} \EndIf
+            \If{$\mathit{unassigned} = 0$} \Return $\mathit{False}$ \Comment{CONFLICT} \EndIf
+            \If{$\mathit{unassigned} = 1$ \textbf{and} $\mathit{unit} \notin \mathit{agenda\_set}$}
+                \State $\mathit{agenda}.\Call{append}{\mathit{unit}}$ \Comment{New unit clause}
+            \EndIf
+        \EndFor
+    \EndWhile
+    \State \Return $\mathit{True}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% GET UNASSIGNED VAR
+\begin{algorithm}[H]
+\caption{Variable Selection --- MRV + Frequency Heuristic}
+\label{alg:fc-heuristic}
+\begin{algorithmic}[1]
+\Function{GetUnassignedVar}{\textit{model}}
+    \State $\mathit{best\_lit} \gets \mathit{None}$;
+           $\;\mathit{best\_dom} \gets \infty$;
+           $\;\mathit{best\_freq} \gets -1$
+    \For{$i \in 0 \ldots N-1$}
+        \For{$j \in 0 \ldots N-1$}
+            \If{$\exists\,v : \mathit{model}[\mathrm{var}(i,j,v)] = 1$}
+                \textbf{continue} \Comment{Cell already assigned}
+            \EndIf
+            \State $\mathit{dom} \gets [\mathrm{var}(i,j,v) \mid v \in 1..N,\;
+                   \mathit{model}[\mathrm{var}(i,j,v)] \neq -1]$
+            \If{$\mathit{dom} = \emptyset$} \textbf{continue} \EndIf
+            \State $\mathit{cand} \gets \arg\max_{\ell \in \mathit{dom}}\;\mathit{freq}[\ell]$
+            \State $f \gets \mathit{freq}[\mathit{cand}]$
+            \If{$|\mathit{dom}| < \mathit{best\_dom}$ \textbf{or}
+                $(|\mathit{dom}| = \mathit{best\_dom}$ \textbf{and} $f > \mathit{best\_freq})$}
+                \State $\mathit{best\_dom} \gets |\mathit{dom}|$;
+                       $\;\mathit{best\_lit} \gets \mathit{cand}$;
+                       $\;\mathit{best\_freq} \gets f$
+            \EndIf
+        \EndFor
+    \EndFor
+    \State \Return $\mathit{best\_lit}$ \Comment{$\mathit{None}$ if all cells are assigned}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+% BUILD INDEX + COUNT FREQ
+\begin{algorithm}[H]
+\caption{Index Construction and Frequency Count}
+\label{alg:fc-index}
+\begin{algorithmic}[1]
+\Function{BuildIndex}{\textit{clauses}}
+    \State $\mathit{index} \gets \mathbf{defaultdict}(\mathit{list})$
+    \For{each clause $c \in \mathit{clauses}$}
+        \For{each literal $\ell \in c$}
+            \State $\mathit{index}[\ell].\Call{append}{c}$
+        \EndFor
+    \EndFor
+    \State \Return $\mathit{index}$
+\EndFunction
+
+\Function{CountFrequency}{\textit{clauses}}
+    \State $\mathit{freq} \gets \mathbf{defaultdict}(0)$
+    \For{each clause $c \in \mathit{clauses}$}
+        \For{each literal $\ell \in c$}
+            \State $\mathit{freq}[|\ell|] \mathrel{+}= 1$
+        \EndFor
+    \EndFor
+    \State \Return $\mathit{freq}$
+\EndFunction
+
+\Function{TranslateToGrid}{\textit{model}}
+    \State $\mathit{grid} \gets N \times N$ matrix of $0$
+    \For{$i \in 0..N-1$}
+        \For{$j \in 0..N-1$}
+            \For{$v \in 1..N$}
+                \If{$\mathit{model}[\mathrm{var}(i,j,v)] = 1$}
+                    \State $\mathit{grid}[i][j] \gets v$; \textbf{break}
+                \EndIf
+            \EndFor
+        \EndFor
+    \EndFor
+    \State \Return $\mathit{grid}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Illustration}
-[Chèn nội dung tại đây]
-
-\subsubsection{Algorithm Analysis}
 [Chèn nội dung tại đây]
