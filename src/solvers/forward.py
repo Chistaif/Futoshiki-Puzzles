@@ -104,10 +104,6 @@ class ForwardSolver(Solver):
     # Tầng 1 — FC Engine (Modus Ponens)
     # =========================================================================
 
-    # =========================================================================
-    # Tầng 1 — FC Engine (Modus Ponens)
-    # =========================================================================
-
     def _run_fc(
         self,
         domains:       Domains,
@@ -139,8 +135,7 @@ class ForwardSolver(Solver):
             agenda_set.discard(fact)
             action = fact[0]
 
-            # ── Luật 1 + 4: xử lý Assign ─────────────────────────────────────
-            # ── Luật 1 + 4: xử lý Assign ─────────────────────────────────────
+            # ── Rule 1 + 4: xử lý Assign ─────────────────────────────────────
             if action == "Assign":
                 _, i, j, val = fact
 
@@ -148,8 +143,6 @@ class ForwardSolver(Solver):
                 if val not in domains[i][j]:
                     return False
 
-                # [FIX]: Dùng propagated set để đảm bảo Assign chỉ xử lý 1 lần cho mỗi ô
-                # Bỏ hoàn toàn biến already_singleton gây lỗi
                 if (i, j) not in propagated:
                     propagated.add((i, j))
                     
@@ -163,7 +156,7 @@ class ForwardSolver(Solver):
                     # Lan truyền bất đẳng thức ngay lập tức
                     self._propagate_inequalities(i, j, domains, push)
 
-                    # Lan truyền hàng và cột (Luật 4)
+                    # Lan truyền hàng và cột (Rule 4)
                     for c in range(self.n):
                         if c != j:
                             push(("Remove", i, c, val))
@@ -171,7 +164,7 @@ class ForwardSolver(Solver):
                         if r != i:
                             push(("Remove", r, j, val))
 
-            # ── Luật 2 + 3 + 5: xử lý Remove ────────────────────────────────
+            # ── Rule 2 + 3 + 5: xử lý Remove ────────────────────────────────
             elif action == "Remove":
                 _, i, j, val = fact
 
@@ -180,15 +173,15 @@ class ForwardSolver(Solver):
 
                 domains[i][j].discard(val)
 
-                # Luật 2: domain rỗng → Contradiction
+                # Rule 2: domain rỗng → Contradiction
                 if not domains[i][j]:
                     return False
 
-                # Luật 3: domain còn 1 value → Assign
+                # Rule 3: domain còn 1 value → Assign
                 if len(domains[i][j]) == 1:
                     push(("Assign", i, j, next(iter(domains[i][j]))))
 
-                # Luật 5: lan truyền bất đẳng thức 4 hướng
+                # Rule 5: lan truyền bất đẳng thức 4 hướng
                 self._propagate_inequalities(i, j, domains, push)
 
         return True
@@ -204,26 +197,21 @@ class ForwardSolver(Solver):
     ) -> bool:
         """
         MAC Backtracking: chọn ô (MRV) → thử value → chạy FC → đệ quy.
-
-        FIX: bỏ tham số puzzle thừa (dùng self._puzzle qua _run_fc).
-        FIX: thay deepcopy bằng shallow copy thủ công — nhanh hơn đáng kể.
-        FIX: guard max_nodes ở đầu mỗi lần đệ quy.
         """
-        # FIX: guard max_nodes trong vòng đệ quy backtrack
+
         if self.has_exceeded_max_nodes():
             return False
 
-        # Chọn ô chưa gán có domain nhỏ nhất (MRV heuristic)
+        # Chọn ô chưa gán có domain nhỏ nhất
         cell = self._pick_unassigned_cell(domains)
         if cell is None:
-            return True   # Tất cả ô đã gán → thành công
+            return True   # Tất cả ô đã gán -> thành công
 
         i, j = cell
 
         # Thử từng value trong domain theo thứ tự tăng dần
         for val in sorted(domains[i][j]):
 
-            # FIX: thay deepcopy bằng shallow copy thủ công — O(N²) không overhead
             saved_domains = [
                 [domains[r][c].copy() for c in range(self.n)]
                 for r in range(self.n)
@@ -284,7 +272,7 @@ class ForwardSolver(Solver):
         push:    Callable[[Fact], None],
     ) -> None:
         """
-        Luật 5: Sau khi domain(i,j) thay đổi, lan truyền sang 4 ô láng giềng
+        Rule 5: Sau khi domain(i,j) thay đổi, lan truyền sang 4 ô láng giềng
         dựa trên min/max hiện tại của domain(i,j).
 
         Nguyên lý:
@@ -362,8 +350,6 @@ class ForwardSolver(Solver):
                 cur_len  = len(current_domains[i][j])
                 prev_len = len(saved_domains[i][j])
 
-                # [FIX 2]: Nếu trước đó chưa gán (len > 1) 
-                # mà hiện tại đã bị gán (len == 1) HOẶC bị xóa rỗng do mâu thuẫn (len == 0)
                 if prev_len > 1 and cur_len <= 1:
                     step_callback(i, j, 0)
                 
