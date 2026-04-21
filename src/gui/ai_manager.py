@@ -16,7 +16,7 @@ from src.solvers.astar import AStarSolver
 from src.solvers.backward import BackwardSolver
 from src.solvers.backtrack import Backtracking
 from src.solvers.brute_force import BruteForceSolver
-from src.solvers.forward import ForwardBacktrackSolver
+from src.solvers.forward import ForwardSolver
 from src.solvers.sat_solver import SATSolver
 
 
@@ -162,7 +162,7 @@ class AISolverManager:
                 solver = BackwardSolver()
                 result = solver.run(case, step_callback=on_step, input_file=input_file)
             elif solver_name == "forward":
-                solver = ForwardBacktrackSolver()
+                solver = ForwardSolver()
                 result = solver.run(case, step_callback=on_step, input_file=input_file)
             else:
                 solver = Backtracking(case)
