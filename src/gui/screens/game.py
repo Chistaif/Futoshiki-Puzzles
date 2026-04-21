@@ -112,7 +112,7 @@ class GameScreen:
         )
         self.play_again_button = Button(
             pygame.Rect(0, 0, 170, 44),
-            "Play Again",
+            "Cancel",
             self.button_font,
             bg_color=(196, 138, 42),
             hover_color=(224, 167, 64),
@@ -627,10 +627,11 @@ class GameScreen:
 
     def _handle_victory_event(self, event: pygame.event.Event) -> Transition:
         if self.play_again_button.handle_event(event):
-            if self.current_case is not None:
-                self._load_case(self.current_case)
-                return None
-            self.new_puzzle()
+            # Close the congratulation dialog and keep current solved board visible.
+            self.is_victory = False
+            self.victory_anim_elapsed = 0.0
+            self.status_message = "Solved"
+            self.force_full_draw = True
             return None
 
         if self.back_to_menu_button.handle_event(event):
