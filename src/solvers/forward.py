@@ -1,3 +1,25 @@
+"""
+ForwardSolver — FOL Forward Chaining + Backtracking (MAC).
+ 
+Kiến trúc 2 tầng:
+  Tầng 1 — FC thuần (Modus Ponens):
+    Xuất phát từ các facts ban đầu (Given, LessH, GreaterH, LessV, GreaterV),
+    áp dụng 5 luật suy diễn liên tục cho đến khi không còn fact mới.
+    Đây là bước "inference" đúng nghĩa FOL Forward Chaining.
+ 
+  Tầng 2 — Backtracking (MAC):
+    Khi FC bị kẹt (domain > 1, không mâu thuẫn), chọn ô chưa gán
+    có domain nhỏ nhất (MRV), thử từng value, chạy FC sau mỗi lần gán.
+    Nếu FC phát hiện mâu thuẫn → backtrack, khôi phục domain và thử value khác.
+ 
+5 Luật suy diễn (Modus Ponens):
+  Luật 1: Assign(i,j,v)        → Remove(i,j,v') ∀v' ≠ v
+  Luật 2: domain(i,j) = ∅      → Contradiction
+  Luật 3: domain(i,j) = {v}    → Assign(i,j,v)
+  Luật 4: Assign(i,j,v)        → Remove(i,c,v) ∀c≠j  (hàng)
+                                → Remove(r,j,v) ∀r≠i  (cột)
+  Luật 5: domain(i,j) thay đổi → lan truyền bất đẳng thức 4 hướng (AC-3)
+"""
 from collections import deque
 from typing import Callable, Deque, List, Optional, Set, Tuple
 
