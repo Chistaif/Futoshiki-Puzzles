@@ -2,6 +2,7 @@
 from src.domain.puzzle import PuzzleCase
 from src.solvers.solver import MAX_NODES_BACKTRACKING, Solver
 from typing import Callable, Optional
+from pathlib import Path
 
 
 StepCallback = Callable[[int, int, int], None]
@@ -168,6 +169,10 @@ class Backtracking(Solver):
         return False
     
     def write_output(self, filename: str, solved: bool = True):
+        output_dir = Path("Outputs")
+        output_dir.mkdir(exist_ok = True) 
+
+        file_path = output_dir / filename
         with open(filename, "w") as f:
                 if not solved:
                     f.write("No solution found.\n")
