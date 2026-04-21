@@ -166,8 +166,18 @@ class Backtracking(Solver):
                     step_callback(i, j, 0)
 
         return False
+    
+    def write_output(self, filename: str, solved: bool = True):
+        with open(filename, "w") as f:
+                if not solved:
+                    f.write("No solution found.\n")
+                    return
 
-    def solve(self, step_callback: Optional[StepCallback] = None):
+                f.write(f"Solution ({self.n}x{self.n}):\n")
+                for row in self.grid:
+                    f.write(" ".join(map(str, row)) + "\n")
+
+    def solve(self, output_file: str, step_callback: Optional[StepCallback] = None):
         """Hàm public để giải puzzle.
 
         Trả về:
@@ -175,5 +185,10 @@ class Backtracking(Solver):
         - None nếu không có nghiệm.
         """
         if self.backtrack(step_callback):
+            if output_file:
+                self.write_output(output_file)
             return self.grid
+        
+        if output_file:
+            self.write_output(output_file, solved = False)
         return None

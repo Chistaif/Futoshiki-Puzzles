@@ -143,6 +143,7 @@ class AISolverManager:
     ) -> None:
         try:
             input_file = case.name
+            output_file = input_file.replace("input", "output")
 
             def on_step(row: int, col: int, value: int) -> None:
                 if cancel_event.is_set():
@@ -166,7 +167,7 @@ class AISolverManager:
                 result = solver.run(case, step_callback=on_step, input_file=input_file)
             else:
                 solver = Backtracking(case)
-                result = solver.run(step_callback=on_step, input_file=input_file)
+                result = solver.run(step_callback=on_step, input_file=input_file, output_file = output_file)
 
             solved_grid = result.get("solution")
             stop_reason = result.get("stop_reason")
