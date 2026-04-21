@@ -177,7 +177,7 @@ class Backtracking(Solver):
                 for row in self.grid:
                     f.write(" ".join(map(str, row)) + "\n")
 
-    def solve(self, output_file: str, step_callback: Optional[StepCallback] = None):
+    def solve(self, step_callback: Optional[StepCallback] = None, output_file: Optional[str] = None):
         """Hàm public để giải puzzle.
 
         Trả về:

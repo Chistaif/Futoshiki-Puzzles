@@ -145,6 +145,9 @@ class AISolverManager:
             input_file = case.name
             output_file = input_file.replace("input", "output")
 
+            if not output_file.endswith(".txt"):
+                output_file += ".txt"
+
             def on_step(row: int, col: int, value: int) -> None:
                 if cancel_event.is_set():
                     raise RuntimeError("solver-cancelled")
