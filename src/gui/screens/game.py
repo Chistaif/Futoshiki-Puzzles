@@ -74,6 +74,7 @@ class GameScreen:
         self.ai_focus_backtrack = False
         self.ai_dirty_cells: set[Tuple[int, int]] = set()
         self.force_full_draw = True
+        self.ai_skip_requested = False
 
         self.ai_click_sound: Optional[pygame.mixer.Sound] = None
         self._init_audio()
@@ -125,6 +126,14 @@ class GameScreen:
             hover_color=(67, 145, 143),
             text_color=(240, 252, 250),
         )
+        self.skip_ai_button = Button(
+            pygame.Rect(0, 0, 98, 44),
+            "Skip",
+            self.button_font,
+            bg_color=COLOR_BUTTON,
+            hover_color=COLOR_BUTTON_HOVER,
+            text_color=COLOR_BUTTON_TEXT,
+        )
         self.timer = Timer()
 
     def _init_audio(self) -> None:
@@ -153,6 +162,10 @@ class GameScreen:
         self.layout_margin = max(16, int(self.surface_rect.width * 0.03))
 
         self.back_button.rect.topleft = (self.layout_margin, self.layout_margin)
+        self.skip_ai_button.rect.bottomright = (
+            self.surface_rect.width - self.layout_margin,
+            self.surface_rect.height - self.layout_margin,
+        )
 
         header_left = self.back_button.rect.right + 12
         header_width = max(130, self.surface_rect.width - self.layout_margin - header_left)
@@ -357,6 +370,12 @@ class GameScreen:
                 "solver_name": solver_key,
             }
 
+        if self._can_show_skip_button():
+            skip_clicked = self.skip_ai_button.handle_event(event)
+            if skip_clicked and self._is_skip_enabled():
+                self._skip_ai_animation()
+                return None
+
         if self.ai_manager.animating:
             return None
 
@@ -381,15 +400,22 @@ class GameScreen:
             on_finished=self._handle_ai_finished,
         )
 
+        if self.ai_skip_requested:
+            self._flush_pending_ai_steps()
+            if self.ai_manager.solver_done and not self.ai_manager.pending_steps:
+                self.ai_skip_requested = False
+
     def _reset_ai_animation(self) -> None:
         self.ai_manager.reset(wait_timeout=0.15)
         self.ai_dirty_cells.clear()
         self.force_full_draw = True
+        self.ai_skip_requested = False
         self._set_ai_focus(None, False)
 
     def start_ai_solver(self, case: PuzzleCase, solver_name: str = "backtracking") -> None:
         self.set_mode("ai")
         self.set_level(case.n, case.name)
+        self.ai_skip_requested = False
 
         active_case = self.current_case if self.current_case is not None else case
         try:
@@ -408,12 +434,15 @@ class GameScreen:
         if value != 0:
             self._play_ai_click()
 
-    def _handle_ai_finished(self, found_solution: bool) -> None:
+    def _handle_ai_finished(self, found_solution: bool, stop_reason: Optional[str] = None) -> None:
         self._set_ai_focus(None, False)
+        self.ai_skip_requested = False
         if found_solution and self.board_model.is_filled() and not self.invalid_positions:
             self._trigger_victory("Solved")
         elif found_solution:
             self.status_message = "Completed"
+        elif stop_reason:
+            self.status_message = stop_reason
         else:
             self.status_message = "No solution found"
         self.force_full_draw = True
@@ -425,6 +454,53 @@ class GameScreen:
             self.ai_click_sound.play()
         except pygame.error:
             pass
+
+    def _can_show_skip_button(self) -> bool:
+        return self.screen_mode == "ai" and not self.is_victory
+
+    def _is_skip_enabled(self) -> bool:
+        if not self._can_show_skip_button():
+            return False
+        # Skip only becomes available after solver finishes.
+        return self.ai_manager.solver_done
+
+    def _skip_ai_animation(self) -> None:
+        if not self._is_skip_enabled():
+            return
+        self.ai_skip_requested = True
+        self.status_message = f"Skipping animation ({self.ai_manager.solver_name})..."
+        self._flush_pending_ai_steps()
+        self.force_full_draw = True
+
+    def _draw_skip_button(self, surface: pygame.Surface) -> None:
+        if not self._can_show_skip_button():
+            return
+
+        if self._is_skip_enabled():
+            self.skip_ai_button.draw(surface)
+            return
+
+        # Disabled style (gray + no hover accent) while solver is not done.
+        original_bg = self.skip_ai_button.bg_color
+        original_hover = self.skip_ai_button.hover_color
+        original_text = self.skip_ai_button.text_color
+        original_hovered = self.skip_ai_button.is_hovered
+
+        self.skip_ai_button.bg_color = (130, 134, 142)
+        self.skip_ai_button.hover_color = (130, 134, 142)
+        self.skip_ai_button.text_color = (224, 226, 230)
+        self.skip_ai_button.is_hovered = False
+        self.skip_ai_button.draw(surface)
+
+        self.skip_ai_button.bg_color = original_bg
+        self.skip_ai_button.hover_color = original_hover
+        self.skip_ai_button.text_color = original_text
+        self.skip_ai_button.is_hovered = original_hovered
+
+    def _flush_pending_ai_steps(self) -> None:
+        while self.ai_manager.pending_steps:
+            row, col, value = self.ai_manager.pending_steps.popleft()
+            self._handle_ai_step(row, col, value)
 
     def render_step(self, row: int, col: int, value: int) -> None:
         """Apply one AI step and mark only impacted cells for incremental redraw."""
@@ -765,6 +841,9 @@ class GameScreen:
 
         surface.blit(case_surface, (left_x, self.header_rect.top + 4))
         surface.blit(status_surface, (left_x, self.header_rect.top + 24))
+
+        # Draw Skip last so it is never hidden by the header panel.
+        self._draw_skip_button(surface)
 
     def _draw_board(self, surface: pygame.Surface) -> None:
         board_shadow = self.board_rect.move(0, 10)

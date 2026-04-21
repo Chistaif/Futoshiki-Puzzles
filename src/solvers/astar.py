@@ -13,7 +13,7 @@ from itertools import count
 from typing import Callable, Deque, Dict, List, Optional, Set, Tuple
 
 from src.domain.puzzle import PuzzleCase
-from src.solvers.solver import Solver
+from src.solvers.solver import MAX_NODES_ASTAR, Solver
 
 
 StepCallback = Callable[[int, int, int], None]
@@ -43,6 +43,7 @@ class AStarSolver(Solver):
 		emit_search_trace: bool = False,
 	):
 		super().__init__(name="A* Search")
+		self.max_nodes = MAX_NODES_ASTAR
 		self.n = puzzle.n
 		self.grid = copy.deepcopy(puzzle.grid)
 		self.horizontal = puzzle.horizontal
@@ -90,6 +91,8 @@ class AStarSolver(Solver):
 				continue
 
 			self.increment_nodes()
+			if self.has_exceeded_max_nodes():
+				return None
 			closed.add(state)
 			if self._is_goal_state(state):
 				solved_grid = self._state_to_grid(state)

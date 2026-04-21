@@ -29,7 +29,7 @@ class MenuScreen:
         self.small_font = pygame.font.SysFont(FONT_FAMILY, FONT_BUTTON_SIZE - 8, bold=True)
 
         self.selected_ai_solver = "backtracking"
-        self.solver_options = ("backtracking", "backward", "forward", "astar", "sat")
+        self.solver_options = ("backtracking", "brute_force", "backward", "forward", "astar", "sat")
         self.solver_dropdown_open = False
         self.hovered_solver: Optional[str] = None
         self.solver_option_rects: list[tuple[str, pygame.Rect]] = []
@@ -83,6 +83,8 @@ class MenuScreen:
 
     @staticmethod
     def _format_solver_label(solver_name: str) -> str:
+        if solver_name == "brute_force":
+            return "Brute Force"
         if solver_name == "backward":
             return "Backward Chaining"
         if solver_name == "forward":

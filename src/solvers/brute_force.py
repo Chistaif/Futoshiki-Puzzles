@@ -1,8 +1,8 @@
-﻿from src.solvers.solver import Solver
+﻿from src.solvers.solver import MAX_NODES_BRUTE_FORCE, Solver
 from src.domain.puzzle import PuzzleCase
 import itertools
 import copy
-from typing import Optional
+from typing import Callable, Optional
 
 class BruteForceSolver(Solver):
     """Giải bài toán bằng thuật toán Brute Force THUẦN
@@ -15,6 +15,7 @@ class BruteForceSolver(Solver):
     """
     def __init__(self, puzzle: PuzzleCase):
         super().__init__(name = "BruteForceSolver")
+        self.max_nodes = MAX_NODES_BRUTE_FORCE
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.horizontal = puzzle.horizontal
@@ -58,7 +59,7 @@ class BruteForceSolver(Solver):
                     
         return True
     
-    def solve(self, step_callback = None) -> Optional[list]:
+    def solve(self, step_callback: Optional[Callable[[int, int, int], None]] = None) -> Optional[list]:
         """Brute Force Solver"""
 
         #find empty cell
@@ -77,6 +78,8 @@ class BruteForceSolver(Solver):
         #thử hết khả năng
         for assignment in itertools.product(values, repeat=len(empty_cells)):
             self.increment_nodes()
+            if self.has_exceeded_max_nodes():
+                return None
 
             #copy lại grid sau mỗi lần thử
             temp_grid = copy.deepcopy(original_grid)
@@ -84,6 +87,8 @@ class BruteForceSolver(Solver):
             #fill toan bo
             for (i, j), val in zip(empty_cells, assignment):
                 temp_grid[i][j] = val
+                if step_callback is not None:
+                    step_callback(i, j, val)
 
             #assign tạm vào self de reuse check
             self.grid = temp_grid
@@ -91,5 +96,10 @@ class BruteForceSolver(Solver):
             #Final -> check
             if self.is_valid():
                 return self.grid
+
+            # Visualize failed full assignment by clearing guessed cells.
+            if step_callback is not None:
+                for i, j in reversed(empty_cells):
+                    step_callback(i, j, 0)
         
         return None

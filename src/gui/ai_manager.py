@@ -15,13 +15,14 @@ from src.domain.puzzle import PuzzleCase
 from src.solvers.astar import AStarSolver
 from src.solvers.backward import BackwardSolver
 from src.solvers.backtrack import Backtracking
+from src.solvers.brute_force import BruteForceSolver
 from src.solvers.forward import ForwardBacktrackSolver
 from src.solvers.sat_solver import SATSolver
 
 
 StepHandler = Callable[[int, int, int], None]
 StatusHandler = Callable[[str], None]
-FinishHandler = Callable[[bool], None]
+FinishHandler = Callable[[bool, Optional[str]], None]
 
 
 class AISolverManager:
@@ -37,6 +38,7 @@ class AISolverManager:
         self.solver_running = False
         self.solver_done = False
         self.solver_found_solution = False
+        self.solver_stop_reason: Optional[str] = None
 
         self.solver_name = ""
         self.solver_key = "backtracking"
@@ -53,6 +55,7 @@ class AISolverManager:
         self.solver_running = False
         self.solver_done = False
         self.solver_found_solution = False
+        self.solver_stop_reason = None
         self.solver_name = ""
         self.event_queue = Queue()
 
@@ -63,6 +66,8 @@ class AISolverManager:
         normalized_solver = str(solver_name).strip().lower()
         if normalized_solver in ("a*", "a_star"):
             normalized_solver = "astar"
+        elif normalized_solver in ("bruteforce", "brute-force", "brute force"):
+            normalized_solver = "brute_force"
         elif normalized_solver in ("backward_chaining", "backward_solver"):
             normalized_solver = "backward"
         elif normalized_solver in ("forward_chaining", "dpll", "forward_solver"):
@@ -70,18 +75,20 @@ class AISolverManager:
         elif normalized_solver in ("sat", "sat_solver", "pysat"):
             normalized_solver = "sat"
 
-        if normalized_solver not in ("backtracking", "backward", "forward", "astar", "sat"):
+        if normalized_solver not in ("backtracking", "brute_force", "backward", "forward", "astar", "sat"):
             raise ValueError(f"Unsupported solver: {solver_name}")
 
         self.pending_steps = deque()
         self.step_elapsed = 0.0
         self.solver_done = False
         self.solver_found_solution = False
+        self.solver_stop_reason = None
         self.solver_running = True
         self.animating = True
         self.solver_key = normalized_solver
         solver_display_names = {
             "backtracking": "Backtracking",
+            "brute_force": "Brute Force",
             "backward": "Backward Chaining",
             "forward": "Forward Chaining",
             "astar": "A* Search",
@@ -110,7 +117,7 @@ class AISolverManager:
 
         if not self.pending_steps and self.solver_done:
             self.animating = False
-            on_finished(self.solver_found_solution)
+            on_finished(self.solver_found_solution, self.solver_stop_reason)
 
     def _start_ai_worker(self, case: PuzzleCase, solver_name: str) -> None:
         self._stop_ai_worker(wait_timeout=0.05)
@@ -135,6 +142,7 @@ class AISolverManager:
         cancel_event: threading.Event,
     ) -> None:
         try:
+            input_file = case.name
 
             def on_step(row: int, col: int, value: int) -> None:
                 if cancel_event.is_set():
@@ -143,25 +151,31 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
-                solved_grid = solver.run(step_callback=on_step)["solution"]
+                result = solver.run(step_callback=on_step, input_file=input_file)
+            elif solver_name == "brute_force":
+                solver = BruteForceSolver(case)
+                result = solver.run(step_callback=on_step, input_file=input_file)
             elif solver_name == "sat":
                 solver = SATSolver(case)
-                solved_grid = solver.run(step_callback=on_step)["solution"]
+                result = solver.run(step_callback=on_step, input_file=input_file)
             elif solver_name == "backward":
                 solver = BackwardSolver()
-                solved_grid = solver.run(case, step_callback=on_step)["solution"]
+                result = solver.run(case, step_callback=on_step, input_file=input_file)
             elif solver_name == "forward":
                 solver = ForwardBacktrackSolver()
-                solved_grid = solver.run(case, step_callback=on_step)["solution"]
+                result = solver.run(case, step_callback=on_step, input_file=input_file)
             else:
                 solver = Backtracking(case)
-                solved_grid = solver.run(step_callback=on_step)["solution"]
+                result = solver.run(step_callback=on_step, input_file=input_file)
+
+            solved_grid = result.get("solution")
+            stop_reason = result.get("stop_reason")
 
             if cancel_event.is_set():
                 event_queue.put(("cancelled", None))
                 return
 
-            event_queue.put(("done", solved_grid is not None))
+            event_queue.put(("done", {"found_solution": solved_grid is not None, "stop_reason": stop_reason}))
         except RuntimeError as exc:
             if str(exc) == "solver-cancelled":
                 event_queue.put(("cancelled", None))
@@ -192,13 +206,20 @@ class AISolverManager:
             if event_type == "done":
                 self.solver_running = False
                 self.solver_done = True
-                self.solver_found_solution = bool(payload)
+                if isinstance(payload, dict):
+                    self.solver_found_solution = bool(payload.get("found_solution", False))
+                    stop_reason = payload.get("stop_reason")
+                    self.solver_stop_reason = str(stop_reason) if stop_reason else None
+                else:
+                    self.solver_found_solution = bool(payload)
+                    self.solver_stop_reason = None
                 continue
 
             if event_type == "cancelled":
                 self.solver_running = False
                 self.solver_done = True
                 self.solver_found_solution = False
+                self.solver_stop_reason = None
                 self.pending_steps = deque()
                 self.animating = False
                 set_status("Solver cancelled")
@@ -208,6 +229,7 @@ class AISolverManager:
                 self.solver_running = False
                 self.solver_done = True
                 self.solver_found_solution = False
+                self.solver_stop_reason = None
                 self.pending_steps = deque()
                 self.animating = False
                 set_status(f"Solver error: {payload}")

@@ -1,12 +1,69 @@
 \subsection{Brute-force and Backtracking}
+
 \subsubsection{Idea}
-[Chèn nội dung tại đây]
+Brute-force is a straightforward approach that tries all possible assignments for the empty cells in the Futoshiki puzzle. For a puzzle of size $N \times N$, each empty cell can take a value from $1$ to $N$. The algorithm generates all possible combinations and checks whether they satisfy the constraints (row, column, and inequality constraints). However, this approach is highly inefficient due to the exponential number of possibilities.
+
+Backtracking is an optimized version of brute-force. Instead of generating all possible assignments, it builds the solution step by step and abandons a partial assignment as soon as it violates any constraint. At each step, the algorithm selects an empty cell, tries a valid value, and recursively proceeds to the next cell. If a conflict occurs, it backtracks and tries another value. This significantly reduces the search space compared to brute-force.
 
 \subsubsection{Pseudocode}
-[Chèn nội dung tại đây]
+\textbf{Brute-force:}
+\begin{algorithm}[H]
+\caption{Brute-force}
+\begin{algorithmic}[1]
+\State \textbf{function} BRUTE\_FORCE(grid):
+\State \hspace{1.5em} empty\_cells = list of all empty positions
+\State \hspace{1.5em} \textbf{for} each possible assignment of values to empty\_cells:
+\State \hspace{3em} fill grid with assignment
+\State \hspace{3em} \textbf{if} is\_valid(grid):
+\State \hspace{4.5em} \textbf{return} grid
+\State \hspace{1.5em} \textbf{return} failure
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Backtracking:}
+\begin{algorithm}[H]
+\caption{Backtracking}
+\begin{algorithmic}[1]
+\State \textbf{function} BACKTRACK(grid):
+\State \hspace{1.5em} \textbf{if} no empty cell:
+\State \hspace{3em} \textbf{return} grid
+\State
+\State \hspace{1.5em} (row, col) = find an empty cell
+\State
+\State \hspace{1.5em} \textbf{for} value from 1 to N:
+\State \hspace{3em} \textbf{if} is\_valid(row, col, value):
+\State \hspace{4.5em} grid[row][col] = value
+\State
+\State \hspace{4.5em} result = BACKTRACK(grid)
+\State \hspace{4.5em} \textbf{if} result != failure:
+\State \hspace{6em} \textbf{return} result
+\State
+\State \hspace{4.5em} grid[row][col] = empty
+\State
+\State \hspace{1.5em} \textbf{return} failure
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Illustration}
-[Chèn nội dung tại đây]
+Consider a $4 \times 4$ Futoshiki puzzle with some empty cells. 
+
+Brute-force will generate all possible combinations for the empty cells. For example, if there are $k$ empty cells, it will try up to $N^k$ assignments, checking each one against all constraints.
+
+Backtracking, on the other hand, fills the grid step by step. Suppose it assigns a value that violates a constraint (e.g., duplicates in a row or breaks an inequality). Instead of continuing, it immediately backtracks and tries another value. This pruning avoids exploring invalid branches of the search tree, making it much more efficient in practice.
 
 \subsubsection{Algorithm Analysis}
-[Chèn nội dung tại đây]
+\textbf{Brute-force Complexity:}
+The time complexity is $O(N^k)$, where $k$ is the number of empty cells. In the worst case (empty grid), this becomes $O(N^{N^2})$, which is infeasible for large $N$.
+
+\textbf{Backtracking Complexity:}
+The worst-case time complexity is still exponential, but significantly reduced in practice due to pruning. The actual performance depends on how early invalid assignments are detected.
+
+\textbf{Space Complexity:}
+Backtracking uses recursion, so the space complexity is $O(N^2)$ for the grid plus $O(N^2)$ for the recursion stack in the worst case.
+
+\textbf{Comparison:}
+\begin{itemize}
+    \item Brute-force explores all possibilities without pruning.
+    \item Backtracking prunes invalid states early, making it much more efficient.
+    \item Backtracking is the preferred method for solving constraint satisfaction problems like Futoshiki.
+\end{itemize}

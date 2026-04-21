@@ -2,7 +2,7 @@
 from typing import Callable, Optional, Dict, List, Tuple
 
 from src.kb.horn_converter import HornClause, HornConverter
-from src.solvers.solver import Solver
+from src.solvers.solver import MAX_NODES_BACKWARD_CHAINING, Solver
 from src.solvers.utils import subst, unify, is_variable
 
 StepCallback = Callable[[int, int, int], None]
@@ -23,6 +23,7 @@ def is_ground_expr(expr):
 class BackwardSolver(Solver):
     def __init__(self, name: Optional[str] = None):
         super().__init__(name)
+        self.max_nodes = MAX_NODES_BACKWARD_CHAINING
         self.memo = {}
         self.found_solution = False
         self.fact_index: Dict[str, List[HornClause]] = {}
@@ -181,6 +182,8 @@ class BackwardSolver(Solver):
             return True
 
         self.increment_nodes()
+        if self.has_exceeded_max_nodes():
+            return False
 
         for i in range(self.n):
             for j in range(self.n):
