@@ -190,10 +190,6 @@ class Backtracking(Solver):
         - None nếu không có nghiệm.
         """
         if self.backtrack(step_callback):
-            if output_file:
-                self.write_output(output_file)
             return self.grid
         
-        if output_file:
-            self.write_output(output_file, solved = False)
         return None
