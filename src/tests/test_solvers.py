@@ -25,6 +25,24 @@ CSV_FIELDNAMES = ["input_file", "solver", "solved", "time", "node_expanded", "me
 SOLVER_TIMEOUT_SECONDS = 180
 
 
+def _normalize_input_selector(value: str) -> str:
+    text = str(value).strip().lower()
+    if text.endswith(".txt"):
+        text = text[:-4]
+    return text
+
+
+def _matches_selected_input(input_path: Path, selected_input: str) -> bool:
+    selector = _normalize_input_selector(selected_input)
+    if selector in {"", "all", "*"}:
+        return True
+
+    input_stem = input_path.stem.lower()  # input-03
+    input_name = input_path.name.lower()  # input-03.txt
+    input_num = "".join(ch for ch in input_stem if ch.isdigit())  # 03
+    return selector in {input_stem, input_name, input_num}
+
+
 def _solver_name_for_algo(algo: str) -> str:
     names = {
         "backtracking": "Backtracking",
@@ -295,7 +313,11 @@ def test_solver_correctness(
     input_path: Path,
     selected_algorithms: tuple[str, ...],
     selected_algo: str,
+    selected_input: str,
 ) -> None:
+    if not _matches_selected_input(input_path, selected_input):
+        pytest.skip(f"Filtered by --input={selected_input}")
+
     puzzle = load_puzzle_case(input_path)
     executed = 0
     verified = 0
@@ -333,6 +355,10 @@ pytest -q test_solvers.py --algo sat
 pytest -q test_solvers.py --algo backtracking
 pytest -q test_solvers.py --algo a_star
 pytest -q test_solvers.py --algo brute_force
+Chạy 1 thuật toán với 1 input cụ thể:
+pytest -q test_solvers.py --algo forward_chaining --input input-03.txt
+pytest -q test_solvers.py --algo sat --input input-10
+pytest -q test_solvers.py --algo backtracking --input 01
 Chạy tất cả thuật toán:
 pytest -q test_solvers.py --algo all
 """
