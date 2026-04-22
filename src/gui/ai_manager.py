@@ -167,7 +167,7 @@ class AISolverManager:
                 solver = BackwardSolver()
                 result = solver.run(case, step_callback=on_step, input_file=input_file, output_file = output_file)
             elif solver_name == "forward":
-                solver = ForwardBacktrackSolver()
+                solver = ForwardSolver()
                 result = solver.run(case, step_callback=on_step, input_file=input_file)
                 solver = ForwardSolver()
                 result = solver.run(case, step_callback=on_step, input_file=input_file, output_file = output_file)
