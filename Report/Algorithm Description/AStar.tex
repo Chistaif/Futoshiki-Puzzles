@@ -15,7 +15,7 @@ The transition model assigns one value to one unfilled cell. To reduce branching
 
 This design combines informed search (A*) with CSP-style filtering (MRV + AC-3), making the exploration significantly more directed than naive uninformed expansion.
 
-\subsubsection{Heuristic Function and Admissibility}
+\subsubsection{Heuristic Function and Admissibility Proof}
 Let \(U(s)\) be the number of unassigned cells in state \(s\). We choose:
 \[
 h(s)=U(s).

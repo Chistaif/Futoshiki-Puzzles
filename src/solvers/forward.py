@@ -393,9 +393,9 @@ class ForwardSolver(Solver):
             for i in range(self.n)
         ]
     def run(self, case: PuzzleCase, step_callback=None, input_file=None, output_file=None):
-        solution = self.solve(case, step_callback=step_callback)
-
-        return {
-            "solution": solution,
-            "stop_reason": None if solution else "No solution found"
-        }
+        return super().run(
+            case,
+            step_callback=step_callback,
+            input_file=input_file,
+            output_file=output_file,
+        )

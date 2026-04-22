@@ -1,0 +1,70 @@
+\subsection{GUI}
+\subsubsection{Overview}
+The graphical user interface is implemented with \texttt{pygame} and organized into a small set of reusable screens and components. The goal of the GUI is not only to display the puzzle board, but also to provide a smooth workflow for selecting a puzzle, switching between manual play and AI solving, observing solver progress, and reviewing the final result.
+
+The code is split into three main layers. First, \texttt{constants.py} defines the global visual system, including colors, fonts, screen size, and board layout presets. Second, \texttt{components.py} provides reusable primitives such as rounded buttons, board cells, and the in-game timer. Third, the \texttt{screens} package contains the actual application states: main menu, level selection, deal/input selection, and gameplay.
+
+\subsubsection{Screen Flow}
+The GUI follows a simple state machine driven by transitions returned from each screen handler.
+\begin{itemize}
+    \item \textbf{Menu screen}: presents three actions, namely Play, AI Solver, and Exit. The AI Solver button opens a dropdown list of supported solvers.
+    \item \textbf{Level selection screen}: lets the user choose the puzzle size from the available input sets. The layout adapts to the window width and automatically reorganizes buttons into one or more columns.
+    \item \textbf{Deal/input selection screen}: supports a two-step selection flow. The user first chooses the board size, then selects a concrete input file for that size.
+    \item \textbf{Game screen}: loads the selected puzzle, renders the board, accepts manual input, and optionally runs an AI solver with step-by-step animation.
+\end{itemize}
+
+This separation keeps navigation logic independent from rendering logic and makes the interface easy to extend.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/gui_screen.png}
+    \caption{GUI screen flow from menu to gameplay.}
+    \label{fig:gui-screen-flow}
+\end{figure}
+
+\subsubsection{Gameplay Interface}
+The main gameplay screen is responsible for most of the interaction features. It builds a grid of \texttt{Cell} objects from the current puzzle state, marks clue cells as immutable, and highlights the currently selected cell. Invalid entries are detected by the board model and reflected immediately through the cell styling.
+
+User interaction follows standard puzzle controls:
+\begin{itemize}
+    \item clicking a cell selects it;
+    \item number keys \(1\) to \(N\) assign values to the selected non-clue cell;
+    \item Backspace, Delete, or 0 clears a cell;
+    \item the timer starts when a puzzle is loaded and stops when the board is solved or the user leaves the game.
+\end{itemize}
+
+The game screen also draws inequality symbols between adjacent cells and updates their color according to whether the relation is currently satisfied. When the board becomes valid and complete, a victory dialog is displayed with the final time and move count.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/gameplay.png}
+    \caption{Main gameplay interface in manual mode.}
+    \label{fig:gui-gameplay}
+\end{figure}
+
+\subsubsection{AI Solver Visualization}
+AI execution is managed by the \texttt{AISolverManager} class. Instead of running the solver directly on the render thread, the manager starts a worker thread, streams solver steps through a queue, and applies them incrementally in the GUI. This design prevents the interface from freezing during search and makes the solving process observable.
+
+The manager normalizes solver names, maps them to the available algorithms, and reports status messages such as thinking, backtracking, cancelled, or solver error. Each emitted step is applied to the board one by one, and the impacted cells are redrawn so that animation remains responsive even for larger boards.
+
+Several details improve the AI viewing experience:
+\begin{itemize}
+    \item the currently touched cell is highlighted during solver progress;
+    \item backtracking steps are shown with a distinct color to differentiate them from forward assignments;
+    \item the user can skip the remaining animation after the solver finishes;
+    \item when a solution is found, the board is validated again before the victory state is shown.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{image/ai_solver.png}
+    \caption{Step-by-step AI solver visualization on the game screen.}
+    \label{fig:gui-ai-animation}
+\end{figure}
+
+\subsubsection{Visual Design}
+The GUI uses a consistent visual system across screens. Colors and layout constants are centralized so that the appearance stays coherent from the menu to the gameplay view. Background rendering is handled by shared helper functions, which either load a background image or fall back to a soft textured pattern.
+
+The reusable \texttt{Button} component provides rounded corners, a soft shadow, and hover feedback. This allows the menu, selection screens, and victory dialog to share the same interaction style. As a result, the interface remains compact but still visually clear when moving between the different states of the application.
+
+Overall, the GUI serves as the presentation layer of the project: it connects puzzle loading, manual input, and solver execution into one unified experience while keeping the implementation modular enough for future extensions.

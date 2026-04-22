@@ -1,4 +1,11 @@
 input_file,solver,solved,time,node_expanded,memory
+
+input-01.txt,BackwardSolver,True,0.132364700002654,15,1.6891632080078125
+input-02.txt,BackwardSolver,True,0.19704400000046007,17,2.1442794799804688
+input-03.txt,BackwardSolver,True,3.3696134999991045,185,33.093772888183594
+input-04.txt,BackwardSolver,True,0.6131720000012137,27,7.305183410644531
+input-05.txt,BackwardSolver,True,117.0573218999998,2299,917.4132308959961
+input-06.txt,BackwardSolver,True,16.946794200001023,395,143.3330841064453
 input-01.txt,Forward Chaining,True,0.0007122999995772261,109,0.011322021484375
 input-02.txt,Forward Chaining,True,0.0007458000000042375,122,0.01197052001953125
 input-03.txt,Forward Chaining,True,0.004075799999554874,685,0.045989990234375
@@ -39,15 +46,3 @@ input-07.txt,BruteForceSolver,SKIPPED,0.0,0,0.0
 input-08.txt,BruteForceSolver,SKIPPED,0.0,0,0.0
 input-09.txt,BruteForceSolver,SKIPPED,0.0,0,0.0
 input-10.txt,BruteForceSolver,SKIPPED,0.0,0,0.0
-
-
-input-01.txt,BackwardSolver,True,0.11780490000091959,15,1.7001323699951172
-input-02.txt,BackwardSolver,True,0.1685505000023113,17,2.3462352752685547
-input-03.txt,BackwardSolver,True,3.099089499999536,185,33.33380699157715
-input-04.txt,BackwardSolver,True,0.5448055000015302,27,7.545209884643555
-input-05.txt,BackwardSolver,True,92.89185070000167,2299,917.6569890975952
-input-06.txt,BackwardSolver,True,14.023870299999544,395,143.57308101654053
-input-07.txt,BackwardSolver,time_out,180.0,2180,1813.871283531189
-input-08.txt,BackwardSolver,True,140.02287520000027,2162,1203.446265220642
-input-09.txt,BackwardSolver,True,1.3285983999994642,36,22.735456466674805
-input-10.txt,BackwardSolver,True,1.4657330000009097,40,23.348142623901367
