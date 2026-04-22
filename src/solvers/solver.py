@@ -37,7 +37,7 @@ class Solver(ABC):
         self.memory_used: Optional[float] = None
         self.stop_reason: Optional[str] = None
 
-    def run(self, *args, input_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    def run(self, *args, input_file: Optional[str] = None, output_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         """
         Wrapper cho mọi solver.
         """
@@ -48,7 +48,7 @@ class Solver(ABC):
         tracemalloc.start()
         start_time = time.perf_counter()
 
-        solution = self.solve(*args, **kwargs)
+        solution = self.solve(*args, output_file = output_file, **kwargs)
 
         end_time = time.perf_counter()
         current, peak = tracemalloc.get_traced_memory()
