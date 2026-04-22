@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  22 APR 2026 21:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  23 APR 2026 00:42
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -700,7 +700,7 @@ Package hyperref Info: Link coloring OFF on input line 47.
 \openout3 = `main.out'.
 
  (cover.tex
-<image/hcmus-logo.png, id=255, 597.9138pt x 597.9138pt>
+<image/hcmus-logo.png, id=275, 597.9138pt x 597.9138pt>
 File: image/hcmus-logo.png Graphic file (type png)
 <use image/hcmus-logo.png>
 Package pdftex.def Info: image/hcmus-logo.png  used on input line 4.
@@ -709,19 +709,28 @@ Package pdftex.def Info: image/hcmus-logo.png  used on input line 4.
 
 {C:/Users/LENOVO/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./image/hcmus-logo.png>]) (main.toc [1
 
-])
+]
+Underfull \hbox (badness 1005) in paragraph at lines 85--85
+ [][] [][]\T5/cmr/m/n/12 Trade-off Anal-y-sis (Im-ple-men-ta-tion Com-plex-ity vs 
+ []
+
+[2])
 \tf@toc=\write4
 \openout4 = `main.toc'.
 
- [2] (main.lot)
+ [3] (main.lot
+LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 6.
+ (C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
+File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+))
 \tf@lot=\write5
 \openout5 = `main.lot'.
 
- [3] (main.lof)
+ [4] (main.lof)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [4]
+ [5]
 Underfull \hbox (badness 1803) in paragraph at lines 67--68
 \T5/cmr/m/n/12 knowledge-base con-struc-tion, solver im-ple-men-ta-tions, and a GUI for
  []
@@ -770,10 +779,7 @@ Overfull \hbox (53.04247pt too wide) in alignment at lines 17--19
  [] [] [] 
  []
 
-LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 26.
-(C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
-File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
+
 Underfull \hbox (badness 1796) in paragraph at lines 30--30
 []|\T5/cmr/m/n/10.95 Brute-force and 
  []
@@ -1261,7 +1267,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [32]
-<image/gui_screen.png, id=578, 986.9372pt x 346.29375pt>
+<image/gui_screen.png, id=618, 986.9372pt x 346.29375pt>
 File: image/gui_screen.png Graphic file (type png)
 <use image/gui_screen.png>
 Package pdftex.def Info: image/gui_screen.png  used on input line 20.
@@ -1275,7 +1281,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [33 <./image/gui_screen.png>]
-<image/gameplay.png, id=584, 523.9575pt x 822.07124pt>
+<image/gameplay.png, id=624, 523.9575pt x 822.07124pt>
 File: image/gameplay.png Graphic file (type png)
 <use image/gameplay.png>
 Package pdftex.def Info: image/gameplay.png  used on input line 40.
@@ -1297,7 +1303,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [35 <./image/gameplay.png>]
-<image/ai_solver.png, id=594, 523.9575pt x 820.56563pt>
+<image/ai_solver.png, id=634, 523.9575pt x 820.56563pt>
 File: image/ai_solver.png Graphic file (type png)
 <use image/ai_solver.png>
 Package pdftex.def Info: image/ai_solver.png  used on input line 60.
@@ -1326,7 +1332,86 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[38]) (Conclusion.tex
+[38]
+Overfull \hbox (0.44867pt too wide) in paragraph at lines 31--32
+\T5/cmr/m/n/12 ag-gre-gate mean and me-dian val-ues per solver. Fol-low-ing the graph-generation
+ []
+
+
+Overfull \hbox (108.4298pt too wide) in paragraph at lines 38--50
+ [][] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[39]
+<image/grouped_bar_runtime.png, id=656, 1129.821pt x 554.5518pt>
+File: image/grouped_bar_runtime.png Graphic file (type png)
+<use image/grouped_bar_runtime.png>
+Package pdftex.def Info: image/grouped_bar_runtime.png  used on input line 59.
+(pdftex.def)             Requested size: 370.49881pt x 181.85185pt.
+<image/line_memory_vs_time.png, id=658, 840.2592pt x 555.2745pt>
+File: image/line_memory_vs_time.png Graphic file (type png)
+<use image/line_memory_vs_time.png>
+Package pdftex.def Info: image/line_memory_vs_time.png  used on input line 72.
+(pdftex.def)             Requested size: 312.00119pt x 206.177pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[40 <./image/grouped_bar_runtime.png>]
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[41 <./image/line_memory_vs_time.png>]
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[42]
+Overfull \hbox (0.81694pt too wide) in paragraph at lines 104--104
+|[]\T5/cmr/bx/n/12 Trade-off Anal-y-sis (Im-ple-men-ta-tion Com-plex-ity vs Prac-ti-cal
+ []
+
+<image/radar_solver_performance.png, id=676, 698.1282pt x 423.0204pt>
+File: image/radar_solver_performance.png Graphic file (type png)
+<use image/radar_solver_performance.png>
+Package pdftex.def Info: image/radar_solver_performance.png  used on input line 109.
+(pdftex.def)             Requested size: 350.99762pt x 212.678pt.
+
+Underfull \hbox (badness 1102) in paragraph at lines 117--118
+[]\T5/cmr/bx/n/12 Backtracking\T5/cmr/m/n/12 : mod-er-ate im-ple-men-ta-tion com-plex-ity, strong for
+ []
+
+
+Underfull \hbox (badness 2582) in paragraph at lines 119--120
+\T5/cmr/m/n/12 heuris-tic, con-sis-tency checks), very good search ef-fi-ciency and
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[43 <./image/radar_solver_performance.png>]) (Conclusion.tex
 Underfull \hbox (badness 1033) in paragraph at lines 4--5
 \T5/cmr/m/n/12 for re-pro-ducibil-ity and ex-ten-sion, in-clud-ing stan-dard-ized in-put/output
  []
@@ -1344,7 +1429,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[39])
+[44])
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1352,26 +1437,26 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[40] (main.aux)
+[45] (main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 943C669D9E9952B991D8329DBD5E6E00;9934.
+(rerunfilecheck)             Checksum: 2D119F33B03FF805D457799BEF1D1F3A;11242.
  ) 
 Here is how much of TeX's memory you used:
- 15054 strings out of 467691
- 245426 string characters out of 5414503
- 671706 words of memory out of 5000000
- 43668 multiletter control sequences out of 15000+600000
- 652794 words of font info for 83 fonts, out of 8000000 for 9000
+ 15106 strings out of 467691
+ 246730 string characters out of 5414503
+ 673072 words of memory out of 5000000
+ 43703 multiletter control sequences out of 15000+600000
+ 653370 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,14n,79p,637b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\LENOVO\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vncsc10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on main.pdf (45 pages, 1087601 bytes).
+ 75i,14n,79p,857b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\LENOVO\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vncsc10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
+Output written on main.pdf (51 pages, 1996902 bytes).
 PDF statistics:
- 743 PDF objects out of 1000 (max. 8388607)
- 183 named destinations out of 1000 (max. 500000)
- 525 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 826 PDF objects out of 1000 (max. 8388607)
+ 200 named destinations out of 1000 (max. 500000)
+ 580 words of extra memory for PDF output out of 10000 (max. 10000000)
 
