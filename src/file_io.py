@@ -5,6 +5,8 @@ from typing import List, Optional, Tuple
 
 from src.domain.puzzle import PuzzleCase
 
+from src.solvers.solver import PROJECT_ROOT
+
 
 def _parse_csv_ints(raw_line: str) -> List[int]:
     parts = [part.strip() for part in raw_line.split(",")]
@@ -93,14 +95,46 @@ def readFile(file_name: str) -> Optional[Tuple[int, List[List[int]], List[List[i
     return case.n, case.grid, case.horizontal, case.vertical
 
 
-def write_output(file_name: str, grid: List[List[int]]) -> Path:
-    """Write solved grid to Source/Outputs/<file_name>."""
-    root_path = Path(__file__).resolve().parents[1]
-    output_dir = root_path / "Outputs"
-    output_dir.mkdir(parents=True, exist_ok=True)
+def write_output(n : int, grid, horizontal, vertical, filename: str):
+        output_dir = PROJECT_ROOT / "Outputs"
+        output_dir.mkdir(exist_ok=True)
 
-    output_path = output_dir / file_name
-    lines = [",".join(str(value) for value in row) for row in grid]
-    output_path.write_text("\n".join(lines), encoding="utf-8")
-    return output_path
+        file_path = output_dir / filename
+
+        with open(file_path, "w") as f:
+
+            for i in range(n):
+                # ===== In dòng số + horizontal =====
+                row_str = ""
+                for j in range(n):
+                    row_str += str(grid[i][j])
+
+                    if j < n - 1:
+                        sign = horizontal[i][j]
+                        if sign == 1:
+                            row_str += " < "
+                        elif sign == -1:
+                            row_str += " > "
+                        else:
+                            row_str += "   "
+
+                f.write(row_str + "\n")
+
+                # ===== In dòng vertical (trừ dòng cuối) =====
+                if i < n - 1:
+                    col_str = ""
+                    for j in range(n):
+                        sign = vertical[i][j]
+
+                        if sign == 1:
+                            col_str += "^"
+                        elif sign == -1:
+                            col_str += "v"
+                        else:
+                            col_str += " "
+
+                        if j < n - 1:
+                            col_str += "   "
+
+                    f.write(col_str + "\n")
 

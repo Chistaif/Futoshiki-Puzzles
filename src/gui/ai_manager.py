@@ -18,6 +18,7 @@ from src.solvers.backtrack import Backtracking
 from src.solvers.brute_force import BruteForceSolver
 from src.solvers.forward import ForwardBacktrackSolver
 from src.solvers.sat_solver import SATSolver
+from src.file_io import write_output
 
 
 StepHandler = Callable[[int, int, int], None]
@@ -155,25 +156,28 @@ class AISolverManager:
 
             if solver_name == "astar":
                 solver = AStarSolver(case, use_ac3=True, emit_search_trace=True)
-                result = solver.run(step_callback=on_step, input_file=input_file)
+                result = solver.run(step_callback=on_step, input_file=input_file, output_file = output_file)
             elif solver_name == "brute_force":
                 solver = BruteForceSolver(case)
-                result = solver.run(step_callback=on_step, input_file=input_file)
+                result = solver.run(step_callback=on_step, input_file=input_file, output_file = output_file)
             elif solver_name == "sat":
                 solver = SATSolver(case)
                 result = solver.run(step_callback=on_step, input_file=input_file)
             elif solver_name == "backward":
                 solver = BackwardSolver()
-                result = solver.run(case, step_callback=on_step, input_file=input_file)
+                result = solver.run(case, step_callback=on_step, input_file=input_file, output_file = output_file)
             elif solver_name == "forward":
                 solver = ForwardBacktrackSolver()
-                result = solver.run(case, step_callback=on_step, input_file=input_file)
+                result = solver.run(case, step_callback=on_step, input_file=input_file, output_file = output_file)
             else:
                 solver = Backtracking(case)
                 result = solver.run(step_callback=on_step, input_file=input_file, output_file = output_file)
 
             solved_grid = result.get("solution")
             stop_reason = result.get("stop_reason")
+
+            if solved_grid:
+                write_output(case.n, solved_grid, case.horizontal, case.vertical, output_file)
 
             if cancel_event.is_set():
                 event_queue.put(("cancelled", None))
