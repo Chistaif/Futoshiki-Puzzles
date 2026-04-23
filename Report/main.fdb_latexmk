@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1776879722.62529 "c:/Users/LENOVO/Downloads/2025-26/HOC KI 2/INTRODUCTION TO AI/Project2/Futoshiki-Puzzles/Report/main.tex" "main.pdf" "main" 1776879725.34503 0
+["pdflatex"] 1776911296.02311 "c:/Users/LENOVO/Downloads/2025-26/HOC KI 2/INTRODUCTION TO AI/Project2/Futoshiki-Puzzles/Report/main.tex" "main.pdf" "main" 1776911298.69896 0
   "Algorithm Description/AStar.tex" 1776848604 5753 b7ac965644d9d81603326bf4f6b9cffc ""
   "Algorithm Description/Backward.tex" 1776868133 11136 b786fca417c7359c5bda724d9635257f ""
   "Algorithm Description/Brute-force_backtracking.tex" 1776757764 3805 d774cd71c0ddbf2488a15aa169dade17 ""
@@ -137,7 +137,7 @@
   "C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/tex/latex/vntex/t5enc.def" 1368738347 21986 ccb3b8f7cc27fbd61b3daabbbb82ad3f ""
   "C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/tex/latex/vntex/t5enc.dfu" 1368738347 13949 387dd4fa58aea5f873839c93430fffed ""
   "Conclusion.tex" 1776757764 1058 f7e15ce5c3888b1876f6a010e9f06812 ""
-  "Experiments.tex" 1776879298 10203 f5483fe8c88ca17dbd9a52ff19ce88f3 ""
+  "Experiments.tex" 1776911289 11102 0dadfd7f1534456010a0006381668ece ""
   "Planning.tex" 1776757764 6700 4e914bf3a233a306b86d2d9fe5aabafe ""
   "Problem Formulation.tex" 1776757764 8336 6a2e1d197ee2b09c3069945cedb3e50d ""
   "References.tex" 1776879722 160 191a56049f7ac8c1c786979a496ab607 ""
@@ -151,12 +151,12 @@
   "image/hcmus-logo.png" 1776673398 258629 122747e63e393f11b7f15571540c7d20 ""
   "image/line_memory_vs_time.png" 1776878346 254274 34634d48100d759c3b8d0b54ffc52c42 ""
   "image/radar_solver_performance.png" 1776878347 444355 d3b483554eb984af30ca0513fb7bdcd6 ""
-  "main.aux" 1776879725 17607 900df01e71fea5c5522a4acf608886e2 "pdflatex"
-  "main.lof" 1776879725 815 734df453f4dde47a11ccfa4f7ddbb40b "pdflatex"
-  "main.lot" 1776879725 615 0cac820fbde77639b51ca5caca83f258 "pdflatex"
-  "main.out" 1776879725 11242 2d119f33b03ff805d457799bef1d1f3a "pdflatex"
+  "main.aux" 1776911298 17607 8eb6b28c9b483d3cc5ca19847c5a5b7b "pdflatex"
+  "main.lof" 1776911298 815 734df453f4dde47a11ccfa4f7ddbb40b "pdflatex"
+  "main.lot" 1776911298 615 0cac820fbde77639b51ca5caca83f258 "pdflatex"
+  "main.out" 1776911298 11242 2d119f33b03ff805d457799bef1d1f3a "pdflatex"
   "main.tex" 1776848628 4202 5ffb4464b47ddffc6d77b8c4f8aecc96 ""
-  "main.toc" 1776879725 7904 8fe260c2dfe9d8b4cf1db85f1a642cc7 "pdflatex"
+  "main.toc" 1776911298 7904 45ffe99cc75fd2cc7e0ceed41b99af5f "pdflatex"
   (generated)
   "main.aux"
   "main.lof"

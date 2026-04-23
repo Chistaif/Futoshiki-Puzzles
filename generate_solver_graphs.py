@@ -23,18 +23,11 @@ def extract_input_order(values: List[str]) -> List[str]:
     return unique_values
 
 
-def save_figure(fig: plt.Figure, filename: str, output_graph_dir: Path, report_image_dir: Path) -> None:
-    """Lưu biểu đồ ở cả thư mục src/graph và Report/image."""
-    output_graph_dir.mkdir(parents=True, exist_ok=True)
-    report_image_dir.mkdir(parents=True, exist_ok=True)
-
-    graph_path = output_graph_dir / filename
-    report_path = report_image_dir / filename
-
-    # Bản thông thường lưu ở src/graph
-    fig.savefig(graph_path, bbox_inches="tight")
-    # Bản chất lượng cao 300 DPI lưu ở Report/image
-    fig.savefig(report_path, dpi=300, bbox_inches="tight")
+def save_figure(fig: plt.Figure, filename: str, output_dir: Path) -> None:
+    """Lưu biểu đồ một lần vào thư mục output."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / filename
+    fig.savefig(output_path, bbox_inches="tight")
 
 
 def prepare_data(csv_path: Path) -> pd.DataFrame:
@@ -53,7 +46,7 @@ def prepare_data(csv_path: Path) -> pd.DataFrame:
     return df
 
 
-def plot_grouped_runtime(df: pd.DataFrame, palette: dict, output_graph_dir: Path, report_image_dir: Path) -> None:
+def plot_grouped_runtime(df: pd.DataFrame, palette: dict, output_dir: Path) -> None:
     """Grouped Bar Chart so sánh runtime theo input_file và solver (trục Y log)."""
     runtime_df = df[df["time"] > 0].copy()
     input_order = extract_input_order(runtime_df["input_file"].tolist())
@@ -77,11 +70,11 @@ def plot_grouped_runtime(df: pd.DataFrame, palette: dict, output_graph_dir: Path
     ax.legend(title="Solver", bbox_to_anchor=(1.02, 1), loc="upper left")
 
     fig.tight_layout()
-    save_figure(fig, "grouped_bar_runtime.png", output_graph_dir, report_image_dir)
+    save_figure(fig, "grouped_bar_runtime.png", output_dir)
     plt.close(fig)
 
 
-def plot_memory_vs_time(df: pd.DataFrame, palette: dict, output_graph_dir: Path, report_image_dir: Path) -> None:
+def plot_memory_vs_time(df: pd.DataFrame, palette: dict, output_dir: Path) -> None:
     """Line chart thể hiện trade-off giữa thời gian chạy và bộ nhớ."""
     tradeoff_df = df[df["time"] > 0].copy()
 
@@ -108,11 +101,11 @@ def plot_memory_vs_time(df: pd.DataFrame, palette: dict, output_graph_dir: Path,
     ax.legend(title="Solver", bbox_to_anchor=(1.02, 1), loc="upper left")
 
     fig.tight_layout()
-    save_figure(fig, "line_memory_vs_time.png", output_graph_dir, report_image_dir)
+    save_figure(fig, "line_memory_vs_time.png", output_dir)
     plt.close(fig)
 
 
-def plot_radar_performance(df: pd.DataFrame, palette: dict, output_graph_dir: Path, report_image_dir: Path) -> None:
+def plot_radar_performance(df: pd.DataFrame, palette: dict, output_dir: Path) -> None:
     """Radar chart cho trung bình time/memory/node_expanded với chuẩn hóa đảo chiều (lower is better)."""
     radar_df = df[df["time"] > 0].copy()
 
@@ -175,20 +168,23 @@ def plot_radar_performance(df: pd.DataFrame, palette: dict, output_graph_dir: Pa
     ax.legend(title="Solver", bbox_to_anchor=(1.2, 1.1), loc="upper left")
 
     fig.tight_layout()
-    save_figure(fig, "radar_solver_performance.png", output_graph_dir, report_image_dir)
+    save_figure(fig, "radar_solver_performance.png", output_dir)
     plt.close(fig)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate solver performance graphs from solved.csv")
     parser.add_argument("--csv", default="solved.csv", help="Path to solved.csv")
-    parser.add_argument("--out", default="src/graph/standard", help="Output directory for standard charts")
-    parser.add_argument("--report-image", default="src/graph/hires", help="Output directory for 300 DPI charts")
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Output directory for charts (default: same level as main.py)",
+    )
     args = parser.parse_args()
 
     csv_path = Path(args.csv)
-    output_graph_dir = Path(args.out)
-    report_image_dir = Path(args.report_image)
+    project_root = Path(__file__).resolve().parent
+    output_dir = Path(args.out) if args.out else project_root
 
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV file not found: {csv_path}")
@@ -198,13 +194,12 @@ def main() -> None:
     palette_colors = sns.color_palette("tab10", n_colors=max(len(solver_order), 3))
     palette = {solver: palette_colors[i] for i, solver in enumerate(solver_order)}
 
-    plot_grouped_runtime(df, palette, output_graph_dir, report_image_dir)
-    plot_memory_vs_time(df, palette, output_graph_dir, report_image_dir)
-    plot_radar_performance(df, palette, output_graph_dir, report_image_dir)
+    plot_grouped_runtime(df, palette, output_dir)
+    plot_memory_vs_time(df, palette, output_dir)
+    plot_radar_performance(df, palette, output_dir)
 
     print("✓ Biểu đồ đã được tạo thành công (Graphs generated successfully)")
-    print(f"  - Standard: {output_graph_dir.resolve()}")
-    print(f"  - 300 DPI (High Resolution): {report_image_dir.resolve()}")
+    print(f"  - Output: {output_dir.resolve()}")
 
 
 if __name__ == "__main__":

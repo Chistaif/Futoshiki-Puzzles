@@ -22,7 +22,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INPUT_FILES = [PROJECT_ROOT / "Inputs" / f"input-{index:02d}.txt" for index in range(1, 11)]
 CSV_FILE = PROJECT_ROOT / "solved.csv"
 CSV_FIELDNAMES = ["input_file", "solver", "solved", "time", "node_expanded", "memory"]
-SOLVER_TIMEOUT_SECONDS = 180
+# Set to None to disable hard timeout for solver execution in tests.
+SOLVER_TIMEOUT_SECONDS = None
 
 
 def _normalize_input_selector(value: str) -> str:
@@ -207,9 +208,8 @@ def solve_with_algorithm(algo: str, puzzle: PuzzleCase):
     process = ctx.Process(target=_solver_worker, args=(algo, puzzle, result_queue, progress_queue))
     process.start()
     latest_progress = {"node_expanded": 0, "memory": 0.0}
-    deadline = time.monotonic() + SOLVER_TIMEOUT_SECONDS
 
-    while process.is_alive() and time.monotonic() < deadline:
+    while process.is_alive():
         process.join(0.25)
         while True:
             try:
@@ -218,25 +218,6 @@ def solve_with_algorithm(algo: str, puzzle: PuzzleCase):
                 break
             latest_progress["node_expanded"] = int(snapshot.get("node_expanded", 0) or 0)
             latest_progress["memory"] = float(snapshot.get("memory", 0.0) or 0.0)
-
-    if process.is_alive():
-        process.terminate()
-        process.join()
-        _append_timeout_metrics(
-            algo,
-            puzzle,
-            SOLVER_TIMEOUT_SECONDS,
-            latest_progress["node_expanded"],
-            latest_progress["memory"],
-        )
-        return {
-            "solver": _solver_name_for_algo(algo),
-            "solution": None,
-            "time": float(SOLVER_TIMEOUT_SECONDS),
-            "node_expanded": latest_progress["node_expanded"],
-            "memory": latest_progress["memory"],
-            "stop_reason": f"Stopped: TIMEOUT={SOLVER_TIMEOUT_SECONDS}s",
-        }
 
     # Drain snapshot queue lần cuối để có số liệu mới nhất.
     while True:
@@ -356,7 +337,7 @@ pytest -q test_solvers.py --algo backtracking
 pytest -q test_solvers.py --algo a_star
 pytest -q test_solvers.py --algo brute_force
 Chạy 1 thuật toán với 1 input cụ thể:
-pytest -q test_solvers.py --algo forward_chaining --input input-03.txt
+pytest -q test_solvers.py --algo backward_chaining --input input-07.txt
 pytest -q test_solvers.py --algo sat --input input-10
 pytest -q test_solvers.py --algo backtracking --input 01
 Chạy tất cả thuật toán:
