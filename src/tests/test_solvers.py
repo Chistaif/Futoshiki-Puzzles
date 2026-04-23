@@ -22,8 +22,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INPUT_FILES = [PROJECT_ROOT / "Inputs" / f"input-{index:02d}.txt" for index in range(1, 11)]
 CSV_FILE = PROJECT_ROOT / "solved.csv"
 CSV_FIELDNAMES = ["input_file", "solver", "solved", "time", "node_expanded", "memory"]
-# Set to None to disable hard timeout for solver execution in tests.
-SOLVER_TIMEOUT_SECONDS = None
+SOLVER_TIMEOUT_SECONDS = 180
 
 
 def _normalize_input_selector(value: str) -> str:
@@ -207,6 +206,7 @@ def solve_with_algorithm(algo: str, puzzle: PuzzleCase):
     progress_queue = ctx.Queue()
     process = ctx.Process(target=_solver_worker, args=(algo, puzzle, result_queue, progress_queue))
     process.start()
+    started_at = time.perf_counter()
     latest_progress = {"node_expanded": 0, "memory": 0.0}
 
     while process.is_alive():
@@ -218,6 +218,20 @@ def solve_with_algorithm(algo: str, puzzle: PuzzleCase):
                 break
             latest_progress["node_expanded"] = int(snapshot.get("node_expanded", 0) or 0)
             latest_progress["memory"] = float(snapshot.get("memory", 0.0) or 0.0)
+
+        if SOLVER_TIMEOUT_SECONDS is not None and (time.perf_counter() - started_at) >= SOLVER_TIMEOUT_SECONDS:
+            process.terminate()
+            process.join(timeout=1.0)
+            if process.is_alive():
+                process.kill()
+                process.join(timeout=1.0)
+            return {
+                "solution": None,
+                "stop_reason": f"time_out({SOLVER_TIMEOUT_SECONDS}s)",
+                "node_expanded": latest_progress["node_expanded"],
+                "memory": latest_progress["memory"],
+                "timed_out": True,
+            }
 
     # Drain snapshot queue lần cuối để có số liệu mới nhất.
     while True:
@@ -236,7 +250,10 @@ def solve_with_algorithm(algo: str, puzzle: PuzzleCase):
     if payload.get("status") == "error":
         raise RuntimeError(f"{algo} failed in worker process: {payload.get('error')}")
 
-    return payload["result"]
+    result = payload["result"]
+    if isinstance(result, dict):
+        result["timed_out"] = False
+    return result
 
 
 def is_valid_solution(grid, puzzle: PuzzleCase) -> bool:
@@ -311,6 +328,16 @@ def test_solver_correctness(
         executed += 1
 
         result = solve_with_algorithm(algo, puzzle)
+        if result.get("timed_out"):
+            _append_timeout_metrics(
+                algo,
+                puzzle,
+                SOLVER_TIMEOUT_SECONDS,
+                int(result.get("node_expanded", 0) or 0),
+                float(result.get("memory", 0.0) or 0.0),
+            )
+            continue
+
         solution = result.get("solution")
         stop_reason = result.get("stop_reason")
 

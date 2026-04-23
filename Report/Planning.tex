@@ -1,6 +1,6 @@
 \section{Project Planning and Task Distribution}
 \subsection{Work Breakdown}
-To ensure traceability to the official grading rubric, the project was decomposed into major work packages that map directly to the required deliverables: FOL modeling, automatic knowledge-base generation, inference algorithms, baseline search algorithms, experimentation, and dissemination artifacts (report and video demonstration). Table~\ref{tab:work-breakdown} summarizes the work structure and expected outputs.
+To align with the grading rubric, the project was divided into work packages covering FOL modeling, automatic KB generation, inference/search solvers, experiments, and final deliverables. Table~\ref{tab:work-breakdown} summarizes tasks and outputs.
 
 {\small
 \begin{longtable}{|c|>{\RaggedRight\arraybackslash}p{4.8cm}|>{\RaggedRight\arraybackslash}p{8.6cm}|}
@@ -17,23 +17,23 @@ To ensure traceability to the official grading rubric, the project was decompose
 \endfoot
 \hline
 \endlastfoot
-WP1 & FOL formalization for Futoshiki & Complete set of axioms (domain, uniqueness, inequality, clue constraints), plus representative Skolemization and CNF derivations for the report. \\
+WP1 & FOL formalization for Futoshiki & Full axiom set (domain, uniqueness, inequality, clues) with representative Skolemization and CNF derivations. \\
 \hline
-WP2 & Automatic ground KB/CNF generation & Program module that automatically instantiates puzzle constraints for any grid size \(N\) and produces solver-ready clauses/facts. \\
+WP2 & Automatic ground KB/CNF generation & Module to instantiate constraints for any \(N\) and output solver-ready clauses/facts. \\
 \hline
-WP3 & Forward Chaining solver & Rule-based inference engine implemented from scratch to derive valid value assignments and detect contradictions. \\
+WP3 & Forward Chaining solver & From-scratch rule-based engine for value inference and contradiction detection. \\
 \hline
-WP4 & Backward Chaining solver & Goal-driven inference mechanism (SLD-style querying) to infer \texttt{Val(i,j,v)} facts for unknown cells. \\
+WP4 & Backward Chaining solver & Goal-driven SLD-style querying to infer \texttt{Val(i,j,v)} facts. \\
 \hline
-WP5 & A* search solver & Heuristic search implementation with admissible state evaluation and constraint-consistency pruning. \\
+WP5 & A* search solver & Heuristic search with admissible evaluation and consistency pruning. \\
 \hline
-WP6 & Brute-force and Backtracking baselines & Two baseline solvers used for correctness checking and computational comparison. \\
+WP6 & Brute-force and Backtracking baselines & Baseline solvers for correctness checks and performance comparison. \\
 \hline
-WP7 & SAT-based solving support & SAT formulation and automated solving pipeline for cross-method verification and performance comparison. \\
+WP7 & SAT-based solving support & SAT encoding and solving pipeline for verification and comparison. \\
 \hline
-WP8 & Experimental setup and I/O pipeline & Input/output standardization, benchmark script, and solved-instance export for all required test cases. \\
+WP8 & Experimental setup and I/O pipeline & Standardized I/O, benchmark script, and solved-output export for required test cases. \\
 \hline
-WP9 & Technical report and video demo & Final HCMUS-format report (analysis, experiments, discussion) and public demonstration video on representative puzzles. \\
+WP9 & Technical report and video demo & Final HCMUS-format report and public demo video on representative puzzles. \\
 \hline
 \end{longtable}
 }
@@ -54,19 +54,19 @@ WP9 & Technical report and video demo & Final HCMUS-format report (analysis, exp
 \endfoot
 \hline
 \endlastfoot
-Nguyễn Khánh Toàn & A* search implementation; SAT-based solver integration; performance export/benchmark pipeline; repository coordination; README and video/demo coordination; GUI integration support; co-editing final report. \\
+Nguyễn Khánh Toàn & A* implementation; SAT integration; benchmark/export pipeline; repository coordination; README and demo coordination; GUI integration support; co-editing final report. \\
 \hline
-Nguyễn Chí Tài & Forward Chaining implementation; construction of input test files and puzzle-set preparation; support for report editing and validation tests. \\
+Nguyễn Chí Tài & Forward Chaining implementation; test-input preparation; support for report editing and validation tests. \\
 \hline
-Nguyễn Ngọc Thiên & FOL axiom design and CNF transformation workflow; Backward Chaining implementation; support for report editing and consistency checking. \\
+Nguyễn Ngọc Thiên & FOL axiom design and CNF workflow; Backward Chaining implementation; support for report editing and consistency checks. \\
 \hline
-Phan Quang Tiến & Automatic KB generation from CNF/grounding logic; Brute-force and Backtracking implementations; support for report editing and comparative analysis sections. \\
+Phan Quang Tiến & Automatic KB generation from grounding/CNF logic; Brute-force and Backtracking implementations; support for report editing and comparative analysis. \\
 \hline
 \end{longtable}
 }
 
 \subsection{Completion Percentage per Member}
-For grading transparency, the team adopted a unified completion declaration at the end of development. As required by this submission, each member is recorded at \textbf{100\%} completion.
+For grading transparency, the team uses a unified completion declaration. In this submission, each member is recorded at \textbf{100\%} completion.
 
 \begin{longtable}{|>{\RaggedRight\arraybackslash}p{8.8cm}|c|}
 \caption{Completion percentage per member}\label{tab:completion-per-member}\\
@@ -93,9 +93,9 @@ Phan Quang Tiến & 100\% \\
 \end{longtable}
 
 \subsection{Project Management Board}
-The team managed source code and integration through \textbf{GitHub} (branch-based collaboration, pull/merge workflow, and version traceability). Task planning and execution tracking were handled through a shared board (Trello/Planner-like workflow) with status labels (\textit{To do}, \textit{In progress}, \textit{Completed}), priority flags, assignees, and due dates. This process enabled transparent ownership, frequent synchronization, and early detection of integration risks.
+The team used \textbf{GitHub} for branch-based collaboration, pull/merge workflow, and version traceability. Planning/tracking were managed on a shared board with status labels (\textit{To do}, \textit{In progress}, \textit{Completed}), assignees, priorities, and deadlines.
 
-Operationally, the management board was synchronized with technical milestones: formalization first, then solver development, then benchmarking and reporting. This ordering reduced late-stage rework and ensured that rubric-weighted items were completed before final packaging.
+The board followed project milestones: formalization, solver implementation, then benchmarking and reporting. This reduced late rework and prioritized rubric-weighted items.
 
 \clearpage
 
@@ -114,13 +114,13 @@ Operationally, the management board was synchronized with technical milestones: 
 \endfoot
 \hline
 \endlastfoot
-08/04/2026--\newline 11/04/2026 & Planning and formalization & Requirement analysis, role assignment, FOL specification, initial CNF workflow design. & Work plan, formal FOL draft, initial puzzle inputs. & Completed \\
+08/04/2026--\newline 11/04/2026 & Planning and formalization & Requirement analysis, role assignment, FOL specification, initial CNF workflow. & Work plan, FOL draft, initial puzzle inputs. & Completed \\
 \hline
-12/04/2026--\newline 17/04/2026 & Core algorithm implementation & Forward/Backward Chaining, A*, SAT pipeline, KB generation, backtracking baseline modules. & Implemented solver modules and intermediate validation runs. & Completed \\
+12/04/2026--\newline 17/04/2026 & Core algorithm implementation & Forward/Backward Chaining, A*, SAT pipeline, KB generation, backtracking baselines. & Solver modules and intermediate validation runs. & Completed \\
 \hline
-18/04/2026--\newline 20/04/2026 & Integration and benchmark & Unified I/O handling, solved-output export, runtime comparison, GUI connection and stability checks. & End-to-end executable system and benchmark artifacts. & Completed \\
+18/04/2026--\newline 20/04/2026 & Integration and benchmark & Unified I/O, solved-output export, runtime comparison, GUI connection and stability checks. & End-to-end executable system and benchmark artifacts. & Completed \\
 \hline
-21/04/2026--\newline 25/04/2026 & Documentation and delivery & Report refinement, figure/table completion, demo video finalization, submission packaging. & Final report PDF, demo link, and complete submission package. & Completed \\
+21/04/2026--\newline 25/04/2026 & Documentation and delivery & Report refinement, figure/table completion, demo finalization, submission packaging. & Final report PDF, demo link, and full submission package. & Completed \\
 \hline
 \end{longtable}
 }

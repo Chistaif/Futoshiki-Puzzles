@@ -1,127 +1,124 @@
 \section{Experiments and Evaluation}
 
 \subsection{Experimental Setup}
-This section evaluates solver behavior on 10 puzzle instances (\texttt{input-01} to \texttt{input-10}) with board sizes from \(4 \times 4\) to \(9 \times 9\). Experimental results were recorded in \texttt{solved.csv} and visualized by \texttt{generate\_solver\_graphs.py}. The primary metrics are runtime (seconds), peak memory usage (MB, measured via \texttt{tracemalloc}), and search effort (\texttt{node\_expanded}).
+We evaluate solvers on 10 instances (\texttt{input-01} to \texttt{input-10}) from \(4 \times 4\) to \(9 \times 9\). Results are stored in \texttt{solved.csv} and visualized by \texttt{generate\_solver\_graphs.py}. Main metrics are runtime (seconds), peak memory (MB via \texttt{tracemalloc}), and search effort (\texttt{node\_expanded}).
 
-To keep experiments bounded and reproducible, each solver uses a hard node-expansion cap:
+For bounded and reproducible runs, each solver uses a node cap:
 \begin{itemize}
-	\item \texttt{MAX\_NODES\_BRUTE\_FORCE = 100000}
-	\item \texttt{MAX\_NODES\_BACKTRACKING = 3000000}
-	\item \texttt{MAX\_NODES\_BACKWARD\_CHAINING = 1500000}
-	\item \texttt{MAX\_NODES\_FORWARD\_CHAINING = 5000000}
-	\item \texttt{MAX\_NODES\_ASTAR = 5000000}
+\item \texttt{MAX\_NODES\_BRUTE\_FORCE = 100000}
+\item \texttt{MAX\_NODES\_BACKTRACKING = 3000000}
+\item \texttt{MAX\_NODES\_BACKWARD\_CHAINING = 1500000}
+\item \texttt{MAX\_NODES\_FORWARD\_CHAINING = 5000000}
+\item \texttt{MAX\_NODES\_ASTAR = 5000000}
 \end{itemize}
-
-To prevent unbounded runs, the test harness also enforces a wall-clock timeout of 180 seconds.
+A wall-clock timeout of 180 seconds is also enforced.
 
 \subsection{Evaluation Protocol and Metrics}
 \subsubsection{Input and Output Test Cases}
-The test suite follows project requirements by covering multiple grid sizes and difficulty levels. Each run returns either: (i) a valid solved grid, (ii) \texttt{False}/no solution under node cap, (iii) \texttt{time\_out} at 180 seconds, or (iv) \texttt{SKIPPED} for intentionally excluded brute-force cases to avoid intractable runs on larger instances.
+The test suite satisfies the assignment requirement on size diversity. Each run returns: (i) solved grid, (ii) \texttt{False}/no solution under node cap, (iii) \texttt{time\_out} at 180 s, or (iv) \texttt{SKIPPED} for intentionally excluded brute-force runs on intractable cases.
 
 \subsubsection{Evaluation Metrics}
 \begin{itemize}
-	\item \textbf{Runtime}: elapsed execution time in seconds.
-	\item \textbf{Memory Usage}: peak memory footprint in MB.
-	\item \textbf{Algorithmic Complexity Proxy}: number of expanded/inferred nodes.
+\item \textbf{Runtime}: execution time in seconds.
+\item \textbf{Memory Usage}: peak memory in MB.
+\item \textbf{Algorithmic Complexity Proxy}: number of expanded/inferred nodes.
 \end{itemize}
 
 \subsection{Experimental Results}
 
 \subsubsection{Aggregate Statistics (Mean/Median by Solver)}
-To improve statistical rigor beyond per-instance plots, Table~\ref{tab:solver-aggregate-stats} reports aggregate mean and median values per solver. Following the graph-generation pipeline, \texttt{SKIPPED} rows are excluded.
+Table~\ref{tab:solver-aggregate-stats} reports per-solver mean and median values. Following the plotting pipeline, \texttt{SKIPPED} rows are excluded.
 
 \begin{table}[H]
-	\centering
-	\caption{Aggregate performance statistics by solver (excluding \texttt{SKIPPED} rows).}
-	\label{tab:solver-aggregate-stats}
-	\scriptsize
-	\setlength{\tabcolsep}{4pt}
-	\resizebox{\textwidth}{!}{%
-	\begin{tabular}{lrrrrrrrr}
-		\hline
-		Solver & $n$ & Success & Mean Time & Median Time & Mean Mem. & Median Mem. & Mean Nodes & Median Nodes \\
-		&  & Rate & (s) & (s) & (MB) & (MB) &  &  \\
-		\hline
-		Forward Chaining & 10 & 100\% & 0.027218 & 0.006389 & 0.090923 & 0.085709 & 5004.9 & 984.5 \\
-		SAT Solver & 10 & 100\% & 0.036400 & 0.009220 & 0.602800 & 0.275000 & 0 & 0 \\
-		A* Search & 10 & 100\% & 1.260518 & 0.301315 & 0.182252 & 0.104591 & 121.2 & 38.0 \\
-		Backtracking & 10 & 90\% & 6.632425 & 0.021260 & 0.002509 & 0.002480 & 324446.7 & 1434.0 \\
-		BackwardSolver & 10 & 90\% & 43.366318 & 2.282411 & 416.955660 & 28.340975 & 735.6 & 112.5 \\
-		BruteForceSolver & 2 & 0\% & 3.037844 & 3.037844 & 0.002975 & 0.002975 & 100001.0 & 100001.0 \\
-		\hline
-	\end{tabular}%
-	}
+\centering
+\caption{Aggregate performance statistics by solver (excluding \texttt{SKIPPED} rows).}
+\label{tab:solver-aggregate-stats}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrrr}
+\hline
+Solver & $n$ & Success & Mean Time & Median Time & Mean Mem. & Median Mem. & Mean Nodes & Median Nodes \\
+&  & Rate & (s) & (s) & (MB) & (MB) &  &  \\
+\hline
+Forward Chaining & 10 & 100\% & 0.027218 & 0.006389 & 0.090923 & 0.085709 & 5004.9 & 984.5 \\
+SAT Solver & 10 & 100\% & 0.026800 & 0.009222 & 0.602992 & 0.275066 & 0 & 0 \\
+A* Search & 10 & 100\% & 1.260518 & 0.301315 & 0.182252 & 0.104591 & 121.2 & 38.0 \\
+Backtracking & 10 & 90\% & 6.632425 & 0.021260 & 0.002509 & 0.002480 & 324446.7 & 1434.0 \\
+BackwardSolver & 10 & 90\% & 43.366318 & 2.282411 & 416.955660 & 28.340975 & 735.6 & 112.5 \\
+BruteForceSolver & 2 & 0\% & 3.037844 & 3.037844 & 0.002975 & 0.002975 & 100001.0 & 100001.0 \\
+\hline
+\end{tabular}%
+}
 \end{table}
 
-The table clarifies distribution effects that are less visible in individual bars. For example, Backtracking has a low median runtime but a much larger mean runtime, indicating heavy-tail behavior on difficult instances.
+The mean-median gap (especially for Backtracking/Backward Chaining) indicates heavy-tail behavior on hard inputs.
 
 \subsubsection{Runtime Analysis}
-Figure~\ref{fig:runtime-log} reports runtime on a logarithmic scale. Forward Chaining is consistently the fastest method across all inputs, with runtimes typically in the millisecond range and remaining below 0.2 s even on hard instances. A* remains stable and significantly slower than Forward Chaining but generally below 10 s. Backtracking solves most small and medium cases quickly but degrades sharply on difficult boards, reaching approximately 62 s on \texttt{input-07}. Backward Chaining exhibits the highest runtime variance and includes one timeout (180 s).
+Figure~\ref{fig:runtime-log} uses a log-scale y-axis. Forward Chaining is the fastest overall and typically runs in milliseconds. A* is stable and usually below 10 s. Backtracking is fast on many cases but degrades sharply on difficult inputs (about 62 s on \texttt{input-07}). Backward Chaining has the largest variance and includes one timeout (180 s).
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.95\textwidth]{image/grouped_bar_runtime.png}
-	\caption{Runtime comparison across inputs (log-scale y-axis).}
-	\label{fig:runtime-log}
+\centering
+\includegraphics[width=0.95\textwidth]{image/grouped_bar_runtime.png}
+\caption{Runtime comparison across inputs (log-scale y-axis).}
+\label{fig:runtime-log}
 \end{figure}
 
 \paragraph{Why log scale is necessary.}
-Runtime values span several orders of magnitude (from roughly \(10^{-3}\) s to \(10^2\) s). A linear y-axis would compress fast algorithms near zero and hide meaningful differences among them. The log scale preserves relative multiplicative gaps, allowing fair visual comparison between very fast and very slow solvers.
+Runtime spans roughly \(10^{-3}\) s to \(10^2\) s. A linear axis would compress fast methods near zero and hide meaningful differences.
 
 \subsubsection{Memory Usage Analysis}
-Figure~\ref{fig:memory-time} shows a strong contrast in memory behavior. Forward Chaining, Backtracking, Brute Force, and A* remain memory-efficient (mostly sub-1 MB in this dataset for A* and very low MB for Forward/Backtracking/Brute Force). In contrast, Backward Chaining grows from a few MB on easy instances to more than 1.8 GB near timeout.
+Figure~\ref{fig:memory-time} shows that Forward Chaining, Backtracking, Brute Force, and A* are memory-efficient on this dataset, while Backward Chaining can exceed 1.8 GB near timeout.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\textwidth]{image/line_memory_vs_time.png}
-	\caption{Memory vs runtime trade-off by solver.}
-	\label{fig:memory-time}
+\centering
+\includegraphics[width=0.8\textwidth]{image/line_memory_vs_time.png}
+\caption{Memory vs runtime trade-off by solver.}
+\label{fig:memory-time}
 \end{figure}
 
 \paragraph{Memory explosion in recursive logic search.}
-Backward Chaining combines recursive goal expansion, memoization tables, and dynamically accumulated facts/rules during deep search. On larger, heavily constrained instances, the search tree broadens before contradictions are discovered, causing rapid growth of intermediate states and cached derivations. This is a typical \textit{memory explosion} pattern: memory grows superlinearly with search depth and branching interactions, eventually becoming the primary bottleneck before the node cap is reached.
+Backward Chaining combines recursive goal expansion, memoization, and dynamic fact/rule accumulation. On large constrained cases, many intermediate derivations are kept before contradictions are found, causing rapid memory growth.
 
 \subsubsection{Algorithmic Complexity (Nodes Expanded)}
-Node-expansion data confirms the above trends. A* solves with very low node counts (tens to hundreds) due to MRV selection plus AC-3-based pruning and admissible heuristic guidance. Forward Chaining can still be fast despite higher node counts because each propagation step is lightweight and aggressively reduces domains early. Backtracking reaches millions of expanded nodes on difficult cases (close to its cap at \(3{,}000{,}000\)). Brute Force quickly hits its cap (\(100{,}000\)) even for small boards. Backward Chaining remains moderate in node count compared with Backtracking but is expensive per node due to recursive unification and fact/rule management, which explains its high runtime and memory.
+Node counts match the runtime trends. A* expands very few nodes (tens to hundreds) due to MRV + AC-3 pruning. Forward Chaining can expand more nodes but remains fast because each propagation step is lightweight. Backtracking can approach its cap (\(3{,}000{,}000\)) on hard inputs. Brute Force quickly hits its cap (\(100{,}000\)). Backward Chaining has moderate node counts but expensive per-node processing, explaining high runtime and memory.
 
 \subsection{Comparative Analysis}
 
 \subsubsection{Performance Leader}
-Based on runtime and completion reliability in \texttt{solved.csv}, \textbf{Forward Chaining} maintains the leading overall method in this benchmark with a mean runtime of \(0.027\) s. However, \textbf{SAT Solver} achieves a competitive median runtime of \(0.0092\) s and solves all instances with 100\% success, making it exceptionally strong on typical cases. It solved all 10 test cases, achieved excellent speed on most instances, and maintained reasonable memory usage (median \(0.275\) MB).
+From \texttt{solved.csv}, \textbf{Forward Chaining} is the best overall runtime performer (mean \(0.027\) s). \textbf{SAT Solver} is highly competitive (median \(0.0092\) s) and also achieves 100\% success. \textbf{A*} is the next strongest practical method with 100\% success and low node expansion.
 
-In terms of success rate on evaluated cases, Forward Chaining, A*, and SAT Solver all reached \(10/10\) solved (100\%), Backtracking reached \(9/10\) solved (one failure near node cap), and Backward Chaining reached \(9/10\) solved with one timeout at 180 s.
+Success rates on evaluated cases are: Forward Chaining 10/10, A* 10/10, SAT 10/10, Backtracking 9/10, Backward Chaining 9/10 (one timeout), Brute Force 0/2 under cap.
 
-The explanation is consistent with Chapter 3: Forward Chaining performs continuous constraint propagation (including inequality propagation and domain pruning similar to local arc-consistency maintenance). SAT Solver benefits from advanced DPLL/CDCL algorithms that efficiently explore the CNF search space. Both methods achieve early elimination of infeasible values, reducing the effective search space.
-
-\textbf{A*} is the second strongest practical solver: it also solved all tested cases with low node expansion because heuristic pruning (MRV + AC-3 feasibility filtering) suppresses unpromising branches.
+These results are consistent with Chapter 3: Forward Chaining benefits from strong propagation, SAT benefits from CDCL search, and A* benefits from heuristic pruning.
 
 \subsubsection{Preferred Conditions}
-The recommended use conditions are:
+Recommended usage:
 \begin{itemize}
-	\item \textbf{Brute Force / Backtracking (\(N \leq 5\))}: suitable for small boards or teaching/debugging contexts due to simple implementation and direct interpretability. Backtracking remains practical up to medium difficulty but can degrade abruptly near hard large cases.
-	\item \textbf{A* Search}: preferred when a good heuristic is available and controlled search order matters. It is robust for medium-to-large structured instances because heuristic guidance reduces expansion dramatically.
-	\item \textbf{Forward Chaining (\(N \geq 6\), low to moderate constraints)}: preferred when rapid constraint propagation is effective. Excels in scenarios with early domain reduction.
-	\item \textbf{SAT Solver (\(N \geq 5\), any constraint density)}: recommended as a general-purpose solver for diverse puzzle sizes and densities. Outstanding median performance (0.009 s typical) and robust 100\% success rate make it a reliable choice. Best for applications where encoding complexity is acceptable.
+\item \textbf{Brute Force/Backtracking (\(N \leq 5\))}: simple and interpretable; can degrade sharply on hard larger inputs.
+\item \textbf{A* Search}: suitable when heuristic guidance is available and controlled expansion is needed.
+\item \textbf{Forward Chaining (\(N \geq 6\), low-to-medium constraint density)}: strong when early propagation reduces domains quickly.
+\item \textbf{SAT Solver (\(N \geq 5\), varied densities)}: robust general-purpose option with strong median speed and 100\% success in this benchmark.
 \end{itemize}
 
 \subsubsection{Trade-off Analysis (Implementation Complexity vs Practical Performance)}
-Figure~\ref{fig:radar-overall} summarizes normalized performance (lower runtime, lower memory, lower node expansion produce higher radar scores). Forward Chaining and A* dominate most dimensions; Backtracking is competitive on memory but unstable in runtime on hard cases; Backward Chaining is penalized strongly by memory and runtime growth.
+Figure~\ref{fig:radar-overall} summarizes normalized multi-metric performance. Forward Chaining and A* are balanced leaders; Backtracking is memory-light but runtime-unstable on hard cases; Backward Chaining is limited by runtime/memory growth.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{image/radar_solver_performance.png}
-	\caption{Normalized multi-metric comparison (higher area indicates better overall balance).}
-	\label{fig:radar-overall}
+\centering
+\includegraphics[width=0.9\textwidth]{image/radar_solver_performance.png}
+\caption{Normalized multi-metric comparison (higher area indicates better overall balance).}
+\label{fig:radar-overall}
 \end{figure}
 
-From an implementation perspective, the main trade-offs are:
+Implementation trade-offs:
 \begin{itemize}
-	\item \textbf{Brute Force}: lowest implementation complexity, lowest scalability.
-	\item \textbf{Backtracking}: moderate implementation complexity, strong for small-to-medium cases, unstable worst-case behavior.
-	\item \textbf{Forward Chaining}: higher implementation effort (rule engine + propagation) but excellent practical balance in this project.
-	\item \textbf{A*}: high implementation complexity (state modeling, admissible heuristic, consistency checks), very good search efficiency and predictable scaling.
-	\item \textbf{SAT Solver}: moderate-to-high implementation complexity (CNF encoding + SAT solver integration) but exceptional runtime performance (median 0.0092 s) and robust 100\% success rate, making it an outstanding general-purpose choice despite encoding overhead.
+\item \textbf{Brute Force}: simplest, least scalable.
+\item \textbf{Backtracking}: moderate complexity, good on small/medium cases, unstable worst case.
+\item \textbf{Forward Chaining}: higher implementation effort, excellent practical balance.
+\item \textbf{A*}: high implementation effort, very efficient expansion.
+\item \textbf{SAT Solver}: moderate-to-high encoding effort, strong speed and robustness.
 \end{itemize}
 
 \subsection{Self-evaluation Against Project Criteria}
-The implementation satisfies the key project criteria: multiple solving paradigms were developed (search-based, logic-based, SAT-based), test cases cover the required size diversity, and experiments report runtime, memory, and node-expansion statistics with comprehensive visual analysis. The SAT Solver achieves outstanding empirical results (100\% success, median runtime 0.0092 s) and has been fully integrated into the CSV benchmark pipeline. Remaining improvement opportunities include adding per-size aggregate statistics (mean and variance) for stronger statistical rigor and investigating memory usage patterns on larger instances.
+The project satisfies core criteria: multiple solving paradigms were implemented, required test-size diversity is covered, and experiments report runtime, memory, and node expansion with visual analysis. SAT is fully integrated into the benchmark pipeline with strong empirical results. Future improvements include per-size variance analysis and deeper memory profiling on larger instances.

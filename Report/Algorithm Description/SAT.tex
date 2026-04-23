@@ -1,27 +1,27 @@
 \subsection{SAT Solver (Using SAT Library)}
 \subsubsection{Idea}
-The SAT approach converts Futoshiki constraints into CNF clauses and delegates solving to PySAT (Glucose3). In this project, \texttt{FOLKB} builds the CNF, then the SAT model is decoded back to an \(N \times N\) grid.
+The SAT method encodes Futoshiki constraints into CNF and solves them with PySAT (Glucose3). In this project, \texttt{FOLKB} generates clauses, and the SAT model is decoded into an \(N \times N\) solution grid.
 
 \subsubsection{Constraint Encoding}
-To avoid repeating full FOL derivations from Section 3.2, we only summarize the SAT-level encoding. For each \((i,j,v)\), define:
+Instead of repeating full FOL derivations from Section 3.2, we summarize the SAT encoding. For each \((i,j,v)\):
 \[
 X_{i,j,v} = \text{true} \iff \text{cell }(i,j)\text{ has value }v.
 \]
 
-Variable ID mapping used in code:
+Variable mapping used in code:
 \[
 \text{ID}(i,j,v)= i\cdot N^2 + j\cdot N + v,
 \]
 with \(i,j\in[0,N-1]\), \(v\in[1,N]\), so IDs are in \([1,N^3]\).
 
-Main CNF groups are:
+Main clause groups:
 \begin{itemize}
-	\item each cell has exactly one value;
-	\item row and column uniqueness (Latin-square constraints);
-	\item given clues as unit clauses;
-	\item inequality constraints by forbidding violating adjacent value pairs.
+\item each cell has exactly one value;
+\item row and column uniqueness;
+\item given clues as unit clauses;
+\item inequality constraints by forbidding violating adjacent pairs.
 \end{itemize}
-Thus, any SAT model corresponds to a valid solution.
+Any satisfying assignment corresponds to a valid puzzle solution.
 
 \subsubsection{Pseudocode}
 \begin{algorithm}[H]
@@ -31,20 +31,20 @@ Thus, any SAT model corresponds to a valid solution.
 \State Create SAT solver instance (Glucose3)
 \State Add all CNF clauses to solver
 \If{solver returns UNSAT}
-	\State \Return \textbf{failure}
+\State \Return \textbf{failure}
 \EndIf
 \State Get SAT model (set of literals)
 \State Initialize empty grid \(N \times N\)
 \For{each positive literal \(\ell\) in model}
-	\If{\(1 \le \ell \le N^3\)}
-		\State Decode \(\ell \rightarrow (i,j,v)\)
-		\State Set grid\((i,j) \leftarrow v\)
-	\EndIf
+\If{\(1 \le \ell \le N^3\)}
+\State Decode \(\ell \rightarrow (i,j,v)\)
+\State Set grid\((i,j) \leftarrow v\)
+\EndIf
 \EndFor
 \If{any cell remains unassigned}
-	\State \Return \textbf{failure}
+\State \Return \textbf{failure}
 \Else
-	\State \Return solved grid
+\State \Return solved grid
 \EndIf
 \end{algorithmic}
 \end{algorithm}
@@ -52,33 +52,33 @@ Thus, any SAT model corresponds to a valid solution.
 \subsubsection{Illustration}
 For a \(4 \times 4\) puzzle:
 \begin{enumerate}
-	\item Create \(4^3=64\) variables \(X_{i,j,v}\).
-	\item Add clauses for uniqueness, clues, and inequalities.
-	\item Run Glucose3 and decode the satisfying literals.
-	\item Reconstruct the solved grid.
+\item Create \(4^3=64\) variables \(X_{i,j,v}\).
+\item Add clauses for uniqueness, clues, and inequalities.
+\item Run Glucose3 and obtain a satisfying model.
+\item Decode literals to reconstruct the solved grid.
 \end{enumerate}
 
 \subsubsection{Algorithm Analysis}
 \textbf{Encoding cost:}
 \begin{itemize}
-	\item Number of variables is \(N^3\).
-	\item Number of clauses is polynomial in \(N\), mainly from exclusivity and inequality constraints.
+\item Number of variables is \(N^3\).
+\item Number of clauses is polynomial in \(N\), dominated by exclusivity and inequality constraints.
 \end{itemize}
 
 \textbf{Solving cost:}
 \begin{itemize}
-	\item SAT is NP-complete in general, so worst-case complexity is exponential.
-	\item In practice, CDCL solvers are effective on structured instances.
+\item SAT is NP-complete in general (worst-case exponential).
+\item In practice, CDCL solvers perform well on structured instances.
 \end{itemize}
 
 \textbf{Space and implementation trade-offs:}
 \begin{itemize}
-	\item Requires storing full CNF and SAT internal structures.
-	\item Easy to extend by adding new clause templates.
+\item Requires storing CNF and SAT internal state.
+\item Easy to extend by adding new clause templates.
 \end{itemize}
 
 \textbf{Practical behavior in this project:}
 \begin{itemize}
-	\item Provides clear SAT/UNSAT feasibility checking.
-	\item Runtime is competitive in experiments, but SAT is not the central focus of this report.
+\item Gives clear SAT/UNSAT feasibility checking.
+\item Runtime is competitive in experiments, while SAT is presented as a representative method in this report.
 \end{itemize}
