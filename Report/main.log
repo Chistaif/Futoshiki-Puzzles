@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  23 APR 2026 09:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  23 APR 2026 09:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1248,29 +1248,11 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[31]
-Overfull \hbox (6.01144pt too wide) in paragraph at lines 63--64
-[]\T5/cmr/m/n/12 After de-cod-ing all pos-i-tive in-range lit-er-als, the grid is fully re-con-structed
- []
-
-
-Underfull \hbox (badness 1275) in paragraph at lines 72--73
-[]\T5/cmr/m/n/12 Number of clauses is poly-no-mial in $\OML/cmm/m/it/12 N$\T5/cmr/m/n/12 , dom-i-nated by pair-wise
- []
-
-) (gui.tex
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[32]
-<image/gui_screen.png, id=618, 986.9372pt x 346.29375pt>
+[31]) (gui.tex
+<image/gui_screen.png, id=614, 986.9372pt x 346.29375pt>
 File: image/gui_screen.png Graphic file (type png)
 <use image/gui_screen.png>
-Package pdftex.def Info: image/gui_screen.png  used on input line 20.
+Package pdftex.def Info: image/gui_screen.png  used on input line 15.
 (pdftex.def)             Requested size: 350.99762pt x 123.1597pt.
 
 
@@ -1280,11 +1262,11 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[33 <./image/gui_screen.png>]
-<image/gameplay.png, id=624, 523.9575pt x 822.07124pt>
+[32 <./image/gui_screen.png>]
+<image/gameplay.png, id=620, 523.9575pt x 822.07124pt>
 File: image/gameplay.png Graphic file (type png)
 <use image/gameplay.png>
-Package pdftex.def Info: image/gameplay.png  used on input line 40.
+Package pdftex.def Info: image/gameplay.png  used on input line 32.
 (pdftex.def)             Requested size: 350.99762pt x 550.72215pt.
 
 
@@ -1294,7 +1276,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[34]
+[33]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1302,11 +1284,11 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[35 <./image/gameplay.png>]
-<image/ai_solver.png, id=634, 523.9575pt x 820.56563pt>
+[34 <./image/gameplay.png>]
+<image/ai_solver.png, id=630, 523.9575pt x 820.56563pt>
 File: image/ai_solver.png Graphic file (type png)
 <use image/ai_solver.png>
-Package pdftex.def Info: image/ai_solver.png  used on input line 60.
+Package pdftex.def Info: image/ai_solver.png  used on input line 50.
 (pdftex.def)             Requested size: 350.99762pt x 549.71352pt.
 
 
@@ -1316,25 +1298,9 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[36]
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[37 <./image/ai_solver.png>]) (Experiments.tex
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[38]
-Overfull \hbox (0.44867pt too wide) in paragraph at lines 31--32
-\T5/cmr/m/n/12 ag-gre-gate mean and me-dian val-ues per solver. Fol-low-ing the graph-generation
+[35]
+Overfull \hbox (3.26787pt too wide) in paragraph at lines 56--57
+\T5/cmr/m/n/12 help keep in-ter-ac-tion pat-terns uni-form and re-duce im-ple-men-ta-tion com-plex-ity. 
  []
 
 
@@ -1344,13 +1310,33 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[39]
-<image/grouped_bar_runtime.png, id=656, 1129.821pt x 554.5518pt>
+[36 <./image/ai_solver.png>]) (Experiments.tex
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[37]
+Overfull \hbox (0.44867pt too wide) in paragraph at lines 31--32
+\T5/cmr/m/n/12 ag-gre-gate mean and me-dian val-ues per solver. Fol-low-ing the graph-generation
+ []
+
+<image/grouped_bar_runtime.png, id=647, 1129.821pt x 554.5518pt>
 File: image/grouped_bar_runtime.png Graphic file (type png)
 <use image/grouped_bar_runtime.png>
 Package pdftex.def Info: image/grouped_bar_runtime.png  used on input line 63.
 (pdftex.def)             Requested size: 370.49881pt x 181.85185pt.
-<image/line_memory_vs_time.png, id=658, 840.2592pt x 555.2745pt>
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[38]
+<image/line_memory_vs_time.png, id=654, 840.2592pt x 555.2745pt>
 File: image/line_memory_vs_time.png Graphic file (type png)
 <use image/line_memory_vs_time.png>
 Package pdftex.def Info: image/line_memory_vs_time.png  used on input line 76.
@@ -1363,7 +1349,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[40 <./image/grouped_bar_runtime.png>]
+[39 <./image/grouped_bar_runtime.png>]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1371,7 +1357,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[41 <./image/line_memory_vs_time.png>]
+[40 <./image/line_memory_vs_time.png>]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1379,29 +1365,29 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[42]
+[41]
 Overfull \hbox (0.81694pt too wide) in paragraph at lines 107--107
 |[]\T5/cmr/bx/n/12 Trade-off Anal-y-sis (Im-ple-men-ta-tion Com-plex-ity vs Prac-ti-cal
  []
 
-<image/radar_solver_performance.png, id=676, 698.1282pt x 423.0204pt>
+<image/radar_solver_performance.png, id=672, 698.1282pt x 423.0204pt>
 File: image/radar_solver_performance.png Graphic file (type png)
 <use image/radar_solver_performance.png>
 Package pdftex.def Info: image/radar_solver_performance.png  used on input line 112.
 (pdftex.def)             Requested size: 350.99762pt x 212.678pt.
 
+Underfull \hbox (badness 1102) in paragraph at lines 120--121
+[]\T5/cmr/bx/n/12 Backtracking\T5/cmr/m/n/12 : mod-er-ate im-ple-men-ta-tion com-plex-ity, strong for
+ []
+
+
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
 (fancyhdr)                \setlength{\headheight}{27.11469pt}.
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[43 <./image/radar_solver_performance.png>]
-Underfull \hbox (badness 1102) in paragraph at lines 120--121
-[]\T5/cmr/bx/n/12 Backtracking\T5/cmr/m/n/12 : mod-er-ate im-ple-men-ta-tion com-plex-ity, strong for
- []
-
-
+[42 <./image/radar_solver_performance.png>]
 Underfull \hbox (badness 2582) in paragraph at lines 122--123
 \T5/cmr/m/n/12 heuris-tic, con-sis-tency checks), very good search ef-fi-ciency and
  []
@@ -1416,19 +1402,11 @@ Underfull \hbox (badness 1033) in paragraph at lines 4--5
 \T5/cmr/m/n/12 for re-pro-ducibil-ity and ex-ten-sion, in-clud-ing stan-dard-ized in-put/output
  []
 
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[44]) (References.tex
+) (References.tex
 Underfull \hbox (badness 2401) in paragraph at lines 6--1
 \T5/cmr/m/n/12 cor-rectly, im-ple-ment-ing rep-re-sen-ta-tive AI meth-ods, eval-u-at-ing solver
  []
 
-) (Appendix.tex
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1436,7 +1414,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[45])
+[43]) (Appendix.tex)
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1444,7 +1422,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[46] (main.aux)
+[44] (main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
@@ -1453,17 +1431,17 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: 2D119F33B03FF805D457799BEF1D1F3A;11242.
  ) 
 Here is how much of TeX's memory you used:
- 15107 strings out of 467691
- 246737 string characters out of 5414503
+ 15105 strings out of 467691
+ 246723 string characters out of 5414503
  673072 words of memory out of 5000000
  43703 multiletter control sequences out of 15000+600000
  653370 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  75i,14n,79p,857b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\LENOVO\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vncsc10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on main.pdf (52 pages, 1998482 bytes).
+Output written on main.pdf (50 pages, 1993225 bytes).
 PDF statistics:
- 830 PDF objects out of 1000 (max. 8388607)
- 201 named destinations out of 1000 (max. 500000)
+ 822 PDF objects out of 1000 (max. 8388607)
+ 199 named destinations out of 1000 (max. 500000)
  580 words of extra memory for PDF output out of 10000 (max. 10000000)
 

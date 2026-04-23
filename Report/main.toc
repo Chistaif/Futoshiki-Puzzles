@@ -60,32 +60,32 @@
 \contentsline {subsubsection}{\numberline {3.7.2}Constraint Encoding}{30}{subsubsection.3.7.2}%
 \contentsline {subsubsection}{\numberline {3.7.3}Pseudocode}{31}{subsubsection.3.7.3}%
 \contentsline {subsubsection}{\numberline {3.7.4}Illustration}{31}{subsubsection.3.7.4}%
-\contentsline {subsubsection}{\numberline {3.7.5}Algorithm Analysis}{32}{subsubsection.3.7.5}%
+\contentsline {subsubsection}{\numberline {3.7.5}Algorithm Analysis}{31}{subsubsection.3.7.5}%
 \contentsline {subsection}{\numberline {3.8}GUI}{32}{subsection.3.8}%
 \contentsline {subsubsection}{\numberline {3.8.1}Overview}{32}{subsubsection.3.8.1}%
-\contentsline {subsubsection}{\numberline {3.8.2}Screen Flow}{33}{subsubsection.3.8.2}%
-\contentsline {subsubsection}{\numberline {3.8.3}Gameplay Interface}{34}{subsubsection.3.8.3}%
-\contentsline {subsubsection}{\numberline {3.8.4}AI Solver Visualization}{36}{subsubsection.3.8.4}%
-\contentsline {subsubsection}{\numberline {3.8.5}Visual Design}{38}{subsubsection.3.8.5}%
-\contentsline {section}{\numberline {4}Experiments and Evaluation}{38}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Experimental Setup}{38}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Evaluation Protocol and Metrics}{39}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Input and Output Test Cases}{39}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Evaluation Metrics}{39}{subsubsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.3}Experimental Results}{39}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Aggregate Statistics (Mean/Median by Solver)}{39}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Runtime Analysis}{40}{subsubsection.4.3.2}%
-\contentsline {paragraph}{Why log scale is necessary.}{40}{paragraph*.26}%
-\contentsline {subsubsection}{\numberline {4.3.3}Memory Usage Analysis}{40}{subsubsection.4.3.3}%
-\contentsline {paragraph}{Memory explosion in recursive logic search.}{41}{paragraph*.28}%
-\contentsline {subsubsection}{\numberline {4.3.4}Algorithmic Complexity (Nodes Expanded)}{41}{subsubsection.4.3.4}%
-\contentsline {subsection}{\numberline {4.4}Comparative Analysis}{42}{subsection.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.1}Performance Leader}{42}{subsubsection.4.4.1}%
-\contentsline {subsubsection}{\numberline {4.4.2}Preferred Conditions}{42}{subsubsection.4.4.2}%
-\contentsline {subsubsection}{\numberline {4.4.3}Trade-off Analysis (Implementation Complexity vs Practical Performance)}{43}{subsubsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.5}Self-evaluation Against Project Criteria}{44}{subsection.4.5}%
-\contentsline {section}{\numberline {5}Conclusion}{44}{section.5}%
-\contentsline {section}{\numberline {6}References}{45}{section.6}%
-\contentsline {section}{\numberline {A}Appendix}{45}{appendix.A}%
-\contentsline {subsection}{\numberline {A.1}Generative AI Usage Disclosure}{45}{subsection.A.1}%
-\contentsline {subsection}{\numberline {A.2}Project Deliverables}{46}{subsection.A.2}%
+\contentsline {subsubsection}{\numberline {3.8.2}Screen Flow}{32}{subsubsection.3.8.2}%
+\contentsline {subsubsection}{\numberline {3.8.3}Gameplay Interface}{33}{subsubsection.3.8.3}%
+\contentsline {subsubsection}{\numberline {3.8.4}AI Solver Visualization}{35}{subsubsection.3.8.4}%
+\contentsline {subsubsection}{\numberline {3.8.5}Visual Design}{37}{subsubsection.3.8.5}%
+\contentsline {section}{\numberline {4}Experiments and Evaluation}{37}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Experimental Setup}{37}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Evaluation Protocol and Metrics}{37}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Input and Output Test Cases}{37}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Evaluation Metrics}{38}{subsubsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.3}Experimental Results}{38}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Aggregate Statistics (Mean/Median by Solver)}{38}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Runtime Analysis}{38}{subsubsection.4.3.2}%
+\contentsline {paragraph}{Why log scale is necessary.}{39}{paragraph*.26}%
+\contentsline {subsubsection}{\numberline {4.3.3}Memory Usage Analysis}{39}{subsubsection.4.3.3}%
+\contentsline {paragraph}{Memory explosion in recursive logic search.}{40}{paragraph*.28}%
+\contentsline {subsubsection}{\numberline {4.3.4}Algorithmic Complexity (Nodes Expanded)}{40}{subsubsection.4.3.4}%
+\contentsline {subsection}{\numberline {4.4}Comparative Analysis}{41}{subsection.4.4}%
+\contentsline {subsubsection}{\numberline {4.4.1}Performance Leader}{41}{subsubsection.4.4.1}%
+\contentsline {subsubsection}{\numberline {4.4.2}Preferred Conditions}{41}{subsubsection.4.4.2}%
+\contentsline {subsubsection}{\numberline {4.4.3}Trade-off Analysis (Implementation Complexity vs Practical Performance)}{42}{subsubsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.5}Self-evaluation Against Project Criteria}{43}{subsection.4.5}%
+\contentsline {section}{\numberline {5}Conclusion}{43}{section.5}%
+\contentsline {section}{\numberline {6}References}{44}{section.6}%
+\contentsline {section}{\numberline {A}Appendix}{44}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Generative AI Usage Disclosure}{44}{subsection.A.1}%
+\contentsline {subsection}{\numberline {A.2}Project Deliverables}{44}{subsection.A.2}%
