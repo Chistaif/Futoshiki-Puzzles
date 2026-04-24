@@ -1,5 +1,6 @@
 ﻿from abc import ABC, abstractmethod
 import csv
+import inspect
 import tracemalloc
 import time
 from pathlib import Path
@@ -11,7 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 MAX_NODES_DEFAULT = 10000000
 MAX_NODES_BRUTE_FORCE = 100000
-MAX_NODES_BACKTRACKING = 1500000
+MAX_NODES_BACKTRACKING = 3000000
 MAX_NODES_BACKWARD_CHAINING = 1500000
 MAX_NODES_FORWARD_CHAINING = 5000000
 MAX_NODES_ASTAR = 5000000
@@ -37,7 +38,7 @@ class Solver(ABC):
         self.memory_used: Optional[float] = None
         self.stop_reason: Optional[str] = None
 
-    def run(self, *args, input_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
+    def run(self, *args, input_file: Optional[str] = None, output_file: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         """
         Wrapper cho mọi solver.
         """
@@ -48,7 +49,17 @@ class Solver(ABC):
         tracemalloc.start()
         start_time = time.perf_counter()
 
-        solution = self.solve(*args, **kwargs)
+        solve_signature = inspect.signature(self.solve)
+        params = solve_signature.parameters.values()
+        accepts_output_file = (
+            "output_file" in solve_signature.parameters
+            or any(param.kind == inspect.Parameter.VAR_KEYWORD for param in params)
+        )
+
+        if accepts_output_file:
+            solution = self.solve(*args, output_file=output_file, **kwargs)
+        else:
+            solution = self.solve(*args, **kwargs)
 
         end_time = time.perf_counter()
         current, peak = tracemalloc.get_traced_memory()

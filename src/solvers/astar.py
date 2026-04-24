@@ -429,6 +429,13 @@ class AStarSolver(Solver):
 	@staticmethod
 	def _state_to_grid(state: State) -> List[List[int]]:
 		return [list(row) for row in state]
+	
+	def run(self, step_callback=None, input_file=None, output_file=None):
+		return super().run(
+			step_callback=step_callback,
+			input_file=input_file,
+			output_file=output_file,
+		)
 
 
 def solve_with_astar(

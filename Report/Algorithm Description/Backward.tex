@@ -2,20 +2,21 @@
 
 % Approach & Architecture
 \subsubsection{Idea}
-The backward-chaining solver developed by our team operates as a hybrid of Prolog-style SLD resolution and backtracking search.
+The implemented solver is a hybrid architecture that combines Prolog-style SLD resolution with explicit state-space backtracking.
 \begin{itemize}
-    \item \textbf{KB construction($HornConverter$):} Converts a Futoshiki instance into a Knowledge Base (KB) consisting of facts and definite Horn rules over predicates like $val(i,j,v)$ and $not\_val(i,j,v)$.
-    \item \textbf{Backward chaining engine ($fol\_bc\_or$ / $fol\_bc\_and$):} Prolog-like interpreter implemented from scratch that answers queries using unification and depth-first goal reduction.
-    \item \textbf{Search controller ($\_backtrack$):} Responsible for filling the grid. For each empty cell $(r,c)$, the controller calls the backward chaining engine to enumerate valid candidates for $val(r,c,v)$. It then asserts the chosen val as a new fact in the KB, recurses to the next cell, and retracts the fact upon failure.
+    \item \textbf{KB construction ($HornConverter$):} Converts a puzzle instance into Horn facts and rules using predicates such as $val(i,j,v)$, $given(i,j,v)$, and $not\_val(i,j,v)$.
+    \item \textbf{Backward chaining core ($fol\_bc\_or$ / $fol\_bc\_and$):} A Prolog-like SLD interpreter with unification, substitution, DFS goal reduction, cycle detection, and NAF handling.
+    \item \textbf{Search controller ($\_backtrack$):} Controls assignment of values to cells. At each step, it selects one unassigned cell, queries $val(r,c,v)$ to obtain legal candidates, asserts one candidate as a temporary fact, recurses, and retracts on failure.
 \end{itemize}
 
-\paragraph{Why search is integrated with SLD Resolution:} The fundamental First-Order Logic (FOL) constraint for Futoshiki states that "every cell has at least one value" ($\forall i\forall j \exists v\ Val(i,j,v)$). This existential quantification is not expressible as a definite Horn rule. Therefore, a pure Prolog-style engine cannot natively generate assignments without complex, inefficient workarounds. To resolve this, we employ choice + backtracking in Python to build a full assignment incrementally, while utilizing the Horn rules within the BC engine purely to derive exclusions ($not\_val$) and prune invalid branches.
+\paragraph{Why search is integrated with SLD Resolution:}
+The axiom $\forall i\forall j\exists v\;Val(i,j,v)$ contains existential quantification and cannot be encoded directly as a definite Horn rule. Therefore, the solver uses backtracking for value choice, while the backward chaining engine is used to validate and prune candidates through derivable constraints (mainly $not\_val$).
 
 \paragraph{Technical Implementation Notes:}~
 \begin{itemize}
-    \item \textbf{0-based Indexing:} While the formal FOL axioms in this report use 1-based indexing (as per the mathematical specification $1..N$), the internal engine and the trace examples below utilize 0-based indexing. This engineering decision aligns naturally with Python's List data structures, eliminating redundant $+1/-1$ arithmetic at every node expansion and optimizing low-level computational speed.
-    \item \textbf{Hybrid vs. Pure Prolog:} A pure Prolog implementation solving a $7\times7$ or higher grid via a single query would generate an SLD tree so deep it would cause a RecursionError or a memory blowout in Python. The Hybrid architecture ensures the memory footprint remains manageable by using BC as a highly precise "Domain Pruning Oracle" for individual cells, rather than a global solver.
-    \item \textbf{Partial Grounding:} To mitigate combinatorial explosion during unification, our implementation uses Partial Grounding. Static constraints (like boundary inequalities) are fully grounded into facts (e.g., $not\_val(0, 1, 3)$), while the core generator rules are kept in First-Order form with variables (e.g., $val(i, j, v)$). This drastically reduces the size of the KB while retaining the dynamic power of SLD resolution.
+    \item \textbf{0-based indexing in code:} Internally, rows/columns are represented as $0..N-1$ for direct mapping to Python lists.
+    \item \textbf{Cell-level candidate generation with NAF:} The generator rule $val(i,j,v) \leftarrow domain(v),\; naf(not\_val(i,j,v))$ is used to propose candidates that are not provably forbidden.
+    \item \textbf{Hybrid workflow:} BC serves as a logical inference engine; backtracking constructs a full solution by incrementally asserting/retracting $val$ facts.
 \end{itemize}
 
 \subsubsection{Algorithm Analysis}
@@ -26,7 +27,7 @@ The Horn KB used the following vocabulary:
     \item $val(i,j,v)$: Cell $(i,j)$ is assigned the value $v$.
     \item $given(i,j,v)$: Cell $(i,j)$ has the pre-filled clue value $v$
     \item $less\_h(i,j)$ / $greater\_h(i,j)$: Horizontal inequalities between $(i,j)$ and $(i,j+1)$.
-    \item $less\_v(i,j)$ / $greater\_v(i,j$): Vertical inequalities between $(i,j)$ and $(i+1,j)$.
+    \item $less\_v(i,j)$ / $greater\_v(i,j)$: Vertical inequalities between $(i,j)$ and $(i+1,j)$.
     \item $less(v1,v2)$: Background arithmetic fact representing $v_1 < v_2$.
     \item $neq(x,y)$: Background inequality fact representing $x \neq y$.
     \item $not\_val(i,j,v)$: Value $v$ is explicitly forbidden at cell $(i,j)$.
@@ -39,7 +40,7 @@ The Horn KB used the following vocabulary:
 \end{itemize}
 
 \paragraph{Rules (Definite Horn)}~\\
-Constraints are strictly encoded as rules deriving $not\_val$:
+Constraints are encoded by Horn rules that derive either $val$ (from givens) or $not\_val$ (forbidden assignments):
 \begin{itemize}
     \item Given $\Rightarrow$ $Val: val(i,j,v) :- given(i,j,v)$
     \item Cell uniqueness: If a value is chosen, all others are forbidden in that cell.
@@ -48,8 +49,11 @@ Constraints are strictly encoded as rules deriving $not\_val$:
 \end{itemize}
 
 \paragraph{Existence / Choice Rule via NAF}~\\
-To generate valid candidates for an empty cell, the following rule is injected into the KB:$val(i,j,v) :- domain(v), naf(not\_val(i,j,v))$
-Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the domain AND the system fails to prove that it is forbidden ($not\_val$). This utilizes "Negation as Failure" (NAF), enabling non-monotonic reasoning over our finite Knowledge Base.
+To generate candidates for an empty cell, the solver adds:
+\[
+val(i,j,v) \leftarrow domain(v),\; naf(not\_val(i,j,v)).
+\]
+A value $v$ is accepted as a candidate for $(i,j)$ when $v$ is in the domain and $not\_val(i,j,v)$ cannot be proven.
 
 
 
@@ -64,21 +68,23 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
 \begin{itemize}
     \item OR node ($bc\_or$): Proves a goal by attempting to match and unify it against the head of any available fact or rule.
     \item AND node ($bc\_and$): Proves the body of a rule by proving all subgoals sequentially from left to right.
-    \item This mimics the standard Prolog evaluation strategy: depth-first, leftmost.
+    \item Evaluation follows depth-first, leftmost goal expansion.
 \end{itemize}
 
 \paragraph{Negation as Failure (NAF) Handling}~
 \begin{itemize}
-    \item naf(G) succeeds if and only if the engine exhausts all paths and cannot derive G.
-    \item Safety Implementation: When evaluating inside a NAF block ($in\_naf=True$), the engine restricts derivations for val to facts only, ignoring rules. This prevents fatal self-supporting cycles (e.g., attempting to prove val by assuming not $not\_val$, which loops back to val), ensuring termination and soundness.
+    \item $naf(G)$ succeeds iff the engine fails to derive $G$.
+    \item Inside NAF context ($in\_naf=True$), rule expansion for predicate $val$ is disabled. This prevents self-supporting loops between $val$ and $naf(not\_val)$.
 \end{itemize}
 
 
 % Optimizations
 \paragraph{Optimizations Implemented}~
 \begin{itemize}
-    \item Fact and Rule Indexing: Knowledge is partitioned using dictionaries ($fact\_index[pred], pred\_rule\_index, exact\_rule\_index$) to ensure $O(1)$ lookup times instead of scanning the entire KB sequentially.Per-query 
-    \item Memoization: Subgoal results are cached (self.memo) during a single $bc\_ask$ lifecycle to prevent recomputation of identical states.
+    \item \textbf{MRV variable ordering:} Backtracking chooses the unassigned cell with minimum remaining values (MRV) based on current BC query results.
+    \item \textbf{Predicate indexing:} Facts and rules are indexed by predicate ($fact\_index$, $pred\_rule\_index$, $exact\_rule\_index$).
+    \item \textbf{Cell-specific index for $val$:} Additional indexes by cell $(i,j)$ are used for both facts and rules of predicate $val$, reducing scan cost for queries of the form $val(r,c,v)$.
+    \item \textbf{Versioned memoization:} Memo keys include $kb\_version$, so cache is reused across queries while remaining correct after assert/retract operations.
     \item Cycle Detection (visited set): Tracks the active resolution path to prevent infinite recursion in cyclic goal graphs.
     \item Boundary Pruning: Converting extreme inequalities into immediate $not\_val$ facts drastically reduces the search space before resolution even begins.
 \end{itemize}
@@ -93,18 +99,17 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
 \Function {solve}{\textit{puzzle}}
 \State $kb \gets HornConverter(puzzle).build()$
 \State add facts $domain(1..N)$
-\State add facts $val(...)$ 
-\For {$givens$ in the grid}
-\State add rule schema: $val(i,j,v) :- domain(v), naf(not\_val(i,j,v))$
-\State build indexes for facts/rules
-\EndFor
-\\
+\State add facts $val(r,c,v)$ for all givens
+\State add generator rules $val(i,j,v) :- domain(v), naf(not\_val(i,j,v))$
+\State build fact/rule indexes and cell indexes for $val$
+\State initialize $kb\_version \gets 1$
+
 \For{each given $(r, c) = v$}
-\If {$FOL\_BC\_ASK(kb, not\_val(r, c, v)$ succeeds}
+\If {$FOL\_BC\_ASK(kb, not\_val(r, c, v))$ succeeds}
 \State\Return failure // Contradiction in givens
 \EndIf
-\State\Return $\_BACKTRACK(kb)$
 \EndFor
+\State\Return $\_BACKTRACK(kb)$
 \EndFunction
 \end{algorithmic}
 \end{algorithm}
@@ -117,17 +122,21 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
     \If{grid complete}
         \State \Return $success$
     \EndIf
-    \State $(r,c) \gets $ first empty cell
-    \For{each answer substitution theta in \Call{fol\_bc\_ask}{$kb, val(r,c,v)$}}
-        \State $value \gets theta[v]$
+    \State $(r,c,\mathcal{C}) \gets$ MRV-SelectCell($kb$)
+    \If{$\mathcal{C} = \emptyset$}
+        \State \Return $failure$
+    \EndIf
+    \For{each $value$ in $\mathcal{C}$}
         \State $grid[r][c] \gets value$
         \State assert fact $val(r,c,value)$ into $kb$
+        \State $kb\_version \gets kb\_version + 1$
         
         \If{\Call{\_Backtrack}{$kb$} $success$}
             \State \Return $success$
         \EndIf
         
         \State retract fact $val(r,c,value)$ from $kb$
+        \State $kb\_version \gets kb\_version + 1$
         \State $grid[r][c] \gets 0$
     \EndFor
     \State \Return $failure$
@@ -140,7 +149,6 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
 \caption{Inference Interface}
 \begin{algorithmic}[1]
 \Function{fol\_bc\_ask}{$kb, goal$}
-    \State $memo \gets \emptyset$ \Comment{Init Memoization}
     \State \Return \Call{fol\_bc\_or}{$kb, goal, theta=\emptyset, in\_naf=false, visited=\emptyset$}
 \EndFunction
 \end{algorithmic}
@@ -156,9 +164,13 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
         \State \Return $\emptyset$ \Comment{Cycle detection}
     \EndIf
     \State $visited' \gets visited \cup \{(g, in\_naf)\}$
+    \State $k \gets (kb\_version, g, in\_naf, \theta)$
+    \If{$k \in memo$}
+        \State \Return $memo[k]$
+    \EndIf
 
     \If{$g$ is $naf(inner)$} \Comment{Negation As Failure}
-        \If{\Call{fol\_bc\_or}{$kb, inner, theta, true, visited'$} is None}
+        \If{\Call{fol\_bc\_or}{$kb, inner, theta, true, visited'$} yields no proof}
             \State \Return $\{theta\}$ \Comment{NAF success}
         \Else
             \State \Return $\emptyset$ \Comment{NAF failure}
@@ -166,15 +178,20 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
     \EndIf
 
     \State $answers \gets \emptyset$
-    \For{each fact $F$ matching $g$ in $kb$}
+    \State $facts \gets$ indexed facts matching $pred(g)$
+    \If{$pred(g)=val$ and $(i,j)$ of $g$ is grounded}
+        \State $facts \gets$ cell-indexed facts for $(i,j)$
+    \EndIf
+    \For{each fact $F$ in $facts$}
         \State $theta' \gets \Call{Unify}{args(g), args(head(F)), theta}$
         \If{$theta' \neq failure$}
             \State $answers \gets answers \cup \Call{fol\_bc\_and}{kb, body(F), theta', in\_naf, visited'}$
         \EndIf
     \EndFor
 
-    \If{\textbf{not} ($in\_naf$ and $pred(g) == val$)} 
-        \For{each rule $R$ matching $g$ in $kb$}
+    \If{\textbf{not} ($in\_naf$ and $pred(g)=val$)}
+        \State choose rule candidates from exact/predicate/cell index
+        \For{each rule $R$ in candidates}
             \State $theta' \gets \Call{Unify}{args(g), args(head(R)), theta}$
             \If{$theta' \neq failure$}
                 \State $answers$ $\gets$ $answers \cup \Call{fol\_bc\_and}{kb, body(R), theta', in\_naf, visited'}$
@@ -182,6 +199,7 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
         \EndFor
     \EndIf
 
+    \State $memo[k] \gets answers$
     \State \Return $answers$
 \EndFunction
 \end{algorithmic}
@@ -192,11 +210,11 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
 \caption{Rule Body Validator - AND Node}
 \begin{algorithmic}[1]
 \Function{fol\_bc\_and}{$kb, goals, theta, in\_naf, visited$}
-    \If{$goals$ is None}
-        \State \Return $\{theta\}$ \Comment{Chứng minh thành công toàn bộ Body}
+    \If{$goals$ is empty}
+        \State \Return $\{theta\}$
     \EndIf
     \State $first \gets \Call{Subst}{theta, goals[0]}$
-    \State $rest \gets goals[1:]$ \Comment{Các mục tiêu còn lại}
+    \State $rest \gets goals[1:]$
     \State $answers \gets \emptyset$
     
     \For{each $theta'$ in \Call{fol\_bc\_or}{$kb, first, theta, in\_naf, visited$}}
@@ -209,5 +227,9 @@ Explain: A value $v$ is a valid candidate for cell $(i,j)$ IF it exists in the d
 \end{algorithm}
 
 \subsubsection{Illustration}
-[Chèn nội dung tại đây]
+On a query $val(r,c,v)$ for an unassigned cell, the resolver first tries indexed $val$ facts for $(r,c)$, then indexed $val$ rules for $(r,c)$ (plus generic generator rules). The result is a candidate set $\mathcal{C}$.
+
+MRV chooses the cell with smallest $|\mathcal{C}|$. If a candidate $v \in \mathcal{C}$ is tentatively assigned, the solver asserts $val(r,c,v)$ into KB and increments $kb\_version$. This makes old memo entries automatically inactive (because memo key includes $kb\_version$), while still preserving cache reuse for repeated subgoals inside the same KB state.
+
+If recursion fails, the fact is retracted, $kb\_version$ is incremented again, and the next candidate is tried. This loop continues until a complete grid is found or the branch set is exhausted.
 

@@ -9,11 +9,11 @@
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Project Overview}{1}{subsection.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Objectives and Scope}{1}{subsection.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Team Information}{1}{subsection.1.3}\protected@file@percent }
 \gdef \LT@i {\LT@entry 
     {5}{36.97531pt}\LT@entry 
     {1}{148.9733pt}\LT@entry 
     {1}{257.09386pt}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Team Information}{2}{subsection.1.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {2}Project Planning and Task Distribution}{2}{section.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Work Breakdown}{2}{subsection.2.1}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Project work breakdown aligned with assignment requirements}}{2}{table.1}\protected@file@percent }
@@ -21,16 +21,16 @@
 \gdef \LT@ii {\LT@entry 
     {1}{129.45645pt}\LT@entry 
     {1}{299.773pt}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Member Responsibilities}{3}{subsection.2.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Member responsibilities}}{3}{table.2}\protected@file@percent }
-\newlabel{tab:member-responsibilities}{{2}{3}{Member responsibilities}{table.2}{}}
 \gdef \LT@iii {\LT@entry 
     {1}{263.18433pt}\LT@entry 
     {1}{149.80386pt}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Completion Percentage per Member}{4}{subsection.2.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Completion percentage per member}}{4}{table.3}\protected@file@percent }
-\newlabel{tab:completion-per-member}{{3}{4}{Completion percentage per member}{table.3}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Project Management Board}{4}{subsection.2.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Member Responsibilities}{3}{subsection.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Member responsibilities}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:member-responsibilities}{{2}{3}{Member responsibilities}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Completion Percentage per Member}{3}{subsection.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Completion percentage per member}}{3}{table.3}\protected@file@percent }
+\newlabel{tab:completion-per-member}{{3}{3}{Completion percentage per member}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Project Management Board}{3}{subsection.2.4}\protected@file@percent }
 \gdef \LT@iv {\LT@entry 
     {1}{78.24141pt}\LT@entry 
     {1}{86.37732pt}\LT@entry 
@@ -45,88 +45,112 @@
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Predicate Symbols}{6}{subsubsection.3.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Core Axioms}{6}{subsubsection.3.2.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Step-by-step CNF Derivation}{7}{subsubsection.3.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Example 1: Cell Value Uniqueness}{8}{paragraph*.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Example 1: Cell Value Uniqueness}{7}{paragraph*.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Example 2: Row Uniqueness (Binary Clauses)}{8}{paragraph*.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Example 3: Horizontal Less-than}{9}{paragraph*.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Forward Chaining (DPLL-based SAT Solver)}{9}{subsection.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Idea}{9}{subsubsection.3.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Why Unit Propagation equals Forward Chaining on a ground KB:}{10}{paragraph*.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Technical Implementation Notes:}{10}{paragraph*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Algorithm Analysis}{11}{subsubsection.3.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{CNF Encoding --- Variable Schema}{11}{paragraph*.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{CNF Clause Groups}{11}{paragraph*.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Unit Propagation (Forward Chaining step)}{11}{paragraph*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Variable Selection Heuristic: MRV + Frequency}{11}{paragraph*.9}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Complexity Analysis}{12}{paragraph*.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Advantages and Limitations}{12}{paragraph*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Forward Chaining (Maintaining Arc Consistency)}{9}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Idea and Architecture}{9}{subsubsection.3.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why MAC instead of pure Forward Chaining or DPLL}{9}{paragraph*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Algorithm Analysis}{10}{subsubsection.3.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Domain Representation}{10}{paragraph*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Initial Facts}{10}{paragraph*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Five Modus Ponens Rules (FC Engine)}{11}{paragraph*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Backtracking with MRV}{11}{paragraph*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Complexity Analysis}{11}{paragraph*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Advantages and Limitations}{12}{paragraph*.10}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.3}Pseudocode}{13}{subsubsection.3.3.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces Master Coordinator}}{13}{algorithm.1}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces MAC Master Coordinator}}{13}{algorithm.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{alg:fc-solve}{{1}{13}{Master Coordinator}{algorithm.1}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces DPLL --- Recursive Branch-and-Propagate}}{14}{algorithm.2}\protected@file@percent }
-\newlabel{alg:fc-dpll}{{2}{14}{DPLL --- Recursive Branch-and-Propagate}{algorithm.2}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Unit Propagation --- Forward Chaining Engine}}{15}{algorithm.3}\protected@file@percent }
-\newlabel{alg:fc-propagate}{{3}{15}{Unit Propagation --- Forward Chaining Engine}{algorithm.3}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces Variable Selection --- MRV + Frequency Heuristic}}{16}{algorithm.4}\protected@file@percent }
-\newlabel{alg:fc-heuristic}{{4}{16}{Variable Selection --- MRV + Frequency Heuristic}{algorithm.4}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Index Construction and Frequency Count}}{17}{algorithm.5}\protected@file@percent }
-\newlabel{alg:fc-index}{{5}{17}{Index Construction and Frequency Count}{algorithm.5}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.4}Illustration}{17}{subsubsection.3.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Backward Chaining (SLD Resolution)}{18}{subsection.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}Idea}{18}{subsubsection.3.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Why search is integrated with SLD Resolution:}{18}{paragraph*.12}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Technical Implementation Notes:}{18}{paragraph*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Algorithm Analysis}{19}{subsubsection.3.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Atoms (Predicates)}{19}{paragraph*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Facts}{19}{paragraph*.15}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Rules (Definite Horn)}{19}{paragraph*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Existence / Choice Rule via NAF}{20}{paragraph*.17}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Unification and Substitution}{20}{paragraph*.18}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{SLD Resolution (AND/OR Search Tree)}{20}{paragraph*.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Negation as Failure (NAF) Handling}{20}{paragraph*.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Optimizations Implemented}{21}{paragraph*.21}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.3}Pseudocode}{21}{subsubsection.3.4.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces Master Coordinator}}{21}{algorithm.6}\protected@file@percent }
-\newlabel{alg:label}{{6}{21}{Master Coordinator}{algorithm.6}{}}
-\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces State Space Manager}}{22}{algorithm.7}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces Inference Interface}}{22}{algorithm.8}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces Goal Resolver - OR Node}}{23}{algorithm.9}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces Rule Body Validator - AND Node}}{24}{algorithm.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.4}Illustration}{24}{subsubsection.3.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}A* Search}{24}{subsection.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.1}Idea}{24}{subsubsection.3.5.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.2}Heuristic Function and Admissibility}{25}{subsubsection.3.5.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.3}Pseudocode}{26}{subsubsection.3.5.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces A* for Futoshiki (with MRV and AC-3)}}{26}{algorithm.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.4}Illustration}{27}{subsubsection.3.5.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.5}Algorithm Analysis}{27}{subsubsection.3.5.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Brute-force and Backtracking}{28}{subsection.3.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Idea}{28}{subsubsection.3.6.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Pseudocode}{28}{subsubsection.3.6.2}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {12}{\ignorespaces Brute-force}}{28}{algorithm.12}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {13}{\ignorespaces Backtracking}}{29}{algorithm.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.3}Illustration}{29}{subsubsection.3.6.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.4}Algorithm Analysis}{29}{subsubsection.3.6.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}SAT Solver (Using SAT Library)}{30}{subsection.3.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.1}Idea}{30}{subsubsection.3.7.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.2}Constraint Encoding}{30}{subsubsection.3.7.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.3}Pseudocode}{31}{subsubsection.3.7.3}\protected@file@percent }
-\@writefile{loa}{\contentsline {algorithm}{\numberline {14}{\ignorespaces SAT-based Futoshiki Solver}}{31}{algorithm.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.4}Illustration}{31}{subsubsection.3.7.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.5}Algorithm Analysis}{32}{subsubsection.3.7.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Experiments and Evaluation}{32}{section.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experimental Setup}{32}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Input and Output Test Cases}{33}{subsection.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Evaluation Metrics}{33}{subsection.4.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Runtime}{33}{subsubsection.4.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Memory Usage}{33}{subsubsection.4.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}Number of Inferences or Expansions}{33}{subsubsection.4.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Comparative Analysis Across Algorithms}{33}{subsection.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Self-evaluation Against Project Criteria}{33}{subsection.4.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{33}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}References}{34}{section.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {A}Appendix}{34}{appendix.A}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Generative AI Usage Disclosure}{34}{subsection.A.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Project Deliverables}{34}{subsection.A.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {A.3}Additional Tables and Charts}{35}{subsection.A.3}\protected@file@percent }
-\gdef \@abspage@last{40}
+\newlabel{alg:mac-solve}{{1}{13}{MAC Master Coordinator}{algorithm.1}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {2}{\ignorespaces FC Engine --- Modus Ponens on Domain Facts}}{14}{algorithm.2}\protected@file@percent }
+\newlabel{alg:mac-fc}{{2}{14}{FC Engine --- Modus Ponens on Domain Facts}{algorithm.2}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {3}{\ignorespaces Inequality Propagation (Rule R5)}}{15}{algorithm.3}\protected@file@percent }
+\newlabel{alg:mac-ineq}{{3}{15}{Inequality Propagation (Rule R5)}{algorithm.3}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {4}{\ignorespaces MAC Backtracking with MRV}}{15}{algorithm.4}\protected@file@percent }
+\newlabel{alg:mac-bt}{{4}{15}{MAC Backtracking with MRV}{algorithm.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.4}Illustration}{15}{subsubsection.3.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Backward Chaining (SLD Resolution)}{16}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}Idea}{16}{subsubsection.3.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why search is integrated with SLD Resolution:}{17}{paragraph*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Technical Implementation Notes:}{17}{paragraph*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Algorithm Analysis}{17}{subsubsection.3.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Atoms (Predicates)}{17}{paragraph*.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Facts}{18}{paragraph*.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Rules (Definite Horn)}{18}{paragraph*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Existence / Choice Rule via NAF}{18}{paragraph*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Unification and Substitution}{18}{paragraph*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{SLD Resolution (AND/OR Search Tree)}{19}{paragraph*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Negation as Failure (NAF) Handling}{19}{paragraph*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Optimizations Implemented}{19}{paragraph*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.3}Pseudocode}{20}{subsubsection.3.4.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {5}{\ignorespaces Master Coordinator}}{20}{algorithm.5}\protected@file@percent }
+\newlabel{alg:label}{{5}{20}{Master Coordinator}{algorithm.5}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {6}{\ignorespaces State Space Manager}}{21}{algorithm.6}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {7}{\ignorespaces Inference Interface}}{21}{algorithm.7}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {8}{\ignorespaces Goal Resolver - OR Node}}{22}{algorithm.8}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {9}{\ignorespaces Rule Body Validator - AND Node}}{23}{algorithm.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.4}Illustration}{23}{subsubsection.3.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5}A* Search}{23}{subsection.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.1}Idea}{23}{subsubsection.3.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.2}Heuristic Function and Admissibility Proof}{24}{subsubsection.3.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.3}Pseudocode}{25}{subsubsection.3.5.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {10}{\ignorespaces A* for Futoshiki (with MRV and AC-3)}}{25}{algorithm.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.4}Illustration}{26}{subsubsection.3.5.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.5.5}Algorithm Analysis}{26}{subsubsection.3.5.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Brute-force and Backtracking}{27}{subsection.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.1}Idea}{27}{subsubsection.3.6.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.2}Pseudocode}{27}{subsubsection.3.6.2}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {11}{\ignorespaces Brute-force}}{27}{algorithm.11}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {12}{\ignorespaces Backtracking}}{28}{algorithm.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.3}Illustration}{28}{subsubsection.3.6.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.6.4}Algorithm Analysis}{28}{subsubsection.3.6.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}SAT Solver (Using SAT Library)}{29}{subsection.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.1}Idea}{29}{subsubsection.3.7.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.2}Constraint Encoding}{29}{subsubsection.3.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.3}Pseudocode}{30}{subsubsection.3.7.3}\protected@file@percent }
+\@writefile{loa}{\contentsline {algorithm}{\numberline {13}{\ignorespaces SAT-based Futoshiki Solver}}{30}{algorithm.13}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.4}Illustration}{30}{subsubsection.3.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.7.5}Algorithm Analysis}{30}{subsubsection.3.7.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8}GUI}{31}{subsection.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.1}Overview}{31}{subsubsection.3.8.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.2}Screen Flow}{31}{subsubsection.3.8.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces GUI screen flow from menu to gameplay.}}{31}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:gui-screen-flow}{{1}{31}{GUI screen flow from menu to gameplay}{figure.caption.21}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.3}Gameplay Interface}{31}{subsubsection.3.8.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Main gameplay interface in manual mode.}}{33}{figure.caption.22}\protected@file@percent }
+\newlabel{fig:gui-gameplay}{{2}{33}{Main gameplay interface in manual mode}{figure.caption.22}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.4}AI Solver Visualization}{34}{subsubsection.3.8.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Step-by-step AI solver visualization on the game screen.}}{35}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:gui-ai-animation}{{3}{35}{Step-by-step AI solver visualization on the game screen}{figure.caption.23}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.8.5}Visual Design}{36}{subsubsection.3.8.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experiments and Evaluation}{36}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Experimental Setup}{36}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Evaluation Protocol and Metrics}{36}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.1}Input and Output Test Cases}{36}{subsubsection.4.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.2.2}Evaluation Metrics}{36}{subsubsection.4.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Experimental Results}{37}{subsection.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.1}Aggregate Statistics (Mean/Median by Solver)}{37}{subsubsection.4.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Aggregate performance statistics by solver (excluding \texttt  {SKIPPED} rows).}}{37}{table.caption.24}\protected@file@percent }
+\newlabel{tab:solver-aggregate-stats}{{5}{37}{Aggregate performance statistics by solver (excluding \texttt {SKIPPED} rows)}{table.caption.24}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.2}Runtime Analysis}{37}{subsubsection.4.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Runtime comparison across inputs (log-scale y-axis).}}{38}{figure.caption.25}\protected@file@percent }
+\newlabel{fig:runtime-log}{{4}{38}{Runtime comparison across inputs (log-scale y-axis)}{figure.caption.25}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why log scale is necessary.}{38}{paragraph*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.3}Memory Usage Analysis}{38}{subsubsection.4.3.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Memory vs runtime trade-off by solver.}}{39}{figure.caption.27}\protected@file@percent }
+\newlabel{fig:memory-time}{{5}{39}{Memory vs runtime trade-off by solver}{figure.caption.27}{}}
+\@writefile{toc}{\contentsline {paragraph}{Memory explosion in recursive logic search.}{39}{paragraph*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.3.4}Algorithmic Complexity (Nodes Expanded)}{39}{subsubsection.4.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Comparative Analysis}{39}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.1}Performance Leader}{39}{subsubsection.4.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.2}Preferred Conditions}{40}{subsubsection.4.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {4.4.3}Trade-off Analysis (Implementation Complexity vs Practical Performance)}{40}{subsubsection.4.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Normalized multi-metric comparison (higher area indicates better overall balance).}}{41}{figure.caption.29}\protected@file@percent }
+\newlabel{fig:radar-overall}{{6}{41}{Normalized multi-metric comparison (higher area indicates better overall balance)}{figure.caption.29}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Self-evaluation Against Project Criteria}{41}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Conclusion}{42}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}References}{42}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {A}Appendix}{42}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Generative AI Usage Disclosure}{42}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Project Deliverables}{43}{subsection.A.2}\protected@file@percent }
+\gdef \@abspage@last{49}

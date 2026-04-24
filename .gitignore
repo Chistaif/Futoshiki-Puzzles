@@ -15,6 +15,8 @@ __pycache__/
 .env/
 env/
 venv/
+.python-version
+pyproject.toml
 
 # LaTeX rác
 *.aux
@@ -23,3 +25,4 @@ venv/
 *.log
 *.synctex.gz
 *.toc
+

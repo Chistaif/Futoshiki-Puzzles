@@ -1,1 +1,7 @@
 \babel@toc {english}{}\relax 
+\contentsline {figure}{\numberline {1}{\ignorespaces GUI screen flow from menu to gameplay.}}{31}{figure.caption.21}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Main gameplay interface in manual mode.}}{33}{figure.caption.22}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Step-by-step AI solver visualization on the game screen.}}{35}{figure.caption.23}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Runtime comparison across inputs (log-scale y-axis).}}{38}{figure.caption.25}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Memory vs runtime trade-off by solver.}}{39}{figure.caption.27}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Normalized multi-metric comparison (higher area indicates better overall balance).}}{41}{figure.caption.29}%

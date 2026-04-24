@@ -40,6 +40,15 @@ def pytest_addoption(parser: pytest.Parser) -> None:
             "forward_chaining, backward_chaining, sat, all"
         ),
     )
+    parser.addoption(
+        "--input",
+        action="store",
+        default="all",
+        help=(
+            "Input file to test: all, input-01.txt ... input-10.txt, "
+            "or shorthand input-01 / 01"
+        ),
+    )
 
 
 @pytest.fixture
@@ -52,6 +61,11 @@ def selected_algorithms(selected_algo: str) -> tuple[str, ...]:
     if selected_algo == "all":
         return SUPPORTED_ALGORITHMS
     return (selected_algo,)
+
+
+@pytest.fixture
+def selected_input(request: pytest.FixtureRequest) -> str:
+    return str(request.config.getoption("--input"))
 
 
 def _format_case_label(nodeid: str) -> str:

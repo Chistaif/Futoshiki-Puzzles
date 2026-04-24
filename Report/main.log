@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  20 APR 2026 23:16
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex 2026.4.16)  23 APR 2026 10:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -700,7 +700,7 @@ Package hyperref Info: Link coloring OFF on input line 47.
 \openout3 = `main.out'.
 
  (cover.tex
-<image/hcmus-logo.png, id=231, 597.9138pt x 597.9138pt>
+<image/hcmus-logo.png, id=275, 597.9138pt x 597.9138pt>
 File: image/hcmus-logo.png Graphic file (type png)
 <use image/hcmus-logo.png>
 Package pdftex.def Info: image/hcmus-logo.png  used on input line 4.
@@ -709,31 +709,30 @@ Package pdftex.def Info: image/hcmus-logo.png  used on input line 4.
 
 {C:/Users/LENOVO/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map} <./image/hcmus-logo.png>]) (main.toc [1
 
-])
+]
+Underfull \hbox (badness 1005) in paragraph at lines 85--85
+ [][] [][]\T5/cmr/m/n/12 Trade-off Anal-y-sis (Im-ple-men-ta-tion Com-plex-ity vs 
+ []
+
+[2])
 \tf@toc=\write4
 \openout4 = `main.toc'.
 
- [2] (main.lot)
+ [3] (main.lot
+LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 6.
+ (C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
+File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+))
 \tf@lot=\write5
 \openout5 = `main.lot'.
 
- [3] (main.lof)
+ [4] (main.lof)
 \tf@lof=\write6
 \openout6 = `main.lof'.
 
- [4]
-Underfull \hbox (badness 1803) in paragraph at lines 67--68
-\T5/cmr/m/n/12 knowledge-base con-struc-tion, solver im-ple-men-ta-tions, and a GUI for
- []
-
-
-Underfull \hbox (badness 1824) in paragraph at lines 72--73
-[]\T5/cmr/m/n/12 Model Fu-toshiki con-straints cor-rectly and con-sis-tently for both
- []
-
-
-Overfull \hbox (6.86403pt too wide) in paragraph at lines 75--76
-[]\T5/cmr/m/n/12 Compare al-go-rithm be-hav-ior through so-lu-tion qual-ity and com-pu-ta-tional
+ [5]
+Underfull \hbox (badness 5302) in paragraph at lines 72--73
+[]\T5/cmr/m/n/12 Model Fu-toshiki con-straints con-sis-tently for search-based and
  []
 
 
@@ -747,10 +746,15 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.88 	\item N
-             guyễn Khánh Toàn --- MSSV: 24127252 [1
+l.90 	\item N
+             guyễn Ngọc Thiên --- MSSV: 24127545 [1
 
-] (Planning.tex
+]
+Underfull \hbox (badness 1117) in paragraph at lines 94--95
+[]\T5/cmr/m/n/12 The team col-lab-o-rated on mod-el-ing, im-ple-men-ta-tion, test-ing, and
+ []
+
+(Planning.tex
 Overfull \hbox (53.04247pt too wide) in alignment at lines 6--11
  [] [] [] 
  []
@@ -770,17 +774,14 @@ Overfull \hbox (53.04247pt too wide) in alignment at lines 17--19
  [] [] [] 
  []
 
-LaTeX Font Info:    Trying to load font information for T5+cmtt on input line 26.
-(C:\Users\LENOVO\AppData\Local\Programs\MiKTeX\tex/latex/vntex\t5cmtt.fd
-File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
-)
-Underfull \hbox (badness 1796) in paragraph at lines 30--30
-[]|\T5/cmr/m/n/10.95 Brute-force and 
+
+Underfull \hbox (badness 1237) in paragraph at lines 26--27
+[]|\T5/cmr/m/n/10.95 Goal-driven SLD-style query-ing to in-fer 
  []
 
 
-Underfull \hbox (badness 1540) in paragraph at lines 36--37
-[]|\T5/cmr/m/n/10.95 Final HCMUS-format re-port (anal-y-sis, 
+Underfull \hbox (badness 1796) in paragraph at lines 30--30
+[]|\T5/cmr/m/n/10.95 Brute-force and 
  []
 
 
@@ -789,15 +790,6 @@ Overfull \hbox (53.04247pt too wide) in alignment at lines 19--38
  []
 
 
-ignored: Infinite glue shrinkage found in box being split
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[2]
 Overfull \hbox (39.22945pt too wide) in alignment at lines 43--48
  [] [] 
  []
@@ -829,7 +821,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[3]
+[2]
 Overfull \hbox (22.98819pt too wide) in alignment at lines 71--76
  [] [] 
  []
@@ -855,20 +847,23 @@ Overfull \hbox (22.98819pt too wide) in alignment at lines 84--93
  []
 
 
-Overfull \hbox (12.59485pt too wide) in paragraph at lines 96--97
-\T5/cmr/m/n/12 The team man-aged source code and in-te-gra-tion through \T5/cmr/bx/n/12 GitHub \T5/cmr/m/n/12 (branch-based
+Underfull \hbox (badness 2393) in paragraph at lines 96--97
+\T5/cmr/m/n/12 The team used \T5/cmr/bx/n/12 GitHub \T5/cmr/m/n/12 for branch-based col-lab-o-ra-tion, pull/merge
  []
 
 
-Underfull \hbox (badness 1968) in paragraph at lines 96--97
-\T5/cmr/m/n/12 col-lab-o-ra-tion, pull/merge work-flow, and ver-sion trace-abil-ity). Task
+Overfull \hbox (15.41057pt too wide) in paragraph at lines 98--99
+[]\T5/cmr/m/n/12 The board fol-lowed project mile-stones: for-mal-iza-tion, solver im-ple-men-ta-tion,
  []
 
 
-Underfull \hbox (badness 1102) in paragraph at lines 96--97
-\T5/cmr/m/n/12 (Trello/Planner-like work-flow) with sta-tus la-bels (\T5/cmr/m/it/12 To do\T5/cmr/m/n/12 , \T5/cmr/m/it/12 In progress\T5/cmr/m/n/12 ,
- []
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
+[3]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -899,11 +894,6 @@ Overfull \hbox (90.65579pt too wide) in alignment at lines 114--116
 
 Overfull \hbox (0.5251pt too wide) in paragraph at lines 119--119
 \T5/cmr/m/n/10.95 im-ple-men-ta-tion|  
- []
-
-
-Underfull \hbox (badness 1292) in paragraph at lines 121--121
-\T5/cmr/m/n/10.95 han-dling, 
  []
 
 
@@ -970,13 +960,8 @@ Overfull \hbox (4.90823pt too wide) detected at line 108
  []
 
 ) (Algorithm Description/Forward.tex
-Underfull \hbox (badness 4429) in paragraph at lines 16--22
-[]\T5/cmr/bx/n/12 Forward-chaining en-gine (\T5/cmr/bx/it/12 _-prop-a-gate\T5/cmr/bx/n/12 ): \T5/cmr/m/n/12 Im-ple-ments Unit
- []
-
-
-Underfull \hbox (badness 1158) in paragraph at lines 16--22
-\T5/cmr/m/n/12 Prop-a-ga-tion over the ground Horn KB. Start-ing from the unit
+Underfull \hbox (badness 4995) in paragraph at lines 13--20
+[]\T5/cmr/m/n/12 DPLL (Davis^^UPutnam^^ULogemann^^ULoveland), on the other hand,
  []
 
 
@@ -987,6 +972,18 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [9]
+LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 33.
+
+Underfull \hbox (badness 1810) in paragraph at lines 39--43
+\T5/cmr/m/n/12 do-main fur-ther, a branch-ing step se-lects the most con-strained
+ []
+
+
+Overfull \hbox (16.22534pt too wide) in paragraph at lines 64--66
+[]$[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 i; j\OT1/cmr/m/n/12 ) :  (\OML/cmm/m/it/12 i; j\OT1/cmr/m/n/12 ) \OML/cmm/m/it/12 > \OT1/cmr/m/n/12 (\OML/cmm/m/it/12 i; j[]\OT1/cmr/m/n/12 1)  \OMS/cmsy/m/n/12 )  []\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 i; j; \OT1/cmr/m/n/12 1)$ \T5/cmr/m/n/12 and $[]\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 i; j[]\OT1/cmr/m/n/12 1\OML/cmm/m/it/12 ; N\OT1/cmr/m/n/12 )$ 
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -995,6 +992,20 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [10]
+Overfull \hbox (169.91443pt too wide) in paragraph at lines 75--92
+ [] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 126--127
+\T5/cmr/m/n/12 arc con-sis-tency elim-i-nates
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 126--127
+\T5/cmr/m/n/12 com-bi-na-to-rial ex-plo-sion on
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1003,8 +1014,16 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [11]
-Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 162.
+Underfull \hbox (badness 2781) in paragraph at lines 134--140
+[]\T5/cmr/bx/n/12 Stronger prun-ing than DPLL: \T5/cmr/m/n/12 MAC prop-a-gates in-equal-ity
+ []
 
+
+Underfull \hbox (badness 2478) in paragraph at lines 148--151
+[]\T5/cmr/bx/n/12 No clause learn-ing: \T5/cmr/m/n/12 Un-like CDCL-based SAT solvers, this
+ []
+
+Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on input line 161.
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1029,6 +1048,10 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [14]
+Underfull \hbox (badness 1888) in paragraph at lines 278--283
+[]\T5/cmr/bx/n/12 FC pass 1 (Ini-tial Prop-a-ga-tion): \T5/cmr/m/n/12 The \T5/cmtt/m/n/12 Assign$\OT1/cmr/m/n/12 (0\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 0\OML/cmm/m/it/12 ; \OT1/cmr/m/n/12 2)$ \T5/cmr/m/n/12 and
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1036,7 +1059,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[15]
+[15]) (Algorithm Description/Backward.tex
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1044,7 +1067,26 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[16]) (Algorithm Description/Backward.tex
+[16]
+Underfull \hbox (badness 2837) in paragraph at lines 8--9
+[]\T5/cmr/bx/n/12 Backward chain-ing core ($\OML/cmm/m/it/12 fol[]bc[]or$ \T5/cmr/bx/n/12 / $\OML/cmm/m/it/12 fol[]bc[]and$\T5/cmr/bx/n/12 ): \T5/cmr/m/n/12 A
+ []
+
+
+Underfull \hbox (badness 2213) in paragraph at lines 13--14
+[] \T5/cmr/bx/n/12 Why search is in-te-grated with SLD Res-o-lu-tion: \T5/cmr/m/n/12 The ax-iom
+ []
+
+
+Underfull \hbox (badness 2409) in paragraph at lines 19--20
+[]\T5/cmr/bx/n/12 Hybrid work-flow: \T5/cmr/m/n/12 BC serves as a log-i-cal in-fer-ence en-gine;
+ []
+
+
+Overfull \hbox (21.15625pt too wide) in paragraph at lines 19--20
+\T5/cmr/m/n/12 back-track-ing con-structs a full so-lu-tion by in-cre-men-tally as-sert-ing/retracting
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1053,10 +1095,6 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [17]
-Overfull \hbox (5.12071pt too wide) in paragraph at lines 8--9
-[]\T5/cmr/bx/n/12 Backward chain-ing en-gine ($\OML/cmm/m/it/12 fol[]bc[]or$ \T5/cmr/bx/n/12 / $\OML/cmm/m/it/12 fol[]bc[]and$\T5/cmr/bx/n/12 ): \T5/cmr/m/n/12 Prolog-like
- []
-
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1065,10 +1103,6 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [18]
-Underfull \hbox (badness 1189) in paragraph at lines 18--19
-\T5/cmr/m/n/12 uni-fi-ca-tion, our im-ple-men-ta-tion uses Par-tial Ground-ing. Static
- []
-
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1077,10 +1111,6 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [19]
-Underfull \hbox (badness 2452) in paragraph at lines 73--74
-[]\T5/cmr/m/n/12 Safety Im-ple-men-ta-tion: When eval-u-at-ing in-side a NAF block
- []
-
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1089,29 +1119,12 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [20]
-Underfull \hbox (badness 2050) in paragraph at lines 80--81
-\T5/cmr/m/n/12 ($\OML/cmm/m/it/12 fact[]index\OT1/cmr/m/n/12 [\OML/cmm/m/it/12 pred\OT1/cmr/m/n/12 ]\OML/cmm/m/it/12 ; pred[]rule[]index; exact[]rule[]index$\T5/cmr/m/n/12 ) to en-sure
- []
-
-
-Overfull \hbox (15.38083pt too wide) in paragraph at lines 80--81
-\OML/cmm/m/it/12 O\OT1/cmr/m/n/12 (1)$ \T5/cmr/m/n/12 lookup times in-stead of scan-ning the en-tire KB sequentially.Per-query 
- []
-
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[21]
-Overfull \hbox (64.64021pt too wide) in paragraph at lines 172--173
+Overfull \hbox (64.64021pt too wide) in paragraph at lines 188--189
 [] $\OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12   \OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12 [ []\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 kb; body\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 F\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; theta[]; in[]naf; visited[]\OT1/cmr/m/n/12 )$ 
  []
 
 
-Overfull \hbox (80.61949pt too wide) in paragraph at lines 180--181
+Overfull \hbox (80.61949pt too wide) in paragraph at lines 197--198
 [] $\OML/cmm/m/it/12 answers$ $\OMS/cmsy/m/n/12  $ $\OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12 [ []\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 kb; body\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 R\OT1/cmr/m/n/12 )\OML/cmm/m/it/12 ; theta[]; in[]naf; visited[]\OT1/cmr/m/n/12 )$ 
  []
 
@@ -1122,10 +1135,9 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[22]
-Overfull \hbox (23.77255pt too wide) in paragraph at lines 203--204
-[] $\OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12   \OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12 [ []\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 kb; rest; theta[]; in[]naf; visited\OT1/cmr/m/n/12 )$ 
- []
+[21]
+Overfull \vbox (21.02748pt too high) has occurred while \output is active []
+
 
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
@@ -1134,11 +1146,20 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[23]) (Algorithm Description/AStar.tex
-Underfull \hbox (badness 1062) in paragraph at lines 14--15
-[]\T5/cmr/m/n/12 The tran-si-tion model as-signs one value to one un-filled cell. To
+[22]
+Overfull \hbox (23.77255pt too wide) in paragraph at lines 221--222
+[] $\OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12   \OML/cmm/m/it/12 answers \OMS/cmsy/m/n/12 [ []\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 kb; rest; theta[]; in[]naf; visited\OT1/cmr/m/n/12 )$ 
  []
 
+) (Algorithm Description/AStar.tex
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[23]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1155,6 +1176,11 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [25]
+Underfull \hbox (badness 2564) in paragraph at lines 98--99
+[]\T5/cmr/m/n/12 AC-3 adds poly-no-mial over-head per state; run-time is mainly
+ []
+
+) (Algorithm Description/Brute-force_backtracking.tex
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1170,7 +1196,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[27]) (Algorithm Description/Brute-force_backtracking.tex
+[27]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1179,14 +1205,6 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
 [28]
-
-Package fancyhdr Warning: \headheight is too small (26.0pt): 
-(fancyhdr)                Make it at least 27.11469pt, for example:
-(fancyhdr)                \setlength{\headheight}{27.11469pt}.
-(fancyhdr)                You might also make \topmargin smaller:
-(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
-
-[29]
 Underfull \hbox (badness 2119) in paragraph at lines 61--63
 []\T5/cmr/bx/n/12 Space Com-plex-ity: \T5/cmr/m/n/12 Back-track-ing uses re-cur-sion, so the space
  []
@@ -1199,7 +1217,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[30]
+[29]
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1207,17 +1225,137 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[31]
-Overfull \hbox (6.01144pt too wide) in paragraph at lines 63--64
-[]\T5/cmr/m/n/12 After de-cod-ing all pos-i-tive in-range lit-er-als, the grid is fully re-con-structed
+[30]) (gui.tex
+<image/gui_screen.png, id=609, 986.9372pt x 346.29375pt>
+File: image/gui_screen.png Graphic file (type png)
+<use image/gui_screen.png>
+Package pdftex.def Info: image/gui_screen.png  used on input line 15.
+(pdftex.def)             Requested size: 350.99762pt x 123.1597pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[31 <./image/gui_screen.png>]
+<image/gameplay.png, id=616, 523.9575pt x 822.07124pt>
+File: image/gameplay.png Graphic file (type png)
+<use image/gameplay.png>
+Package pdftex.def Info: image/gameplay.png  used on input line 32.
+(pdftex.def)             Requested size: 350.99762pt x 550.72215pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[32]
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[33 <./image/gameplay.png>]
+<image/ai_solver.png, id=626, 523.9575pt x 820.56563pt>
+File: image/ai_solver.png Graphic file (type png)
+<use image/ai_solver.png>
+Package pdftex.def Info: image/ai_solver.png  used on input line 50.
+(pdftex.def)             Requested size: 350.99762pt x 549.71352pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[34]
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[35 <./image/ai_solver.png>]) (Experiments.tex
+Underfull \hbox (badness 2213) in paragraph at lines 4--5
+\T5/cmr/m/n/12 We eval-u-ate solvers on 10 in-stances (\T5/cmtt/m/n/12 input-01 \T5/cmr/m/n/12 to \T5/cmtt/m/n/12 input-10\T5/cmr/m/n/12 ) from
  []
 
 
-Underfull \hbox (badness 1275) in paragraph at lines 72--73
-[]\T5/cmr/m/n/12 Number of clauses is poly-no-mial in $\OML/cmm/m/it/12 N$\T5/cmr/m/n/12 , dom-i-nated by pair-wise
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[36]
+<image/grouped_bar_runtime.png, id=642, 1129.821pt x 554.5518pt>
+File: image/grouped_bar_runtime.png Graphic file (type png)
+<use image/grouped_bar_runtime.png>
+Package pdftex.def Info: image/grouped_bar_runtime.png  used on input line 62.
+(pdftex.def)             Requested size: 370.49881pt x 181.85185pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[37]
+<image/line_memory_vs_time.png, id=650, 840.2592pt x 555.2745pt>
+File: image/line_memory_vs_time.png Graphic file (type png)
+<use image/line_memory_vs_time.png>
+Package pdftex.def Info: image/line_memory_vs_time.png  used on input line 75.
+(pdftex.def)             Requested size: 312.00119pt x 206.177pt.
+
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[38 <./image/grouped_bar_runtime.png>]
+
+Package fancyhdr Warning: \headheight is too small (26.0pt): 
+(fancyhdr)                Make it at least 27.11469pt, for example:
+(fancyhdr)                \setlength{\headheight}{27.11469pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
+
+[39 <./image/line_memory_vs_time.png>]
+Underfull \hbox (badness 1259) in paragraph at lines 99--100
+[]\T5/cmr/bx/n/12 A* Search\T5/cmr/m/n/12 : suit-able when heuris-tic guid-ance is avail-able and
  []
 
-) (Experiments.tex
+
+Overfull \hbox (0.81694pt too wide) in paragraph at lines 104--104
+|[]\T5/cmr/bx/n/12 Trade-off Anal-y-sis (Im-ple-men-ta-tion Com-plex-ity vs Prac-ti-cal
+ []
+
+
+Underfull \hbox (badness 1436) in paragraph at lines 105--106
+\T5/cmr/m/n/12 Figure []6[] sum-ma-rizes nor-mal-ized multi-metric per-for-mance. For-ward
+ []
+
+
+Underfull \hbox (badness 1009) in paragraph at lines 105--106
+\T5/cmr/m/n/12 Chain-ing and A* are bal-anced lead-ers; Back-track-ing is memory-light
+ []
+
+<image/radar_solver_performance.png, id=664, 698.1282pt x 423.0204pt>
+File: image/radar_solver_performance.png Graphic file (type png)
+<use image/radar_solver_performance.png>
+Package pdftex.def Info: image/radar_solver_performance.png  used on input line 109.
+(pdftex.def)             Requested size: 350.99762pt x 212.678pt.
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1225,9 +1363,14 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[32]) (Conclusion.tex
-Underfull \hbox (badness 1033) in paragraph at lines 4--5
-\T5/cmr/m/n/12 for re-pro-ducibil-ity and ex-ten-sion, in-clud-ing stan-dard-ized in-put/output
+[40]) (Conclusion.tex
+Underfull \hbox (badness 1859) in paragraph at lines 124--1
+\T5/cmr/m/n/12 The project sat-is-fies core cri-te-ria: mul-ti-ple solv-ing paradigms were
+ []
+
+
+Underfull \hbox (badness 1546) in paragraph at lines 124--1
+\T5/cmr/m/n/12 im-ple-mented, re-quired test-size di-ver-sity is cov-ered, and ex-per-i-ments
  []
 
 
@@ -1237,12 +1380,22 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[33]) (References.tex
-Underfull \hbox (badness 2401) in paragraph at lines 6--1
-\T5/cmr/m/n/12 cor-rectly, im-ple-ment-ing rep-re-sen-ta-tive AI meth-ods, eval-u-at-ing solver
+[41 <./image/radar_solver_performance.png>]
+Underfull \hbox (badness 1112) in paragraph at lines 4--5
+[]\T5/cmr/m/n/12 The code-base is or-ga-nized for re-pro-ducibil-ity and ex-ten-sion, with
  []
 
-) (Appendix.tex
+
+Overfull \hbox (16.79454pt too wide) in paragraph at lines 4--5
+\T5/cmr/m/n/12 stan-dard-ized I/O, solver ab-strac-tions, and au-to-mated tests. The im-ple-men-ta-tion
+ []
+
+
+Overfull \hbox (7.4793pt too wide) in paragraph at lines 4--5
+\T5/cmr/m/n/12 stack re-mains lightweight and aligned with re-quire-ments (\T5/cmtt/m/n/12 pygame\T5/cmr/m/n/12 , \T5/cmtt/m/n/12 python-sat\T5/cmr/m/n/12 ,
+ []
+
+) (References.tex) (Appendix.tex
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1250,11 +1403,7 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[34])
-
-Package caption Warning: Unused \captionsetup[figure] on input line 21.
-See the caption package documentation for explanation.
-
+[42])
 
 Package fancyhdr Warning: \headheight is too small (26.0pt): 
 (fancyhdr)                Make it at least 27.11469pt, for example:
@@ -1262,26 +1411,26 @@ Package fancyhdr Warning: \headheight is too small (26.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.11469pt}.
 
-[35] (main.aux)
+[43] (main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-03-20>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 41A5EF9155A8CA23099CA15776ABBF7C;8987.
+(rerunfilecheck)             Checksum: 2D119F33B03FF805D457799BEF1D1F3A;11242.
  ) 
 Here is how much of TeX's memory you used:
- 15003 strings out of 467691
- 244327 string characters out of 5414503
- 672572 words of memory out of 5000000
- 43634 multiletter control sequences out of 15000+600000
- 653934 words of font info for 85 fonts, out of 8000000 for 9000
+ 15104 strings out of 467691
+ 246716 string characters out of 5414503
+ 674072 words of memory out of 5000000
+ 43703 multiletter control sequences out of 15000+600000
+ 653370 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 75i,12n,79p,819b,694s stack positions out of 10000i,1000n,20000p,200000b,200000s
- <C:\Users\LENOVO\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbxti10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vncsc10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on main.pdf (40 pages, 589855 bytes).
+ 75i,14n,79p,637b,679s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\LENOVO\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vncsc10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr17.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnr8.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/LENOVO/AppData/Local/Programs/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
+Output written on main.pdf (49 pages, 1986577 bytes).
 PDF statistics:
- 688 PDF objects out of 1000 (max. 8388607)
- 166 named destinations out of 1000 (max. 500000)
- 462 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 816 PDF objects out of 1000 (max. 8388607)
+ 198 named destinations out of 1000 (max. 500000)
+ 580 words of extra memory for PDF output out of 10000 (max. 10000000)
 

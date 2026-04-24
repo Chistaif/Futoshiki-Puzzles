@@ -25,8 +25,12 @@ class BackwardSolver(Solver):
         super().__init__(name)
         self.max_nodes = MAX_NODES_BACKWARD_CHAINING
         self.memo = {}
+        self.kb_version = 0
         self.found_solution = False
         self.fact_index: Dict[str, List[HornClause]] = {}
+        self.val_fact_cell_index: Dict[Tuple[int, int], List[HornClause]] = {}
+        self.val_rule_cell_index: Dict[Tuple[int, int], List[HornClause]] = {}
+        self.val_rule_generic: List[HornClause] = []
 
     # ==========================================
     # FACT INDEX
@@ -34,14 +38,36 @@ class BackwardSolver(Solver):
 
     def _index_add(self, clause: HornClause):
         self.fact_index.setdefault(clause.head[0], []).append(clause)
+        if clause.head[0] == "val":
+            i, j, _ = clause.head[1]
+            if not is_variable(i) and not is_variable(j):
+                self.val_fact_cell_index.setdefault((i, j), []).append(clause)
 
     def _index_remove(self, clause: HornClause):
         self.fact_index[clause.head[0]].pop()
+        if clause.head[0] == "val":
+            i, j, _ = clause.head[1]
+            if not is_variable(i) and not is_variable(j):
+                self.val_fact_cell_index[(i, j)].pop()
 
     def _rebuild_fact_index(self, kb):
         self.fact_index = {}
+        self.val_fact_cell_index = {}
         for clause in kb.facts:
             self._index_add(clause)
+
+    def _rebuild_val_rule_index(self, kb):
+        self.val_rule_cell_index = {}
+        self.val_rule_generic = []
+
+        for rule in kb.rules:
+            if rule.head[0] != "val":
+                continue
+            i, j, _ = rule.head[1]
+            if is_variable(i) or is_variable(j):
+                self.val_rule_generic.append(rule)
+            else:
+                self.val_rule_cell_index.setdefault((i, j), []).append(rule)
 
     # ==========================================
     # SOLVE
@@ -54,6 +80,8 @@ class BackwardSolver(Solver):
         self.n = puzzle.n
         self.grid = copy.deepcopy(puzzle.grid)
         self.found_solution = False
+        self.memo = {}
+        self.kb_version = 0
 
         # Domain
         for v in range(1, self.n + 1):
@@ -81,6 +109,8 @@ class BackwardSolver(Solver):
             self.pred_rule_index.setdefault(rule.head[0], []).append(rule)
 
         self._rebuild_fact_index(kb)
+        self._rebuild_val_rule_index(kb)
+        self.kb_version = 1
 
         # Validate givens
         for r in range(self.n):
@@ -102,7 +132,6 @@ class BackwardSolver(Solver):
     # ==========================================
 
     def fol_bc_ask(self, kb, goal):
-        self.memo = {}
         yield from self.fol_bc_or(kb, goal, {}, False, set())
 
     def fol_bc_or(self, kb, goal, theta, in_naf, visited):
@@ -118,7 +147,7 @@ class BackwardSolver(Solver):
         next_visited = visited | {goal_key}
 
         theta_key = tuple(sorted(theta.items()))
-        memo_key = (goal_key, theta_key)
+        memo_key = (self.kb_version, goal_key, theta_key)
 
         if memo_key in self.memo:
             yield from self.memo[memo_key]
@@ -137,7 +166,12 @@ class BackwardSolver(Solver):
 
         else:
             # ===== FACTS =====
-            for clause in reversed(self.fact_index.get(pred, [])):
+            if pred == "val" and not is_variable(args[0]) and not is_variable(args[1]):
+                fact_candidates = self.val_fact_cell_index.get((args[0], args[1]), [])
+            else:
+                fact_candidates = self.fact_index.get(pred, [])
+
+            for clause in reversed(fact_candidates):
                 theta2 = unify(args, clause.head[1], theta)
                 if theta2 != "failure":
                     for res in self.fol_bc_and(kb, clause.body, theta2, in_naf, next_visited):
@@ -148,6 +182,8 @@ class BackwardSolver(Solver):
             if not (in_naf and pred == "val"):
                 if is_ground_expr(args):
                     candidates = self.exact_rule_index.get(inst_goal, [])
+                elif pred == "val" and not is_variable(args[0]) and not is_variable(args[1]):
+                    candidates = self.val_rule_cell_index.get((args[0], args[1]), []) + self.val_rule_generic
                 else:
                     candidates = self.pred_rule_index.get(pred, [])
 
@@ -177,6 +213,37 @@ class BackwardSolver(Solver):
     # BACKTRACK
     # ==========================================
 
+    def _select_cell_mrv(self, kb):
+        best_cell = None
+        best_values = None
+
+        for i in range(self.n):
+            for j in range(self.n):
+                if self.grid[i][j] != 0:
+                    continue
+
+                values = []
+                seen = set()
+                for theta in self.query(kb, ("val", (i, j, 'v'))):
+                    v = theta.get('v')
+                    if v is None or v in seen:
+                        continue
+                    seen.add(v)
+                    values.append(v)
+
+                if not values:
+                    return (i, j, [])
+
+                if best_values is None or len(values) < len(best_values):
+                    best_cell = (i, j)
+                    best_values = values
+                    if len(best_values) == 1:
+                        return best_cell[0], best_cell[1], best_values
+
+        if best_cell is None:
+            return None
+        return best_cell[0], best_cell[1], best_values
+
     def _backtrack(self, kb, step_callback=None):
         if self.found_solution:
             return True
@@ -185,22 +252,15 @@ class BackwardSolver(Solver):
         if self.has_exceeded_max_nodes():
             return False
 
-        for i in range(self.n):
-            for j in range(self.n):
-                if self.grid[i][j] == 0:
-                    r, c = i, j
-                    break
-            else:
-                continue
-            break
-        else:
+        mrv_pick = self._select_cell_mrv(kb)
+        if mrv_pick is None:
             self.found_solution = True
             return True
+        r, c, candidates = mrv_pick
+        if not candidates:
+            return False
 
-        for theta in self.query(kb, ("val", (r, c, 'v'))):
-            v = theta.get('v')
-            if v is None:
-                continue
+        for v in candidates:
 
             self.grid[r][c] = v
             if step_callback:
@@ -209,12 +269,14 @@ class BackwardSolver(Solver):
             fact = HornClause(head=("val", (r, c, v)))
             kb.facts.append(fact)
             self._index_add(fact)
+            self.kb_version += 1
 
             if self._backtrack(kb, step_callback):
                 return True
 
             kb.facts.pop()
             self._index_remove(fact)
+            self.kb_version += 1
 
             self.grid[r][c] = 0
             if step_callback:

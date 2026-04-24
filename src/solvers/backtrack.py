@@ -2,6 +2,7 @@
 from src.domain.puzzle import PuzzleCase
 from src.solvers.solver import MAX_NODES_BACKTRACKING, Solver
 from typing import Callable, Optional
+from pathlib import Path
 
 
 StepCallback = Callable[[int, int, int], None]
@@ -166,8 +167,22 @@ class Backtracking(Solver):
                     step_callback(i, j, 0)
 
         return False
+    
+    def write_output(self, filename: str, solved: bool = True):
+        output_dir = Path("Outputs")
+        output_dir.mkdir(exist_ok = True) 
 
-    def solve(self, step_callback: Optional[StepCallback] = None):
+        file_path = output_dir / filename
+        with open(filename, "w") as f:
+                if not solved:
+                    f.write("No solution found.\n")
+                    return
+
+                f.write(f"Solution ({self.n}x{self.n}):\n")
+                for row in self.grid:
+                    f.write(" ".join(map(str, row)) + "\n")
+
+    def solve(self, step_callback: Optional[StepCallback] = None, output_file: Optional[str] = None):
         """Hàm public để giải puzzle.
 
         Trả về:
@@ -176,4 +191,5 @@ class Backtracking(Solver):
         """
         if self.backtrack(step_callback):
             return self.grid
+        
         return None
