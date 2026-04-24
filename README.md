@@ -31,32 +31,6 @@
 | 24127545 | Nguyễn Ngọc Thiên | Thành viên |
 | 24127250 | Phan Quang Tiến | Thành viên |
 
----
-
-### **DEMO GALLERY**
-
-> Chừa sẵn vị trí để bạn chèn GIF demo của đồ án. Chỉ cần thay `src` bằng file GIF bạn muốn dùng.
-
-**1. Menu chính**
-
-<div align="center">
-<img width="700px" src="https://github.com/user-attachments/assets/d020ee26-9f41-4253-9132-64494107884b" alt="Menu Demo GIF">
-</div>
-
-**2. Chơi thủ công**
-
-<div align="center">
-<img width="700px" src="https://github.com/user-attachments/assets/4d8895df-2587-4aa8-b6e8-3c8a1476ab0d" alt="Manual Demo GIF">
-</div>
-
-**3. Chế độ AI Solver**
-
-<div align="center">
-<img width="700px" src="https://github.com/user-attachments/assets/b1a23e32-f38f-4f4d-8444-41f03c1543d6" alt="AI Solver Demo GIF">
-</div>
-
-**Video demo:** [Xem trên YouTube](https://www.youtube.com/watch?v=25V7OLtf4e8)
-
 </div>
 
 ---
@@ -250,6 +224,32 @@ pytest src/tests/test_solvers.py
 ## **Ghi chú**
 
 Dự án được phát triển phục vụ mục đích học tập trong môn CSC14003 - Cơ Sở Trí Tuệ Nhân Tạo.
+
+---
+
+## 🎬 **Demo Gallery**
+
+**1. Menu chính**
+
+<div align="center">
+<img width="700px" src="https://github.com/user-attachments/assets/d020ee26-9f41-4253-9132-64494107884b" alt="Menu Demo GIF">
+</div>
+
+**2. Chơi thủ công**
+
+<div align="center">
+<img width="700px" src="https://github.com/user-attachments/assets/4d8895df-2587-4aa8-b6e8-3c8a1476ab0d" alt="Manual Demo GIF">
+</div>
+
+**3. Chế độ AI Solver**
+
+<div align="center">
+<img width="700px" src="https://github.com/user-attachments/assets/b1a23e32-f38f-4f4d-8444-41f03c1543d6" alt="AI Solver Demo GIF">
+</div>
+
+## 🎥 **Video Demo**
+
+- [Xem demo trên YouTube](https://www.youtube.com/watch?v=25V7OLtf4e8)
 
 ---
 
