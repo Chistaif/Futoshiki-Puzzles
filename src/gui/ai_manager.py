@@ -17,6 +17,7 @@ from src.solvers.backward import BackwardSolver
 from src.solvers.backtrack import Backtracking
 from src.solvers.brute_force import BruteForceSolver
 from src.solvers.forward import ForwardSolver
+from src.solvers.forward import ForwardSolver
 from src.solvers.sat_solver import SATSolver
 from src.file_io import write_output
 
