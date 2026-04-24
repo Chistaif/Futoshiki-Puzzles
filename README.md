@@ -221,9 +221,9 @@ pytest src/tests/test_solvers.py
 
 ---
 
-## **Ghi chú**
+## **Giấy Phép**
 
-Dự án được phát triển phục vụ mục đích học tập trong môn CSC14003 - Cơ Sở Trí Tuệ Nhân Tạo.
+Dự án này được phát triển cho mục đích học tập và nghiên cứu trong khuôn khổ môn học CSC14003 tại Trường Đại học Khoa học Tự Nhiên - ĐHQG TP.HCM.
 
 ---
 
@@ -250,15 +250,11 @@ Dự án được phát triển phục vụ mục đích học tập trong môn 
 ## 🎥 **Video Demo**
 
 - [Xem demo trên YouTube](https://www.youtube.com/watch?v=25V7OLtf4e8)
-
 ---
-
 <div align="center">
 
-## ⭐ **Nếu dự án hữu ích, hãy cho chúng tôi một ngôi sao!**
-
----
-
-![Footer](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=500&duration=4000&pause=1000&color=F7A800&center=true&vCenter=true&width=700&lines=Thank+you+for+visiting+our+Futoshiki+project!+♠️;Let's+solve+Futoshiki+with+AI+together.;Forward+Chaining+%7C+Backward+Chaining+%7C+A*+%7C+SAT+%7C+Backtracking)
+![Star CTA](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=24&duration=2600&pause=600&color=F7A800&center=true&vCenter=true&width=900&lines=%E2%AD%90+If+this+project+is+helpful%2C+please+give+us+a+star!)
 
 </div>
+
+
